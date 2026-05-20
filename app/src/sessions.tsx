@@ -3,7 +3,15 @@ import type { ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
-export type Status = "spawning" | "working" | "exited" | "failed";
+export type Status =
+  | "spawning"
+  | "working"
+  | "needs"
+  | "idle"
+  | "exited"
+  | "failed";
+
+type TileStatusEvent = { status: "working" | "needs" | "idle"; event: string };
 
 export type SessionDecl = {
   key: string;
@@ -162,7 +170,26 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         }
         setTick((t) => t + 1);
       });
-      unlistenersRef.current.set(decl.key, [dataUnlisten, exitUnlisten]);
+      const statusUnlisten = await listen<TileStatusEvent>(
+        `tile-status:${info.id}`,
+        (ev) => {
+          const cur = sessionsRef.current.get(decl.key);
+          if (!cur || cur.status === "exited" || cur.status === "failed") {
+            return;
+          }
+          if (cur.status === ev.payload.status) return;
+          sessionsRef.current.set(decl.key, {
+            ...cur,
+            status: ev.payload.status,
+          });
+          setTick((t) => t + 1);
+        },
+      );
+      unlistenersRef.current.set(decl.key, [
+        dataUnlisten,
+        exitUnlisten,
+        statusUnlisten,
+      ]);
 
       const updated: Session = {
         ...decl,

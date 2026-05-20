@@ -522,6 +522,8 @@ export default function App() {
     } else if (s === "failed") {
       status = "stale";
       meta = "failed";
+    } else if (s === "working" || s === "needs" || s === "idle") {
+      status = s;
     }
     return { ...t, status, meta };
   });
