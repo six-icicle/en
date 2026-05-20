@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / UI EXPLORATIONS</title>
+<style>
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .section-blurb {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+    max-width: 680px;
+    margin-bottom: 28px;
+  }
+  .deprecated .card-num,
+  .deprecated .card-title { opacity: 0.55; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --factory-green: #73d802;
+  --factory-white: #FFFFFF;
+  --factory-canvas: #F4F4F4;
+  --factory-black: #000000;
+  --factory-ink: #111111;
+  --factory-label: #666666;
+  --factory-border: #E0E0E0;
+  --factory-silver: #CCCCCC;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-sans: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
+  --tracking-wide: 0.05em;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--factory-canvas);
+  color: var(--factory-ink);
+  min-height: 100vh;
+  padding: 56px 64px;
+}
+header {
+  border-bottom: 1px solid var(--factory-border);
+  padding-bottom: 28px;
+  margin-bottom: 56px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.brand {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-mark {
+  width: 14px;
+  height: 16px;
+  background: var(--factory-green);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+.meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--factory-label);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+h1 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 40px;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+.lede {
+  color: var(--factory-label);
+  font-size: 15px;
+  max-width: 680px;
+  margin-bottom: 56px;
+  line-height: 1.6;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1px;
+  background: var(--factory-border);
+  border: 1px solid var(--factory-border);
+  margin-bottom: 56px;
+}
+.card {
+  background: var(--factory-white);
+  padding: 32px 32px 64px;
+  text-decoration: none;
+  color: var(--factory-ink);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  min-height: 320px;
+}
+.card:hover { background: var(--factory-canvas); }
+.card:hover .card-arrow { transform: translateX(6px); color: var(--factory-green); }
+.card:hover .card-num { color: var(--factory-green); }
+.card-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--factory-label);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.card-title {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.card-desc {
+  color: var(--factory-label);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--factory-border);
+  padding: 4px 8px;
+  color: var(--factory-label);
+}
+.card-arrow {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--factory-label);
+  transition: transform 0.2s, color 0.2s;
+}
+footer {
+  padding-top: 32px;
+  border-top: 1px solid var(--factory-border);
+  color: var(--factory-label);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+.footer-action {
+  color: var(--factory-ink);
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="brand-mark"></span>MULTICLAUDE</div>
+  <div class="meta">UI EXPLORATIONS / 2026.05.18 / V1</div>
+</header>
+<h1>UI direction studies</h1>
+<p class="lede">Hub for many concurrent Claude CLI sessions. Layout direction landed on the live grid (25). Below: palette variations of that layout, plus earlier metaphor exploration rounds for reference.</p>
+
+<div class="section-label">// ROUND 05 — LAYOUT LANDED</div>
+<div class="section-title">Live grid — every session visible, ⌘+arrow to focus</div>
+<div class="section-blurb">User pivoted away from the dock+main-pane model. All sessions tile in a 2×2 grid; one is focused, the others are dimmed but readable. Hyper-modern, minimal chrome.</div>
+
+<div class="grid">
+  <a class="card" href="25-live-grid.html" target="_blank">
+    <div class="card-num">// 25 — BASE LAYOUT</div>
+    <div class="card-title">Live Grid</div>
+    <div class="card-desc">2×2 tiled terminals, status dot per tile, single amber accent line on the focused tile. The locked layout — palette variations sit below.</div>
+    <div class="card-tags"><span class="tag">Locked</span><span class="tag">Tiled</span><span class="tag">Minimal</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+</div>
+
+<div class="section-label" style="margin-top: 28px;">// ROUND 04 — PALETTE VARIATIONS OF 25</div>
+<div class="section-title">Eye-comfort palettes for long sessions</div>
+<div class="section-blurb">Same layout as 25, reskinned with palettes researched for 8+ hour comfort. Heads-up: three agents independently picked Rose Pine Moon and three picked Everforest light/paper, so the 9 files only cover ~5 distinct palettes. Distinct ones: <b>Warm Paper</b> · <b>Everforest Dusk</b> · <b>Rose Pine Moon</b> · <b>Solarized Deep Teal</b> · <b>Kanagawa Sumi</b>.</div>
+
+<div class="grid">
+  <a class="card" href="26-warm-paper.html" target="_blank">
+    <div class="card-num">// 26 — LIGHT WARM</div>
+    <div class="card-title">Warm Paper</div>
+    <div class="card-desc">Cream surfaces, warm charcoal ink, muted clay accent. Solarized Light + e-reader sepia direction. Daytime / sunlit desks.</div>
+    <div class="card-tags"><span class="tag">Light</span><span class="tag">Warm</span><span class="tag">Daytime</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="27-everforest-dusk.html" target="_blank">
+    <div class="card-num">// 27 — DARK WARM-GREEN</div>
+    <div class="card-title">Everforest Dusk</div>
+    <div class="card-desc">Deep forest base, parchment ink, sage accent. Low-saturation warm-toned dark — Sainnhe's Everforest. Long evening stretches.</div>
+    <div class="card-tags"><span class="tag">Dark</span><span class="tag">Warm</span><span class="tag">Sage</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="28-rose-pine-moon.html" target="_blank">
+    <div class="card-num">// 28 — DARK COOL-PASTEL</div>
+    <div class="card-title">Rose Pine Moon</div>
+    <div class="card-desc">Lavender base, soft iris ink, dusty rose accent. Cool pastel dark, low-blue. Late-night counterweight to 25's amber.</div>
+    <div class="card-tags"><span class="tag">Dark</span><span class="tag">Pastel</span><span class="tag">Late-night</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="29-rose-pine-moon.html" target="_blank">
+    <div class="card-num">// 29 — DUPLICATE</div>
+    <div class="card-title">Rose Pine Moon (alt)</div>
+    <div class="card-desc">Second take on Rose Pine Moon. Compare against 28 — implementation differs slightly but same palette family.</div>
+    <div class="card-tags"><span class="tag">Dup of 28</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="30-everforest-light-paper.html" target="_blank">
+    <div class="card-num">// 30 — LIGHT WARM</div>
+    <div class="card-title">Everforest Light Paper</div>
+    <div class="card-desc">Warm cream paper with sage accent, burnt-orange warn. Daytime light variant — overlaps with 26 but with green accent vs clay.</div>
+    <div class="card-tags"><span class="tag">Light</span><span class="tag">Sage</span><span class="tag">Near-dup of 26</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="31-solarized-deep-teal.html" target="_blank">
+    <div class="card-num">// 31 — DARK TEAL</div>
+    <div class="card-title">Solarized Deep Teal</div>
+    <div class="card-desc">Schoonover's canonical Solarized dark — teal-tinted base, cyan accent. CIELAB-uniform contrast, all-day workhorse.</div>
+    <div class="card-tags"><span class="tag">Dark</span><span class="tag">Teal</span><span class="tag">Canonical</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="32-rose-pine-moon.html" target="_blank">
+    <div class="card-num">// 32 — DUPLICATE</div>
+    <div class="card-title">Rose Pine Moon (alt 2)</div>
+    <div class="card-desc">Third take on Rose Pine Moon. Implementation differs — same palette family as 28/29.</div>
+    <div class="card-tags"><span class="tag">Dup of 28</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="33-everforest-paper.html" target="_blank">
+    <div class="card-num">// 33 — DUPLICATE</div>
+    <div class="card-title">Everforest Paper (alt)</div>
+    <div class="card-desc">Second take on Everforest light. Same palette family as 30, similar to 26.</div>
+    <div class="card-tags"><span class="tag">Near-dup of 30</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="34-kanagawa-sumi.html" target="_blank">
+    <div class="card-num">// 34 — DARK CHARCOAL</div>
+    <div class="card-title">Kanagawa Sumi</div>
+    <div class="card-desc">Sumi-ink charcoal, fuji-white text, muted gold accent. Hokusai woodblock palette — desaturated, deep heads-down work.</div>
+    <div class="card-tags"><span class="tag">Dark</span><span class="tag">Charcoal</span><span class="tag">Gold</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+</div>
+
+<div class="section-label" style="margin-top: 28px;">// ROUND 03 — VARIATIONS ON 08 + 10</div>
+<div class="section-title">Astromech Bay × Departures Board — pushed further</div>
+<div class="section-blurb">User picked Astromech Bay (10) and Departures Board (08) as favorites. Three skills, three variations each — riffs, hybrids, and radical reinterpretations.</div>
+
+<div class="grid">
+  <a class="card" href="15-astromech-tower.html" target="_blank">
+    <div class="card-num">// 15 — VERTICAL DROID</div>
+    <div class="card-title">Astromech Tower</div>
+    <div class="card-desc">Bay rotated 90° into a vertical service column. Droids hang off a spine rail like instruments on a gantry. Single-glance scan down a column.</div>
+    <div class="card-tags"><span class="tag">Vertical</span><span class="tag">Dense</span><span class="tag">Riff (10)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="16-solari-concourse.html" target="_blank">
+    <div class="card-num">// 16 — HYBRID</div>
+    <div class="card-title">Solari Concourse</div>
+    <div class="card-desc">Brassy Solari hall paired with a glass display case holding the active session as a fully-rendered droid. "Now boarding" character + peripheral board.</div>
+    <div class="card-tags"><span class="tag">Hybrid</span><span class="tag">Warm</span><span class="tag">Hero state</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="17-hangar-floorplan.html" target="_blank">
+    <div class="card-num">// 17 — TOP-DOWN</div>
+    <div class="card-title">Hangar Floorplan</div>
+    <div class="card-desc">Architectural top-down floorplan, drafting-paper grid, twelve bays as concentric-ring droids. Cooler palette, active bay glows amber.</div>
+    <div class="card-tags"><span class="tag">Spatial</span><span class="tag">Drafting</span><span class="tag">Radical (10)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="18-dispatch-tower.html" target="_blank">
+    <div class="card-num">// 18 — RADAR</div>
+    <div class="card-title">Dispatch Tower</div>
+    <div class="card-desc">Air-traffic control: polar radar scope with bee-droid blips orbiting the tower (proximity = urgency) plus paper flight-progress strips along the bottom.</div>
+    <div class="card-tags"><span class="tag">Spatial</span><span class="tag">ATC</span><span class="tag">Riff (08)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="19-workshop-bench.html" target="_blank">
+    <div class="card-num">// 19 — INSPECTION</div>
+    <div class="card-title">Workshop Bench</div>
+    <div class="card-desc">Top-down workshop schematic. Active session is a single exploded-view droid with annotation leaders and spec sheets; others sit in a parts-bin drawer.</div>
+    <div class="card-tags"><span class="tag">Schematic</span><span class="tag">Focus</span><span class="tag">Riff (10)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="20-signal-mast.html" target="_blank">
+    <div class="card-num">// 20 — PERIPHERAL</div>
+    <div class="card-title">Signal Mast</div>
+    <div class="card-desc">Tall vertical pole with droid-head lamps on alternating arms. Status encoded as blink cadence. Calm, peripheral-vision-friendly.</div>
+    <div class="card-tags"><span class="tag">Hybrid</span><span class="tag">Ambient</span><span class="tag">Motion</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="21-astromech-trench.html" target="_blank">
+    <div class="card-num">// 21 — LANES</div>
+    <div class="card-title">Astromech Trench</div>
+    <div class="card-desc">Top-down view: droids as circular chassis pips on two horizontal lanes (hot / cool) with a synced radar minimap. Lane-as-status grouping.</div>
+    <div class="card-tags"><span class="tag">Top-down</span><span class="tag">Grouped</span><span class="tag">Riff (10)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="22-solari-manifest.html" target="_blank">
+    <div class="card-num">// 22 — HERO</div>
+    <div class="card-title">Solari Manifest</div>
+    <div class="card-desc">Tall split-flap manifest sidebar with droid sigils per row, plus a giant "NOW DEPARTING" hero panel rendering the active session in flap glyphs.</div>
+    <div class="card-tags"><span class="tag">Hybrid</span><span class="tag">Hero</span><span class="tag">Kinetic</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="23-droid-blueprint.html" target="_blank">
+    <div class="card-num">// 23 — BLUEPRINT</div>
+    <div class="card-title">Droid Blueprint</div>
+    <div class="card-desc">Cyan-on-deep-blue drafting paper. Active droid as animated SVG schematic with dimension lines and callouts; others as small schematic tiles.</div>
+    <div class="card-tags"><span class="tag">Schematic</span><span class="tag">Focus</span><span class="tag">Radical (10)</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+</div>
+
+<div class="section-label" style="margin-top: 16px;">// ROUND 02 — BEE-DROID</div>
+<div class="section-title">Star Wars droid hardware × bees / honeycomb (no hex tiles)</div>
+<div class="section-blurb">Nine fresh metaphors built across three design skills. Same dock + main pane brief, varied chrome, all aiming for low eye fatigue and quick at-a-glance triage of which sessions need attention.</div>
+
+<div class="grid">
+  <a class="card" href="06-rack-mount.html" target="_blank">
+    <div class="card-num">// 06 — HARDWARE</div>
+    <div class="card-title">Rack Mount</div>
+    <div class="card-desc">Sessions as 1U rack units stacked in a left-side bay — engraved nameplates, three-LED stack, segmented VU strip, faceplate screws. Hardware density at a glance.</div>
+    <div class="card-tags"><span class="tag">Industrial</span><span class="tag">Dense</span><span class="tag">Diagnostic</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="07-channel-strip.html" target="_blank">
+    <div class="card-num">// 07 — MIXING DESK</div>
+    <div class="card-title">Channel Strip</div>
+    <div class="card-desc">Bottom mixing desk of channel strips with knob, VU column, fader, mute/solo, scribble strip. Activity reads as loudness — busy sessions visibly peak.</div>
+    <div class="card-tags"><span class="tag">Tactile</span><span class="tag">Audio</span><span class="tag">Motion</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="08-departures-board.html" target="_blank">
+    <div class="card-num">// 08 — SCAN</div>
+    <div class="card-title">Departures Board</div>
+    <div class="card-desc">Solari split-flap signal hall: each session a row with track, name, project, ETA, status. Catches motion when status flips.</div>
+    <div class="card-tags"><span class="tag">Textual</span><span class="tag">Scannable</span><span class="tag">Kinetic</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="09-apiary-frames.html" target="_blank">
+    <div class="card-num">// 09 — HIVE</div>
+    <div class="card-title">Apiary Frames</div>
+    <div class="card-desc">Sessions as Langstroth hive frames in a wooden super — amber wax pane fills with activity, top-lug LED for status. Calm, golden, organic.</div>
+    <div class="card-tags"><span class="tag">Bee</span><span class="tag">Warm</span><span class="tag">Calm</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="10-astromech-bay.html" target="_blank">
+    <div class="card-num">// 10 — DROID</div>
+    <div class="card-title">Astromech Bay</div>
+    <div class="card-desc">Sessions as numbered service-bay droids with domed heads, blinking lenses, antennae, chest readouts. Gunmetal hangar floor, slightly Star Wars.</div>
+    <div class="card-tags"><span class="tag">Mechanical</span><span class="tag">Characterful</span><span class="tag">Star Wars</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="11-pollinator-almanac.html" target="_blank">
+    <div class="card-num">// 11 — ARCHIVE</div>
+    <div class="card-title">Pollinator Almanac</div>
+    <div class="card-desc">Two-page open notebook — left an indexed almanac with wax-seal status pins, right the active session as a field-notebook entry. Paper tones, archival calm.</div>
+    <div class="card-tags"><span class="tag">Editorial</span><span class="tag">Quiet</span><span class="tag">Serif</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="12-beekeepers-frames.html" target="_blank">
+    <div class="card-num">// 12 — INVENTORY</div>
+    <div class="card-title">Beekeeper's Frames</div>
+    <div class="card-desc">Horizontal Langstroth frames stacked in a metal-rail super. Active frame protrudes from the rack — tactile "slide a session out" interaction.</div>
+    <div class="card-tags"><span class="tag">Bee</span><span class="tag">Tactile</span><span class="tag">Stacked</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="13-mission-patch-board.html" target="_blank">
+    <div class="card-num">// 13 — IDENTITY</div>
+    <div class="card-title">Mission Patch Board</div>
+    <div class="card-desc">Sessions as embroidered NASA-style patches pinned to felt — call-sign, mission number, thread-ring status. Builds memory of which session is which.</div>
+    <div class="card-tags"><span class="tag">Personal</span><span class="tag">Crafted</span><span class="tag">Memorable</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="14-signal-tower.html" target="_blank">
+    <div class="card-num">// 14 — TRIAGE</div>
+    <div class="card-title">Signal Tower</div>
+    <div class="card-desc">Vertical channel strips across the top — stacked status lamps + VU activity meters per session. Pure at-a-glance scanning, like a railway interlocking tower.</div>
+    <div class="card-tags"><span class="tag">Glanceable</span><span class="tag">Compact</span><span class="tag">Operational</span></div>
+    <div class="card-arrow">─→</div>
+  </a>
+</div>
+
+<div class="section-label" style="margin-top: 16px;">// ROUND 01 — FACTORY (DEPRECATED)</div>
+<div class="section-title">Original hex / honeycomb explorations</div>
+<div class="section-blurb">Kept for reference. Direction abandoned — hex tiles felt samey and the factory theme is being replaced by bee-droid above.</div>
+
+<div class="grid deprecated">
+  <a class="card" href="01-classic-dock.html" target="_blank">
+    <div class="card-num">// 01 — BASELINE</div>
+    <div class="card-title">Classic Dock</div>
+    <div class="card-desc">Bottom honeycomb dock + main terminal pane + top telemetry strip. The conservative starting point, refined.</div>
+    <div class="card-tags">
+      <span class="tag">Familiar</span>
+      <span class="tag">Wide</span>
+      <span class="tag">Readable</span>
+    </div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="02-vertical-hive.html" target="_blank">
+    <div class="card-num">// 02 — LAYOUT</div>
+    <div class="card-title">Vertical Hive</div>
+    <div class="card-desc">Left sidebar is a tall honeycomb tessellating in offset columns. Larger main pane, more sessions visible without scrolling.</div>
+    <div class="card-tags">
+      <span class="tag">Vertical</span>
+      <span class="tag">Spacious</span>
+      <span class="tag">Tessellated</span>
+    </div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="03-control-panel.html" target="_blank">
+    <div class="card-num">// 03 — INSTRUMENT</div>
+    <div class="card-title">Control Panel</div>
+    <div class="card-desc">Industrial dashboard. Top row of analog-styled gauges, right strip of hex indicator lights, kinetic status bar at the foot. Maximum factory.</div>
+    <div class="card-tags">
+      <span class="tag">Industrial</span>
+      <span class="tag">Telemetry</span>
+      <span class="tag">Showy</span>
+    </div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="04-conveyor.html" target="_blank">
+    <div class="card-num">// 04 — NARRATIVE</div>
+    <div class="card-title">Conveyor</div>
+    <div class="card-desc">Sessions ride a literal conveyor belt — rails, hazard stripes, a mechanical lift. Active session "lifts" off the belt into the main pane.</div>
+    <div class="card-tags">
+      <span class="tag">Thematic</span>
+      <span class="tag">Playful</span>
+      <span class="tag">Mechanical</span>
+    </div>
+    <div class="card-arrow">─→</div>
+  </a>
+  <a class="card" href="05-honeycomb-grid.html" target="_blank">
+    <div class="card-num">// 05 — SPATIAL</div>
+    <div class="card-title">Honeycomb Grid</div>
+    <div class="card-desc">No traditional dock. The whole space is one tessellated hive — active session is a giant central hex with the terminal inside, smaller previews tile outward.</div>
+    <div class="card-tags">
+      <span class="tag">Distinctive</span>
+      <span class="tag">Spatial</span>
+      <span class="tag">Bold</span>
+    </div>
+    <div class="card-arrow">─→</div>
+  </a>
+</div>
+
+<footer>
+  <span>EVALUATE / PICK / MIX / RESPOND WITH NOTES</span>
+  <span class="footer-action">▣ ROUND 04 // PALETTES OF 25</span>
+</footer>
+</body>
+</html>

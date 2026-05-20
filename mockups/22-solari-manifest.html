@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 22 — Solari Manifest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Major+Mono+Display&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --hall: #0a0907;
+  --frame: #1c1810;
+  --frame-2: #2a2418;
+  --board-bg: #050403;
+  --flap-bg: #0e0c08;
+  --flap-edge: #1a160e;
+  --flap-text: #f6e3a8;
+  --flap-text-dim: #9c8d62;
+  --honey: #f5a524;
+  --honey-deep: #d68a14;
+  --honey-glow: #ffc15c;
+  --bee: #f0c419;
+  --led-green: #6dc83a;
+  --led-red: #e05038;
+  --ink-frame: #c9b88e;
+  --ink-faint: #6a5d44;
+  --ink-mute: #4a4030;
+  --term-bg: #050403;
+  --term-text: #e6dcc0;
+  --display: 'Major Mono Display', monospace;
+  --board-font: 'JetBrains Mono', ui-monospace, monospace;
+  --mono: 'DM Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--mono);
+  background: var(--hall);
+  color: var(--ink-frame);
+  background-image: radial-gradient(ellipse at 50% 0%, #1a160c 0%, #0a0907 60%, #050403 100%);
+  font-size: 13px;
+}
+
+.hall {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  grid-template-rows: 36px 1fr 26px;
+  height: 100vh;
+}
+
+/* TITLEBAR (full width) */
+.titlebar {
+  grid-column: 1 / -1;
+  background: linear-gradient(180deg, #14110b, #0a0805);
+  border-bottom: 1px solid var(--frame);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: relative;
+}
+.titlebar::after {
+  content:''; position:absolute; left:0; right:0; bottom:0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--honey) 30%, var(--honey) 70%, transparent);
+  opacity: 0.4;
+}
+.tb-l { display:flex; align-items:center; gap:14px; }
+.tb-r { display:flex; justify-content:flex-end; align-items:center; gap:10px; color: var(--ink-faint); }
+.lights { display:flex; gap:5px; }
+.lt { width:9px; height:9px; border-radius:50%; background:#1c1810; box-shadow: inset 0 0 2px rgba(0,0,0,0.6); }
+.lt.on { background: radial-gradient(circle at 35% 30%, var(--honey-glow), var(--honey) 60%, #5e3a08); box-shadow: 0 0 5px rgba(245,165,36,0.5); }
+.brand { display:flex; align-items:center; gap:10px; font-family: var(--display); font-size: 14px; letter-spacing: 0.16em; color: var(--honey); }
+.tb-c { color: var(--ink-faint); font-size: 10px; }
+.tb-c b { color: var(--bee); font-weight: 500; }
+.pill { font-size: 9px; letter-spacing: 0.14em; padding: 3px 9px; border: 1px solid #3a2c14; background: #14110b; color: var(--ink-frame); }
+.pill.live { color: var(--led-green); border-color: #2c4a1c; }
+.pill.live::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--led-green); margin-right: 6px; box-shadow: 0 0 5px var(--led-green); animation: blink 1.4s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: 0.4; } }
+
+/* LEFT — MANIFEST list (vertical Solari, narrow) */
+.manifest {
+  background: linear-gradient(180deg, #14110b, #0a0805);
+  border-right: 4px solid var(--frame-2);
+  position: relative;
+  padding: 10px 12px 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.manifest::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: repeating-linear-gradient(90deg, var(--frame-2) 0 60px, var(--frame) 60px 64px);
+}
+.man-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(180deg, var(--frame-2), var(--frame));
+  border-top: 1px solid #3a2f20;
+  border-bottom: 1px solid #050403;
+  padding: 6px 10px;
+  font-family: var(--display);
+  letter-spacing: 0.28em;
+  color: var(--honey);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.man-head .pn {
+  background: var(--bee); color: #1a140e;
+  padding: 2px 8px; font-family: var(--board-font);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+}
+.man-head .clk {
+  font-family: var(--board-font); font-size: 12px; font-weight: 700;
+  color: var(--honey); letter-spacing: 0.12em;
+  background: var(--flap-bg); padding: 3px 8px;
+  border: 1px solid var(--flap-edge);
+  position: relative;
+  text-shadow: 0 0 6px rgba(245,165,36,0.4);
+}
+.man-head .clk::before {
+  content:''; position:absolute; left:0;right:0; top:50%; height:1px;
+  background: rgba(0,0,0,0.85);
+}
+
+.col-head {
+  display: grid;
+  grid-template-columns: 22px 50px 1fr 70px;
+  gap: 6px;
+  padding: 4px 6px;
+  font-family: var(--mono); font-size: 8.5px;
+  letter-spacing: 0.22em; color: #6a5530; text-transform: uppercase;
+  border-bottom: 1px solid var(--frame);
+}
+
+.man-list {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 4px;
+}
+
+/* manifest row — each row has a tiny droid sigil + flap cells */
+.mrow {
+  display: grid;
+  grid-template-columns: 22px 50px 1fr 70px;
+  gap: 6px;
+  align-items: center;
+  height: 38px;
+  padding: 0 4px;
+  cursor: pointer;
+  position: relative;
+  border-left: 3px solid transparent;
+  transition: background 0.15s;
+}
+.mrow:hover { background: rgba(245,165,36,0.04); }
+.mrow.active {
+  background: linear-gradient(90deg, rgba(245,165,36,0.16), rgba(245,165,36,0.02));
+  border-left-color: var(--honey);
+}
+
+/* SIGIL — tiny droid head per row */
+.sigil {
+  width: 22px; height: 22px;
+  border-radius: 50% 50% 4px 4px;
+  background: radial-gradient(ellipse at 35% 25%, #5a4a30 0%, #3a2f1e 55%, #1a140a 100%);
+  box-shadow: inset 0 -2px 2px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.08);
+  position: relative;
+  margin: 0 auto;
+}
+.sigil .eye {
+  position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--led, var(--honey));
+  box-shadow: 0 0 5px var(--led, var(--honey-glow));
+}
+.sigil::before { /* antenna */
+  content:''; position:absolute; top:-5px; left: 50%; transform: translateX(-50%);
+  width: 1px; height: 5px; background: #5a4a30;
+}
+.sigil::after { /* antenna tip */
+  content:''; position:absolute; top:-7px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--led, var(--honey));
+  box-shadow: 0 0 4px var(--led, var(--honey-glow));
+}
+.mrow.idle .sigil .eye, .mrow.idle .sigil::after { background: #2a2418; box-shadow: none; }
+.mrow.stale .sigil .eye, .mrow.stale .sigil::after { background: #1c1810; box-shadow: none; }
+.mrow.stale .sigil { opacity: 0.5; }
+.mrow.needs .sigil .eye { background: var(--led-red); box-shadow: 0 0 6px var(--led-red); animation: pulse 0.7s infinite; }
+.mrow.working .sigil .eye { animation: pulse 1.6s infinite; }
+@keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* small flap-style cells */
+.fcell {
+  background: var(--flap-bg);
+  border: 1px solid var(--flap-edge);
+  border-bottom: 1px solid #000;
+  height: 28px;
+  display: flex; align-items: center;
+  padding: 0 7px;
+  font-family: var(--board-font);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--flap-text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
+}
+.fcell::before {
+  content:''; position:absolute; left:0; right:0; top: 50%; height: 1px;
+  background: #000;
+}
+.fcell::after {
+  content:''; position:absolute; left:0; right:0; top:0; height:50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
+  pointer-events: none;
+}
+.fcell.dep { font-size: 11px; }
+.fcell.name { font-weight: 700; }
+.fcell.eta {
+  background: var(--tag, var(--flap-bg));
+  color: #1a140e;
+  font-weight: 700;
+  border-color: rgba(0,0,0,0.5);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  justify-content: space-between;
+}
+.fcell.eta::before { background: rgba(0,0,0,0.35); }
+.mrow.idle .fcell:not(.eta) { color: var(--flap-text-dim); }
+.mrow.stale .fcell:not(.eta) { color: #5a4f38; }
+.fcell .stat-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+}
+.mrow.working .fcell.eta .stat-dot { background: #14401a; box-shadow: 0 0 4px var(--led-green); }
+.mrow.needs .fcell.eta {
+  background: linear-gradient(180deg, #b62a18 0%, #7a1c10 100%);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255,200,180,0.5);
+  animation: needs-blink 1.2s ease-in-out infinite;
+}
+.mrow.needs .fcell.eta .stat-dot { background: #fff; box-shadow: 0 0 5px #fff; }
+@keyframes needs-blink {
+  0%, 100% { box-shadow: inset 0 0 8px rgba(0,0,0,0.7); }
+  50% { box-shadow: inset 0 0 8px rgba(0,0,0,0.7), 0 0 10px rgba(224,80,56,0.6); }
+}
+
+/* deploy row */
+.deploy {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 6px; align-items: center;
+  height: 32px;
+  padding: 0 4px;
+  border: 1px dashed #3a2c14;
+  cursor: pointer;
+  margin-top: 4px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-faint); letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.deploy:hover { border-color: var(--honey); color: var(--honey); }
+.deploy .plus {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--frame); border: 1px solid #3a2c14;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--ink-faint);
+}
+
+/* RIGHT — HERO MANIFEST PANEL */
+.hero {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  background: linear-gradient(180deg, #0c0a06 0%, #050403 100%);
+  min-width: 0;
+  position: relative;
+}
+
+/* big "now departing" hero */
+.now {
+  background: linear-gradient(180deg, var(--frame), #14110b);
+  border-bottom: 4px solid var(--frame-2);
+  padding: 14px 20px 16px;
+  position: relative;
+}
+.now::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: repeating-linear-gradient(90deg, var(--frame-2) 0 60px, var(--frame) 60px 64px);
+}
+.now-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+  padding-top: 6px;
+}
+.now-head .lbl {
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 0.32em;
+  color: var(--honey);
+  display: flex; align-items: center; gap: 14px;
+}
+.now-head .lbl .plat {
+  background: var(--bee); color: #1a140e;
+  padding: 2px 9px; font-family: var(--board-font);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+}
+.now-head .right {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.18em; color: var(--ink-faint);
+  display: flex; gap: 16px; align-items: center;
+}
+.now-head .right b { color: var(--bee); font-weight: 500; }
+.now-head .clock {
+  font-family: var(--board-font); font-size: 14px; font-weight: 700;
+  color: var(--honey); letter-spacing: 0.16em;
+  background: var(--flap-bg); padding: 3px 9px;
+  border: 1px solid var(--flap-edge);
+  position: relative; text-shadow: 0 0 6px rgba(245,165,36,0.4);
+}
+.now-head .clock::before {
+  content:''; position:absolute; left:0; right:0; top:50%; height:1px;
+  background: rgba(0,0,0,0.85);
+}
+
+/* split flap "name" mega-cell */
+.now-name {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* hero droid sigil — large */
+.bigsigil {
+  width: 80px; height: 80px;
+  position: relative;
+}
+.bigsigil .head {
+  position: absolute;
+  top: 12px; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 42px;
+  border-radius: 50% 50% 4px 4px;
+  background: radial-gradient(ellipse at 35% 25%, #6a5740 0%, #3a2f1e 55%, #1a140a 100%);
+  box-shadow:
+    inset 0 -3px 3px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.1),
+    0 2px 4px rgba(0,0,0,0.5);
+}
+.bigsigil .head::before {
+  content:''; position:absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 11px; height: 11px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1a140a, #050403);
+  box-shadow: inset 0 0 0 1px #3a2f1e;
+}
+.bigsigil .head::after {
+  content:''; position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--honey); box-shadow: 0 0 8px var(--honey-glow);
+  animation: pulse 1.6s infinite;
+}
+.bigsigil .ant {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 1.5px; height: 14px; background: #5a4a30;
+}
+.bigsigil .ant::after {
+  content:''; position:absolute; top:-4px; left:-2px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--honey); box-shadow: 0 0 6px var(--honey);
+  animation: blink 1.4s infinite;
+}
+.bigsigil .led-l, .bigsigil .led-r {
+  position: absolute; top: 18px; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--led-green); box-shadow: 0 0 4px var(--led-green);
+}
+.bigsigil .led-l { left: 16px; }
+.bigsigil .led-r { right: 16px; }
+
+/* big mega flap rendering of the session name */
+.mega {
+  display: flex;
+  gap: 4px;
+  height: 80px;
+}
+.mega .flip {
+  flex: 1;
+  background: var(--flap-bg);
+  border: 1px solid var(--flap-edge);
+  border-bottom: 1px solid #000;
+  font-family: var(--board-font);
+  font-weight: 700;
+  font-size: 36px;
+  color: var(--flap-text);
+  letter-spacing: 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 14px rgba(0,0,0,0.8);
+  text-shadow: 0 0 12px rgba(246,227,168,0.2);
+}
+.mega .flip::before {
+  content:''; position:absolute; left:0; right:0; top:50%; height:1px;
+  background: rgba(0,0,0,0.95);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.6);
+}
+.mega .flip::after {
+  content:''; position:absolute; left:0; right:0; top:0; height:50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), transparent);
+  pointer-events: none;
+}
+.mega .flip.tag {
+  background: var(--bee); color: #1a140e;
+  font-size: 14px; flex: 0 0 60px;
+  letter-spacing: 0.1em;
+}
+.mega .flip.tag::before { background: rgba(0,0,0,0.3); }
+
+/* now-status banner */
+.now-banner {
+  margin-top: 12px;
+  background: linear-gradient(180deg, #0c0a06, #050403);
+  border: 1px solid var(--frame);
+  padding: 8px 14px;
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.now-banner b { color: var(--ink-frame); font-weight: 500; }
+.now-banner .em { color: var(--bee); }
+.now-banner .stat {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--led-green); font-weight: 500;
+  font-family: var(--board-font);
+  letter-spacing: 0.14em;
+}
+.now-banner .stat::before {
+  content:''; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--led-green);
+  box-shadow: 0 0 6px var(--led-green);
+  animation: blink 1.2s infinite;
+}
+.bar2 { display: inline-block; width: 60px; height: 5px; background: var(--frame); position: relative; }
+.bar2 i { position: absolute; inset: 0; right: auto; background: linear-gradient(90deg, var(--honey-deep), var(--bee)); }
+
+/* terminal pane */
+.term-pane {
+  padding: 14px 20px 16px;
+  position: relative;
+  min-height: 0;
+}
+.term {
+  background: var(--term-bg);
+  border: 1px solid #1a160e;
+  border-top: 1px solid #2a2418;
+  height: 100%;
+  padding: 16px 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.7);
+}
+.term::before {
+  content: 'PLATFORM 03 · BOARDING';
+  position: absolute; top: 6px; right: 14px;
+  font-family: var(--mono); font-size: 9px;
+  color: #5b4f3a; letter-spacing: 0.2em;
+}
+.term::after {
+  content:''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.012) 2px 3px);
+  pointer-events: none;
+}
+pre.console {
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+  color: var(--term-text); white-space: pre; margin: 0;
+}
+.c-prompt { color: var(--honey); font-weight: 500; }
+.c-claude { color: #ede4c8; }
+.c-tool { color: #8ad0e5; }
+.c-result { color: #7a7060; }
+.c-edit { color: #f0c074; }
+.c-cursor { display:inline-block; width:9px; height:15px; background: var(--honey); vertical-align: text-top; animation: blink 1s step-end infinite; box-shadow: 0 0 6px rgba(245,165,36,0.5); }
+
+/* footer */
+.foot {
+  grid-column: 1 / -1;
+  background: linear-gradient(180deg, #0c0a06, #050403);
+  border-top: 1px solid var(--frame);
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.14em; color: var(--ink-faint); text-transform: uppercase;
+}
+.foot .right { margin-left: auto; }
+
+.caption {
+  position: fixed; right: 18px; bottom: 32px;
+  font-family: var(--display); font-size: 11px;
+  letter-spacing: 0.22em; color: #5b4f3a;
+  pointer-events: none;
+}
+.caption b { color: var(--honey); }
+
+.back {
+  position: fixed; top: 7px; right: 14px; z-index: 100;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-frame); background: #14110b;
+  border: 1px solid #3a2c14; padding: 3px 9px;
+  text-decoration: none;
+}
+.back:hover { color: var(--honey); border-color: var(--honey); }
+
+/* settle animation on rows */
+.mrow .fcell, .mrow .sigil { animation: settle 0.4s ease-out backwards; }
+.mrow:nth-child(1) .fcell, .mrow:nth-child(1) .sigil { animation-delay: 0.05s; }
+.mrow:nth-child(2) .fcell, .mrow:nth-child(2) .sigil { animation-delay: 0.1s; }
+.mrow:nth-child(3) .fcell, .mrow:nth-child(3) .sigil { animation-delay: 0.15s; }
+.mrow:nth-child(4) .fcell, .mrow:nth-child(4) .sigil { animation-delay: 0.2s; }
+.mrow:nth-child(5) .fcell, .mrow:nth-child(5) .sigil { animation-delay: 0.25s; }
+.mrow:nth-child(6) .fcell, .mrow:nth-child(6) .sigil { animation-delay: 0.3s; }
+.mrow:nth-child(7) .fcell, .mrow:nth-child(7) .sigil { animation-delay: 0.35s; }
+.mrow:nth-child(8) .fcell, .mrow:nth-child(8) .sigil { animation-delay: 0.4s; }
+.mrow:nth-child(9) .fcell, .mrow:nth-child(9) .sigil { animation-delay: 0.45s; }
+.mrow:nth-child(10) .fcell, .mrow:nth-child(10) .sigil { animation-delay: 0.5s; }
+@keyframes settle { from { transform: translateY(-3px); opacity: 0; } to { transform: none; opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div class="hall">
+
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span class="lt"></span><span class="lt"></span><span class="lt on"></span></div>
+      <div class="brand">MULTICLAUDE</div>
+    </div>
+    <div class="tb-c">SIGNAL HALL · MANIFEST · ~/work/<b>multiclaude-hub</b></div>
+    <div class="tb-r">
+      <span class="pill">HALL-A</span>
+      <span class="pill live">10 SCHEDULED</span>
+    </div>
+  </div>
+
+  <!-- LEFT: MANIFEST -->
+  <aside class="manifest">
+    <div class="man-head">
+      <span class="pn">PLAT 03</span>
+      <span>MANIFEST</span>
+      <span class="clk">14:32:08</span>
+    </div>
+    <div class="col-head">
+      <span></span>
+      <span>DEP</span>
+      <span>SESSION</span>
+      <span>ETA · STAT</span>
+    </div>
+    <div class="man-list">
+
+      <div class="mrow working">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:18</div>
+        <div class="fcell name">CLAUDE-CLI</div>
+        <div class="fcell eta" style="--tag:#3a7afe; color:#fff;"><span class="stat-dot"></span>00:14</div>
+      </div>
+
+      <div class="mrow idle">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:09</div>
+        <div class="fcell name">DEMO-PREP</div>
+        <div class="fcell eta" style="--tag:#7a3aff; color:#fff;"><span class="stat-dot"></span>04:21</div>
+      </div>
+
+      <div class="mrow working active">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:31</div>
+        <div class="fcell name" style="color:var(--honey);">R2-MC</div>
+        <div class="fcell eta" style="--tag:#f5a524; color:#1a140e;"><span class="stat-dot"></span>▶ NOW</div>
+      </div>
+
+      <div class="mrow needs">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:28</div>
+        <div class="fcell name">SDO-AUDIT</div>
+        <div class="fcell eta" style="--tag:#e05038; color:#fff;"><span class="stat-dot"></span>NEEDS</div>
+      </div>
+
+      <div class="mrow working">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:24</div>
+        <div class="fcell name">EXPMT-TAURI</div>
+        <div class="fcell eta" style="--tag:#00b3a6; color:#fff;"><span class="stat-dot"></span>00:08</div>
+      </div>
+
+      <div class="mrow idle">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">13:56</div>
+        <div class="fcell name">PROD-MIGRATE</div>
+        <div class="fcell eta" style="--tag:#cc1f3d; color:#fff;"><span class="stat-dot"></span>12:03</div>
+      </div>
+
+      <div class="mrow working">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:01</div>
+        <div class="fcell name">PAPER-WIRE</div>
+        <div class="fcell eta" style="--tag:#f0c419; color:#1a140e;"><span class="stat-dot"></span>00:31</div>
+      </div>
+
+      <div class="mrow working">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">14:14</div>
+        <div class="fcell name">API-PROBES</div>
+        <div class="fcell eta" style="--tag:#4cb8ff; color:#fff;"><span class="stat-dot"></span>00:03</div>
+      </div>
+
+      <div class="mrow idle">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">13:42</div>
+        <div class="fcell name">SCRATCH-B</div>
+        <div class="fcell eta" style="--tag:#ff2d92; color:#fff;"><span class="stat-dot"></span>28:00</div>
+      </div>
+
+      <div class="mrow stale">
+        <span class="sigil"><span class="eye"></span></span>
+        <div class="fcell dep">12:18</div>
+        <div class="fcell name">STAG-DEPLOY</div>
+        <div class="fcell eta" style="--tag:#5a4a30; color:#f6e3a8;"><span class="stat-dot"></span>2:14H</div>
+      </div>
+
+      <div class="deploy">
+        <span class="plus">+</span>
+        <span>DEPLOY UNIT · ⌘N</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT HERO -->
+  <main class="hero">
+    <!-- HERO MANIFEST PANEL -->
+    <section class="now">
+      <div class="now-head">
+        <div class="lbl"><span class="plat">PLAT 03</span> NOW DEPARTING</div>
+        <div class="right">
+          <span>SVC <b>BEE-DROID</b></span>
+          <span class="clock">14:32:08</span>
+        </div>
+      </div>
+
+      <div class="now-name">
+        <div class="bigsigil">
+          <div class="ant"></div>
+          <div class="head">
+            <span class="led-l"></span><span class="led-r"></span>
+          </div>
+        </div>
+        <div class="mega">
+          <div class="flip tag">HUB</div>
+          <div class="flip">R</div>
+          <div class="flip">2</div>
+          <div class="flip">·</div>
+          <div class="flip">M</div>
+          <div class="flip">C</div>
+          <div class="flip">·</div>
+          <div class="flip">M</div>
+          <div class="flip">U</div>
+          <div class="flip">L</div>
+          <div class="flip">T</div>
+          <div class="flip">I</div>
+        </div>
+      </div>
+
+      <div class="now-banner">
+        <span><span class="stat">WORKING</span></span>
+        <span>DEST <b>~/WORK/MULTICLAUDE-HUB</b></span>
+        <span>OPUS <b>4.7</b></span>
+        <span>EFF <b class="em">MAX</b></span>
+        <span>CTX <span class="bar2"><i style="width:47%"></i></span> <b>47%</b></span>
+        <span>UPTIME <b>04:21:08</b></span>
+        <span style="margin-left:auto;">▣ NEXT FLIP IN 12s</span>
+      </div>
+    </section>
+
+    <!-- TERM PANE -->
+    <section class="term-pane">
+      <div class="term">
+<pre class="console"><span class="c-prompt">&gt;</span> <span class="c-claude">claude</span>
+
+<span class="c-claude">⏺ Manifest open. Track 03 highlighted, what now?</span>
+
+<span class="c-prompt">&gt;</span> Add a per-session sigil — small droid head — to each manifest row
+
+<span class="c-claude">⏺ Reading the row template + sigil component...</span>
+
+<span class="c-tool">⏺ Bash(rg "Sigil" src/manifest/ -n)</span>
+  <span class="c-result">⎿  src/manifest/Sigil.tsx:1:    export function Sigil({status})
+     src/manifest/Row.tsx:18:   <Sigil status={s.status}/>
+     src/manifest/sigil.css:6:  .sigil { 22x22 droid bust }</span>
+
+<span class="c-claude">⏺ I'll wire each sigil's eye + antenna LED to the same status the row's
+  flap-status uses. WORKING pulses honey, NEEDS pulses red, IDLE goes
+  dark. The big hero sigil mirrors whichever row is active.</span>
+
+<span class="c-edit">⏺ Edit(src/manifest/Row.tsx)</span>
+  <span class="c-result">⎿  Bound Sigil status to session.status
+     Promoted active row's sigil to .bigsigil in hero panel
+     Synced flap-flip animation timing with sigil eye pulse</span>
+
+<span class="c-claude">⏺ Done. Try clicking SDO-AUDIT — its little red eye gets enlarged
+  into the hero sigil; the manifest's now-departing flaps re-render
+  and the hub knows which station you're standing at.</span>
+
+<span class="c-prompt">&gt;</span> <span class="c-cursor"></span></pre>
+      </div>
+    </section>
+  </main>
+
+  <div class="foot">
+    <span>HALL-A</span>
+    <span>MANIFEST · 10 ROWS</span>
+    <span style="color:#aef07e;">DEPARTING 5</span>
+    <span style="color:#ff8a78;">HOLD 1</span>
+    <span style="color:#c9b88e;">STANDBY 3</span>
+    <span style="color:#6a5d44;">CANCELLED 1</span>
+    <span class="right">▣ FLAP REV 2026.05.19 · ⌘K SEARCH</span>
+  </div>
+</div>
+
+<div class="caption"><b>22 ·</b> SOLARI MANIFEST — split-flap rows + hero "now departing" panel; each session has a tiny droid sigil whose eye pulses with status.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

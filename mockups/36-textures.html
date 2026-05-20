@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="kanagawa" data-texture="grain">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 36 — Textures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ───────────────────── THEMES ───────────────────── */
+
+/* default = kanagawa sumi */
+:root,
+[data-theme="kanagawa"] {
+  --bg:        #1f1f28;
+  --tile:      #25252e;
+  --tile-2:    #2a2a37;
+  --line:      #2f3043;
+  --line-2:    #3a3b53;
+  --ink:       #dcd7ba;
+  --ink-2:     #a6a08a;
+  --ink-3:     #727169;
+  --ink-4:     #54546d;
+  --accent:    #c0a36e;
+  --accent-glow: rgba(192,163,110,0.32);
+  --ok:        #76946a;
+  --warn:      #c34043;
+  --grain-opacity: 0.07;
+  --grain-blend: overlay;
+  --vignette: rgba(0,0,0,0.18);
+  --sheen: rgba(220,215,186,0.025);
+}
+
+[data-theme="everforest"] {
+  --bg:        #232a2e;
+  --tile:      #2d353b;
+  --tile-2:    #343f44;
+  --line:      #3d484d;
+  --line-2:    #4f585e;
+  --ink:       #d3c6aa;
+  --ink-2:     #9da9a0;
+  --ink-3:     #7a8478;
+  --ink-4:     #56635f;
+  --accent:    #a7c080;
+  --accent-glow: rgba(167,192,128,0.32);
+  --ok:        #83c092;
+  --warn:      #e67e80;
+  --grain-opacity: 0.05;
+  --grain-blend: overlay;
+  --vignette: rgba(0,0,0,0.14);
+  --sheen: rgba(211,198,170,0.022);
+}
+
+[data-theme="rose-pine"] {
+  --bg:        #1f1d2e;
+  --tile:      #232136;
+  --tile-2:    #2a273f;
+  --line:      #393552;
+  --line-2:    #44415a;
+  --ink:       #e0def4;
+  --ink-2:     #908caa;
+  --ink-3:     #6e6a86;
+  --ink-4:     #4a475e;
+  --accent:    #ea9a97;
+  --accent-glow: rgba(234,154,151,0.30);
+  --ok:        #9ccfd8;
+  --warn:      #eb6f92;
+  --grain-opacity: 0.055;
+  --grain-blend: overlay;
+  --vignette: rgba(0,0,0,0.16);
+  --sheen: rgba(224,222,244,0.022);
+}
+
+[data-theme="rose-pine-alt"] {
+  --bg:        #232136;
+  --tile:      #2a273f;
+  --tile-2:    #312e4a;
+  --line:      #393552;
+  --line-2:    #44415a;
+  --ink:       #e0def4;
+  --ink-2:     #908caa;
+  --ink-3:     #6e6a86;
+  --ink-4:     #4a4660;
+  --accent:    #ea9a97;
+  --accent-glow: rgba(234,154,151,0.35);
+  --ok:        #9ccfd8;
+  --warn:      #eb6f92;
+  --grain-opacity: 0.05;
+  --grain-blend: overlay;
+  --vignette: rgba(0,0,0,0.14);
+  --sheen: rgba(224,222,244,0.022);
+}
+
+[data-theme="original"] {
+  --bg:        #0a0c0e;
+  --tile:      #0e1114;
+  --tile-2:    #11141a;
+  --line:      #1a1f25;
+  --line-2:    #232a32;
+  --ink:       #d8dde3;
+  --ink-2:     #9aa3ac;
+  --ink-3:     #5a636c;
+  --ink-4:     #353c44;
+  --accent:    #f0a929;
+  --accent-glow: rgba(240,169,41,0.40);
+  --ok:        #6dd2a8;
+  --warn:      #ff5a3a;
+  --grain-opacity: 0.03;
+  --grain-blend: overlay;
+  --vignette: rgba(0,0,0,0.22);
+  --sheen: rgba(216,221,227,0.018);
+}
+
+/* ───────────────────── BASE ───────────────────── */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+:root {
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+  --fz: 1;  /* global font-size scale; bumped by header buttons */
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(16px * var(--fz));
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* ───────────────────── TEXTURES ─────────────────────
+   Selected via [data-texture] on <html>. Each one paints
+   into body::before. Tunable per-theme via --grain-opacity.
+*/
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: none;
+  background-repeat: repeat;
+}
+
+/* All textures use screen blend so light source colors
+   show on dark themes. Opacity tuned absolutely (not via
+   --grain-opacity) so each is actually visible. */
+
+/* none — clean */
+[data-texture="none"] body::before { opacity: 0; }
+
+/* grain — fractalNoise, full-bright source */
+[data-texture="grain"] body::before {
+  opacity: 0.10;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.95 0 0 0 0 0.85 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* scanlines — horizontal CRT lines */
+[data-texture="scanlines"] body::before {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image:
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.55) 0 1px,
+      transparent 1px 3px);
+}
+
+/* dots — quiet dot grid */
+[data-texture="dots"] body::before {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.95) 0.7px, transparent 1.1px);
+  background-size: 14px 14px;
+}
+
+/* sakura — scattered cherry blossom petals */
+[data-texture="sakura"] body::before {
+  opacity: 0.12;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420'%3E%3Cdefs%3E%3Cg id='p'%3E%3Cpath d='M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z' fill='%23f6c8d4' opacity='0.9'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23p' transform='translate(40,60) rotate(15) scale(1.1)'/%3E%3Cuse href='%23p' transform='translate(120,30) rotate(-40) scale(0.85)'/%3E%3Cuse href='%23p' transform='translate(220,90) rotate(70) scale(1.3)'/%3E%3Cuse href='%23p' transform='translate(330,40) rotate(20) scale(0.95)'/%3E%3Cuse href='%23p' transform='translate(80,160) rotate(-15) scale(1.0)'/%3E%3Cuse href='%23p' transform='translate(180,220) rotate(55) scale(1.15)'/%3E%3Cuse href='%23p' transform='translate(290,200) rotate(-30) scale(0.9)'/%3E%3Cuse href='%23p' transform='translate(380,260) rotate(45) scale(1.05)'/%3E%3Cuse href='%23p' transform='translate(60,300) rotate(80) scale(0.8)'/%3E%3Cuse href='%23p' transform='translate(160,340) rotate(-50) scale(1.2)'/%3E%3Cuse href='%23p' transform='translate(260,360) rotate(25) scale(0.95)'/%3E%3Cuse href='%23p' transform='translate(360,380) rotate(-10) scale(1.1)'/%3E%3C/svg%3E");
+  background-size: 420px 420px;
+}
+
+/* seigaiha — Japanese wave pattern */
+[data-texture="seigaiha"] body::before {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.7'%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3Ccircle cx='60' cy='20' r='18'/%3E%3Ccircle cx='60' cy='20' r='12'/%3E%3Ccircle cx='60' cy='20' r='6'/%3E%3Ccircle cx='0' cy='40' r='18'/%3E%3Ccircle cx='40' cy='40' r='18'/%3E%3Ccircle cx='80' cy='40' r='18'/%3E%3Ccircle cx='0' cy='0' r='18'/%3E%3Ccircle cx='40' cy='0' r='18'/%3E%3Ccircle cx='80' cy='0' r='18'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 40px;
+}
+
+/* very subtle global vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, var(--vignette) 100%);
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 44px 1fr 32px;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ───────────────────── TITLEBAR ───────────────────── */
+.titlebar {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, var(--tile-2) 0%, var(--bg) 100%);
+}
+.brand {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: calc(16px * var(--fz));
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.brand span { color: var(--accent); }
+.status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-family: var(--mono);
+  font-size: calc(14px * var(--fz));
+  color: var(--ink-3);
+}
+.status .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background: var(--ink-4);
+}
+.status .dot.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.status .dot.warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); animation: pulse 1s infinite; }
+.status b { color: var(--ink-2); font-weight: 500; }
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+/* THEME SWITCHER */
+.themes {
+  margin-left: 22px;
+  padding-left: 22px;
+  border-left: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.themes .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+.themes button {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.themes button:hover { transform: scale(1.15); border-color: var(--ink-3); }
+.themes button[data-active="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent), 0 0 8px var(--accent-glow);
+}
+/* swatch fills — show theme bg + a sliver of accent */
+.themes button[data-set="kanagawa"]      { background: linear-gradient(135deg, #1f1f28 50%, #c0a36e 50%); }
+.themes button[data-set="everforest"]    { background: linear-gradient(135deg, #232a2e 50%, #a7c080 50%); }
+.themes button[data-set="rose-pine"]     { background: linear-gradient(135deg, #1f1d2e 50%, #ea9a97 50%); }
+.themes button[data-set="rose-pine-alt"] { background: linear-gradient(135deg, #232136 50%, #ea9a97 50%); }
+.themes button[data-set="original"]      { background: linear-gradient(135deg, #0a0c0e 50%, #f0a929 50%); }
+
+/* TEXTURE SWITCHER */
+.textures {
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.textures .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-right: 4px;
+}
+.textures button {
+  width: 22px; height: 16px;
+  border-radius: 2px;
+  border: 1px solid var(--line-2);
+  cursor: pointer;
+  padding: 0;
+  background-color: var(--tile);
+  background-repeat: repeat;
+  position: relative;
+  transition: transform 0.12s, border-color 0.12s;
+  overflow: hidden;
+}
+.textures button:hover { transform: scale(1.1); border-color: var(--ink-3); }
+.textures button[data-active="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+/* swatch fills — show a tiny preview of each texture */
+.textures button[data-tex="none"]      { background: var(--tile); }
+.textures button[data-tex="grain"]     {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.8 0 0 0 0 0.7 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"), var(--tile);
+}
+.textures button[data-tex="washi"] {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.18' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.85 0 0 0 0 0.8 0 0 0 0 0.65 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)' opacity='0.7'/%3E%3C/svg%3E"), var(--tile);
+}
+.textures button[data-tex="scanlines"] {
+  background-image: repeating-linear-gradient(0deg, var(--ink-2) 0 1px, transparent 1px 3px), var(--tile);
+}
+.textures button[data-tex="dots"] {
+  background-image: radial-gradient(var(--ink-2) 0.7px, transparent 0.9px), var(--tile);
+  background-size: 4px 4px, auto;
+}
+.textures button[data-tex="sakura"] {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='16' viewBox='0 0 22 16'%3E%3Cpath d='M11,3 C12,5 13,7 13,8.5 C13,10 12,11 11,11.2 C10,11 9,10 9,8.5 C9,7 10,5 11,3 Z' fill='%23f6c8d4'/%3E%3C/svg%3E"), var(--tile);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.textures button[data-tex="seigaiha"] {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='16'%3E%3Cg fill='none' stroke='%23dcd7ba' stroke-width='0.5'%3E%3Ccircle cx='5' cy='8' r='5'/%3E%3Ccircle cx='5' cy='8' r='3'/%3E%3Ccircle cx='17' cy='8' r='5'/%3E%3Ccircle cx='17' cy='8' r='3'/%3E%3C/g%3E%3C/svg%3E"), var(--tile);
+}
+
+/* FONT SIZE CONTROL */
+.fz {
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fz .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  margin-right: 2px;
+}
+.fz button {
+  width: 22px; height: 20px;
+  border-radius: 3px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.12s, color 0.12s;
+}
+.fz button:hover { border-color: var(--accent); color: var(--accent); }
+.fz .val {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-3);
+  min-width: 28px;
+  text-align: center;
+}
+
+.back {
+  margin-left: 18px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink-3); text-decoration: none;
+  padding: 3px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+}
+.back:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ───────────────────── GRID ───────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+}
+
+.tile {
+  position: relative;
+  background: var(--tile);
+  display: grid;
+  grid-template-rows: 38px 1fr;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tile:hover { background: var(--tile-2); }
+
+/* tile head — subtle gradient + faint sheen line at top */
+.t-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: calc(14px * var(--fz));
+  background:
+    linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+  position: relative;
+}
+.t-head::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--sheen);
+}
+
+.t-head .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--ink-4);
+}
+.tile.working .t-head .dot { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+.tile.needs   .t-head .dot { background: var(--warn); box-shadow: 0 0 8px var(--warn); animation: pulse 0.9s infinite; }
+.tile.idle    .t-head .dot { background: var(--ink-3); }
+.tile.stale   .t-head .dot { background: var(--ink-4); }
+
+.t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+.t-head .path { color: var(--ink-3); font-size: calc(14px * var(--fz)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--fz)); letter-spacing: 0.04em; }
+
+/* terminal body */
+.t-body {
+  padding: 18px 22px;
+  background: var(--tile);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: calc(15.5px * var(--fz));
+  line-height: 1.65;
+  color: var(--ink);
+  position: relative;
+}
+/* very faint scanline texture */
+.t-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  z-index: 1;
+}
+/* soft inner-top sheen on tile body */
+.t-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, var(--sheen) 0%, transparent 60%);
+  z-index: 1;
+}
+pre.term {
+  white-space: pre-wrap;
+  font-family: var(--mono);
+  position: relative;
+  z-index: 2;
+}
+.p { color: var(--accent); }
+.c { color: var(--ink); }
+.t { color: var(--ink-2); }
+.r { color: var(--ink-3); }
+.k { color: var(--ink-2); }
+.cur {
+  display: inline-block;
+  width: 9px; height: 17px;
+  background: var(--accent);
+  vertical-align: text-top;
+  animation: cur 1s steps(1) infinite;
+}
+.cur.dim { background: var(--ink-3); }
+@keyframes cur { 50% { opacity: 0; } }
+
+.tile:not(.active) .t-body { opacity: 0.7; }
+.tile.stale .t-body { opacity: 0.4; }
+
+/* ACTIVE — accent line + soft bloom from top */
+.tile.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  z-index: 3;
+}
+.tile.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 100% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
+  opacity: 0.5;
+  z-index: 2;
+}
+.tile.active .t-head .name { color: var(--accent); }
+
+/* subtle focus ring on active tile — 1px inset accent at low opacity */
+.tile.active {
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    inset 0 0 24px -8px var(--accent-glow);
+}
+
+/* ───────────────────── FOOT ───────────────────── */
+.foot {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, var(--bg) 0%, var(--tile-2) 100%);
+  font-family: var(--mono);
+  font-size: calc(13.5px * var(--fz));
+  color: var(--ink-3);
+}
+.foot kbd {
+  font-family: var(--mono);
+  font-size: calc(13px * var(--fz));
+  padding: 1px 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  color: var(--ink-2);
+  background: transparent;
+  margin: 0 2px;
+}
+.foot .group { display: flex; align-items: center; gap: 6px; }
+.foot .right { margin-left: auto; color: var(--ink-3); }
+.foot .right b { color: var(--accent); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="brand">multi<span>·</span>claude</div>
+    <div class="status">
+      <span><span class="dot ok"></span>2 working</span>
+      <span><span class="dot warn"></span>1 needs you</span>
+      <span><span class="dot"></span>1 idle</span>
+    </div>
+    <div class="themes">
+      <span class="label">theme</span>
+      <button data-set="kanagawa"      data-active="true"  title="Kanagawa Sumi"></button>
+      <button data-set="everforest"                        title="Everforest Dusk"></button>
+      <button data-set="rose-pine"                         title="Rose Pine Moon"></button>
+      <button data-set="rose-pine-alt"                     title="Rose Pine Moon (alt)"></button>
+      <button data-set="original"                          title="Original (dark amber)"></button>
+    </div>
+    <div class="textures">
+      <span class="label">tex</span>
+      <button data-tex="none"                          title="None"></button>
+      <button data-tex="grain"     data-active="true"  title="Grain"></button>
+      <button data-tex="scanlines"                     title="Scanlines"></button>
+      <button data-tex="dots"                          title="Dot grid"></button>
+      <button data-tex="sakura"                        title="Sakura"></button>
+      <button data-tex="seigaiha"                      title="Seigaiha (waves)"></button>
+    </div>
+    <div class="fz">
+      <span class="label">size</span>
+      <button id="fz-down" title="Decrease font size">−</button>
+      <span class="val" id="fz-val">100%</span>
+      <button id="fz-up" title="Increase font size">+</button>
+    </div>
+    <a class="back" href="index.html">index</a>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <section class="tile working active">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">multiclaude</span>
+        <span class="path">~/work/multiclaude-hub</span>
+        <span class="meta">04:21</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Wire the bay readouts to the live status feed and
+  make the wing flap rate map to working intensity.
+
+<span class="c">⏺ Reading the registry to see how status events flow.</span>
+
+<span class="t">⏺ Bash(rg "SessionStatus" src/ -n)</span>
+  <span class="r">⎿  src/state/registry.ts:18:  type SessionStatus = …
+     src/components/Tile.tsx:42:    status: SessionStatus
+     src/hooks/useSessions.ts:9:  return store.subscribe(…)</span>
+
+<span class="c">⏺ The components already accept a status prop, they just
+  aren't subscribing to the live store. Wiring that up.</span>
+
+<span class="t">⏺ Edit(src/components/Tile.tsx)</span>
+  <span class="r">⎿  Subscribed to useSessions(); mapped status → dot color
+     Working: 1.6s pulse · Needs: 0.9s pulse (red)</span>
+
+<span class="c">⏺ Done. Each tile's dot now reflects the live session.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+      </div>
+    </section>
+
+    <section class="tile working">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">paper-wire</span>
+        <span class="path">~/decks/r26/release</span>
+        <span class="meta">03:36</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Resume work on slide 33 — accent thread
+
+<span class="c">⏺ Reading the lab page to find the override.</span>
+
+<span class="t">⏺ Read(corporate26-cards.html)</span>
+  <span class="r">⎿  Removed 1 line
+     64    .slide .slide-title,
+     65    .slide .slide-subtitle,
+     66 -  .slide .card-heading,
+     67    .slide .card-body,</span>
+
+<span class="c">⏺ Cards heading still looks navy — checking for an
+  overriding selector.</span>
+
+<span class="t">⏺ Bash(rg "card-heading" assets/ -n)</span>
+  <span class="r">⎿  (no matches)</span>
+
+<span class="c">⏺ Done. Accent thread is in place across all 5.</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <section class="tile needs">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">sdo-audit</span>
+        <span class="path">~/work/disco2demo/cals</span>
+        <span class="meta">prompt</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ All 4 reference-doc copies sync-verified via md5.
+
+One open question:
+
+Want me to retrofit Company C's existing artifacts to
+the new shape?</span>
+
+<span class="r">  1.  Yes, retrofit now
+       Re-fold Section 7 time-sinks into Section 6 pain
+       cards in 01-analysis.md.
+
+  2.  No, leave Company C as-is
+
+  3.  Type something.</span>
+
+<span class="t">⌃ Enter to select</span>  <span class="r">· ↑/↓ navigate · esc cancel</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <section class="tile idle">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">demo-prep</span>
+        <span class="path">~/sdo/spring/mythos</span>
+        <span class="meta">idle 4m</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ 8 tasks (7 done, 1 in progress, 0 open)
+
+  ▸ Offer to update Company C artifacts
+  ✓ Verify all 4 skills are in sync via md5
+  ✓ Edit craft-demo SKILL.md line 82
+  ✓ Edit pov-framework.md line 183
+  ✓ Sync reference files to map-solution
+   … +3 completed</span>
+
+<span class="r">austin@ltmh6va ~ % cd ~
+austin@ltmh6va ~ % ls
+Applications  Documents  Music
+claude-projects  Library  Pictures</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FOOT -->
+  <div class="foot">
+    <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+    <span class="group">send <kbd>⌘</kbd><kbd>↵</kbd></span>
+    <span class="group">spawn <kbd>⌘</kbd><kbd>N</kbd></span>
+    <span class="right">focus <b>multiclaude</b></span>
+  </div>
+</div>
+
+<script>
+  const themeBtns = document.querySelectorAll('.themes button');
+  themeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      themeBtns.forEach(b => b.removeAttribute('data-active'));
+      btn.dataset.active = 'true';
+      document.documentElement.dataset.theme = btn.dataset.set;
+    });
+  });
+
+  const texBtns = document.querySelectorAll('.textures button');
+  texBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      texBtns.forEach(b => b.removeAttribute('data-active'));
+      btn.dataset.active = 'true';
+      document.documentElement.dataset.texture = btn.dataset.tex;
+    });
+  });
+
+  // font size scale
+  let fz = 1;
+  const fzVal = document.getElementById('fz-val');
+  const setFz = v => {
+    fz = Math.max(0.7, Math.min(1.6, v));
+    document.documentElement.style.setProperty('--fz', fz);
+    fzVal.textContent = Math.round(fz * 100) + '%';
+  };
+  document.getElementById('fz-up').addEventListener('click', () => setFz(fz + 0.05));
+  document.getElementById('fz-down').addEventListener('click', () => setFz(fz - 0.05));
+
+  // click tile to focus
+  const tiles = document.querySelectorAll('.tile');
+  tiles.forEach(tile => {
+    tile.addEventListener('click', () => {
+      tiles.forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en" data-theme="rose-pine-alt">
+<head>
+<meta charset="utf-8" />
+<title>multiclaude — pulse, 5 variants</title>
+<style>
+  /* ─── Theme tokens (rose-pine-alt default) ─── */
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #312e4a;
+    --line: #393552;
+    --line-2: #44415a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a4660;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.35);
+    --ok: #9ccfd8;
+    --warn: #eb6f92;
+    --sheen: rgba(224, 222, 244, 0.022);
+    --fz: 1;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body {
+    min-height: 100vh;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ─── Page header ─── */
+  .head {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .head .title b { color: var(--accent); font-weight: 500; }
+  .head .sep { color: var(--ink-4); }
+  .switcher { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .switcher button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    padding: 0;
+  }
+  .switcher button[data-set="kanagawa"]      { background: #c0a36e; }
+  .switcher button[data-set="everforest"]    { background: #a7c080; }
+  .switcher button[data-set="rose-pine"]     { background: #ea9a97; }
+  .switcher button[data-set="rose-pine-alt"] { background: #ea9a97; box-shadow: inset 0 0 0 2px #312e4a; }
+  .switcher button[data-set="original"]      { background: #f0a929; }
+  .switcher button[data-active="true"] {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .switcher button[data-active="true"][data-set="rose-pine-alt"] {
+    box-shadow: inset 0 0 0 2px #312e4a, 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+
+  /* ─── Grid (3 across, then 2 across centered) ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: minmax(240px, 1fr);
+    gap: 22px;
+    flex: 1;
+  }
+  /* Top row: 3 tiles, 2 columns each */
+  .tile.v01 { grid-column: 1 / span 2; grid-row: 1; }
+  .tile.v02 { grid-column: 3 / span 2; grid-row: 1; }
+  .tile.v03 { grid-column: 5 / span 2; grid-row: 1; }
+  /* Bottom row: 2 tiles centered, 2 columns each, offset by 1 column */
+  .tile.v04 { grid-column: 2 / span 2; grid-row: 2; }
+  .tile.v05 { grid-column: 4 / span 2; grid-row: 2; }
+
+  /* ─── Tile (mirrors App.css .tile) ─── */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    min-height: 240px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .label-pill {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    z-index: 6;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .label-pill b { color: var(--accent); font-weight: 500; }
+
+  .t-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 14px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    position: relative;
+    z-index: 1;
+  }
+  .t-head::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: var(--sheen);
+  }
+  .t-head .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: dot-pulse 0.9s infinite;
+  }
+  @keyframes dot-pulse { 50% { opacity: 0.4; } }
+  .t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t-head .meta {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+  .t-head .meta .jp { font-family: var(--jp); margin-right: 4px; color: var(--accent); }
+
+  .t-body {
+    padding: 14px 18px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+  .t-body::before {
+    content: ''; position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  }
+  .t-body .line { color: var(--ink-2); }
+  .t-body .line.dim { color: var(--ink-3); }
+  .t-body .line.acc { color: var(--accent); }
+  .t-body .cursor {
+    display: inline-block;
+    width: 7px; height: 1.05em;
+    background: var(--accent);
+    vertical-align: -2px;
+    margin-left: 2px;
+    animation: cur 1s steps(1) infinite;
+  }
+  @keyframes cur { 50% { opacity: 0; } }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 01 — HEARTBEAT
+     Two-beat rhythm: a stronger 'lub' followed by a softer
+     'dub', then a long rest. The whole tile holds a faint
+     accent ring at all times so the beat reads as inflation
+     of the existing halo rather than a flash.
+     Cycle: 1.4s. lub at ~7%, dub at ~18%, rest 25–100%.
+     ───────────────────────────────────────────────────── */
+  .tile.v01 {
+    border-color: transparent;
+    animation: hb-halo 1.4s linear infinite;
+  }
+  @keyframes hb-halo {
+    /* baseline */
+    0%, 30%, 100% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 4px -1px var(--accent-glow);
+    }
+    /* lub — strong primary beat */
+    7% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 22px 2px var(--accent-glow);
+    }
+    /* between beats — back near baseline */
+    14% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 6px -1px var(--accent-glow);
+    }
+    /* dub — weaker second beat */
+    21% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 14px 0px var(--accent-glow);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 02 — SLOW BREATH
+     5s breath cycle with asymmetric ease — inhale 60% of
+     the cycle, exhale 40%. Soft inset bloom layered with
+     outer halo. Reads as a single, deliberate respiration.
+     ───────────────────────────────────────────────────── */
+  .tile.v02 {
+    border-color: transparent;
+    animation: breath-halo 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes breath-halo {
+    0% {
+      box-shadow:
+        inset 0 0 0 1px rgba(234, 154, 151, 0.55),
+        inset 0 0 18px -10px var(--accent-glow),
+        0 0 3px -1px var(--accent-glow);
+    }
+    60% {
+      /* peak inhale — slow climb */
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        inset 0 0 36px -8px var(--accent-glow),
+        0 0 22px 1px var(--accent-glow);
+    }
+    100% {
+      /* exhale — quicker drop */
+      box-shadow:
+        inset 0 0 0 1px rgba(234, 154, 151, 0.55),
+        inset 0 0 18px -10px var(--accent-glow),
+        0 0 3px -1px var(--accent-glow);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 03 — COMET TRAIL
+     A small luminous head rides the tile perimeter (corner
+     to corner) wearing a wide diffused glow. Two comets
+     offset 180° (animation-delay -3s) keep motion symmetric
+     so the eye is never far from a moving point. The faint
+     accent-tinted inset reads as a circuit being traversed.
+     Cycle: 6s linear, smooth.
+     ───────────────────────────────────────────────────── */
+  .tile.v03 {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234, 154, 151, 0.20),
+      inset 0 0 32px -18px var(--accent-glow);
+  }
+  .tile.v03 .comet-track {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    overflow: hidden;
+  }
+  .tile.v03 .comet {
+    position: absolute;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+    /* The wide diffused trail is layered box-shadows of increasing radius —
+       reads as a soft comet head rather than a hard pixel. */
+    box-shadow:
+      0 0 6px var(--accent),
+      0 0 14px var(--accent-glow),
+      0 0 30px var(--accent-glow),
+      0 0 60px var(--accent-glow);
+    animation: comet-lap 6s linear infinite;
+    mix-blend-mode: screen;
+  }
+  .tile.v03 .comet:nth-child(2) {
+    animation-delay: -3s;
+    opacity: 0.6;
+  }
+  @keyframes comet-lap {
+    0%   { top: 0%;   left: 0%;   }
+    25%  { top: 0%;   left: 100%; }
+    50%  { top: 100%; left: 100%; }
+    75%  { top: 100%; left: 0%;   }
+    100% { top: 0%;   left: 0%;   }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 04 — CORNER LAMP
+     The accent is concentrated as a soft glow at one corner
+     and gently inflates / deflates. Every other cycle the
+     corner switches (TL → BR → TL → BR …) so motion is felt
+     across the tile rather than as a single hot spot. Border
+     stays minimal — this is desk-lamp light, not alarm.
+     Cycle: 6s. Phases: TL bloom 0–40%, fade 40–50%, BR bloom
+     50–90%, fade 90–100%.
+     ───────────────────────────────────────────────────── */
+  .tile.v04 {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234, 154, 151, 0.22);
+  }
+  .tile.v04::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at 0% 0%,
+      var(--accent-glow) 0%,
+      transparent 45%);
+    opacity: 0;
+    z-index: 3;
+    animation: lamp-tl 6s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  .tile.v04::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      circle at 100% 100%,
+      var(--accent-glow) 0%,
+      transparent 45%);
+    opacity: 0;
+    z-index: 3;
+    animation: lamp-br 6s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes lamp-tl {
+    0%   { opacity: 0; }
+    20%  { opacity: 0.95; }
+    40%  { opacity: 0.95; }
+    50%  { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  @keyframes lamp-br {
+    0%, 50%  { opacity: 0; }
+    70%      { opacity: 0.95; }
+    90%      { opacity: 0.95; }
+    100%     { opacity: 0; }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 05 — VERTICAL SCAN
+     A soft, broad accent gradient line slides slowly from
+     the top of the tile body to the bottom. Continuous loop
+     in a single direction (no bouncing back). 3.5s per pass.
+     The faint border holds steady. Reads like a CT scan or
+     a slow xerographic lamp.
+     ───────────────────────────────────────────────────── */
+  .tile.v05 {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234, 154, 151, 0.30),
+      inset 0 0 24px -12px var(--accent-glow);
+  }
+  .tile.v05 .scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 90px;
+    pointer-events: none;
+    z-index: 4;
+    background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(234, 154, 151, 0.04) 30%,
+      var(--accent-glow) 50%,
+      rgba(234, 154, 151, 0.04) 70%,
+      transparent 100%);
+    animation: scan-down 3.5s linear infinite;
+    mix-blend-mode: screen;
+  }
+  .tile.v05 .scanline::after {
+    content: '';
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 50%;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0.55;
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+  /* Animate `top` against the parent — works at any tile height.
+     -90px starts the band fully above the tile; 100% pushes its top
+     edge to the bottom of the tile (so the band exits cleanly). */
+  @keyframes scan-down {
+    0%   { top: -90px; }
+    100% { top: 100%; }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Reduced-motion fallback — every variant collapses to
+     the same calm static accent ring.
+     ───────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .tile.v01, .tile.v02, .tile.v03, .tile.v04, .tile.v05 {
+      animation: none;
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 12px -2px var(--accent-glow);
+    }
+    .tile.v01::before, .tile.v01::after,
+    .tile.v02::before, .tile.v02::after,
+    .tile.v03 .comet,
+    .tile.v04::before, .tile.v04::after,
+    .tile.v05 .scanline {
+      animation: none !important;
+    }
+    .tile.v03 .comet { display: none; }
+    .tile.v05 .scanline { display: none; }
+    .tile.v04::before { opacity: 0.45; }
+    .tile.v04::after { opacity: 0; }
+  }
+
+  /* Footer */
+  .foot {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex; gap: 18px; align-items: center;
+  }
+  .foot kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--tile);
+    color: var(--ink-2);
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <header class="head">
+    <span class="title">multiclaude · <b>pulse — 5 variants</b></span>
+    <span class="sep">·</span>
+    <span>each tile shows a different ambient pulse, all on the accent token</span>
+    <div class="switcher" role="tablist" aria-label="Theme">
+      <button data-set="kanagawa" title="Kanagawa"></button>
+      <button data-set="everforest" title="Everforest"></button>
+      <button data-set="rose-pine" title="Rose Pine"></button>
+      <button data-set="rose-pine-alt" data-active="true" title="Rose Pine Moon (alt)"></button>
+      <button data-set="original" title="Original (amber)"></button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 01. HEARTBEAT -->
+    <section class="tile v01">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">multiclaude</span>
+        <span class="meta">heartbeat · 1.4s</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Apply this change?</div>
+        <div class="line acc">[y/n]<span class="cursor"></span></div>
+      </div>
+      <div class="label-pill"><b>01</b> &nbsp;·&nbsp; heartbeat · lub-dub</div>
+    </section>
+
+    <!-- 02. SLOW BREATH -->
+    <section class="tile v02">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">growthbook-api</span>
+        <span class="meta">breath · 5.0s</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ I drafted the migration.</div>
+        <div class="line acc">run · cancel · diff<span class="cursor"></span></div>
+      </div>
+      <div class="label-pill"><b>02</b> &nbsp;·&nbsp; slow breath · 5s in/out</div>
+    </section>
+
+    <!-- 03. COMET TRAIL -->
+    <section class="tile v03">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">tron-systems</span>
+        <span class="meta">comet · 6.0s</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ &gt; awaiting input</div>
+        <div class="line acc">[y/n]<span class="cursor"></span></div>
+      </div>
+      <div class="comet-track" aria-hidden="true">
+        <span class="comet"></span>
+        <span class="comet"></span>
+      </div>
+      <div class="label-pill"><b>03</b> &nbsp;·&nbsp; comet · border travel</div>
+    </section>
+
+    <!-- 04. CORNER LAMP -->
+    <section class="tile v04">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">notes-app</span>
+        <span class="meta">lamp · TL ⇄ BR</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ ready when you are.</div>
+        <div class="line acc">▌<span class="cursor"></span></div>
+      </div>
+      <div class="label-pill"><b>04</b> &nbsp;·&nbsp; corner lamp · alternating</div>
+    </section>
+
+    <!-- 05. VERTICAL SCAN -->
+    <section class="tile v05">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">shadow-clone</span>
+        <span class="meta">scan · 3.5s</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ scanning context …</div>
+        <div class="line acc">→ acknowledge<span class="cursor"></span></div>
+      </div>
+      <span class="scanline" aria-hidden="true"></span>
+      <div class="label-pill"><b>05</b> &nbsp;·&nbsp; scan · top → bottom</div>
+    </section>
+
+  </div>
+
+  <footer class="foot">
+    <span>cycle theme <kbd>1</kbd>–<kbd>5</kbd></span>
+    <span>·</span>
+    <span>all motion respects <kbd>prefers-reduced-motion</kbd></span>
+    <span>·</span>
+    <span>accent token drives every glow — change the picker, every variant follows</span>
+  </footer>
+
+<script>
+  const THEMES = {
+    "kanagawa":      { bg:"#1f1f28", tile:"#25252e", t2:"#2a2a37", line:"#2f3043", l2:"#3a3b53", ink:"#dcd7ba", i2:"#a6a08a", i3:"#727169", i4:"#54546d", a:"#c0a36e", g:"rgba(192,163,110,0.32)" },
+    "everforest":    { bg:"#232a2e", tile:"#2d353b", t2:"#343f44", line:"#3d484d", l2:"#4f585e", ink:"#d3c6aa", i2:"#9da9a0", i3:"#7a8478", i4:"#56635f", a:"#a7c080", g:"rgba(167,192,128,0.32)" },
+    "rose-pine":     { bg:"#1f1d2e", tile:"#232136", t2:"#2a273f", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a475e", a:"#ea9a97", g:"rgba(234,154,151,0.30)" },
+    "rose-pine-alt": { bg:"#232136", tile:"#2a273f", t2:"#312e4a", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a4660", a:"#ea9a97", g:"rgba(234,154,151,0.35)" },
+    "original":      { bg:"#0a0c0e", tile:"#0e1114", t2:"#11141a", line:"#1a1f25", l2:"#232a32", ink:"#d8dde3", i2:"#9aa3ac", i3:"#5a636c", i4:"#353c44", a:"#f0a929", g:"rgba(240,169,41,0.40)" },
+  };
+  function applyTheme(name) {
+    const t = THEMES[name];
+    if (!t) return;
+    const r = document.documentElement;
+    r.dataset.theme = name;
+    r.style.setProperty("--bg", t.bg);
+    r.style.setProperty("--tile", t.tile);
+    r.style.setProperty("--tile-2", t.t2);
+    r.style.setProperty("--line", t.line);
+    r.style.setProperty("--line-2", t.l2);
+    r.style.setProperty("--ink", t.ink);
+    r.style.setProperty("--ink-2", t.i2);
+    r.style.setProperty("--ink-3", t.i3);
+    r.style.setProperty("--ink-4", t.i4);
+    r.style.setProperty("--accent", t.a);
+    r.style.setProperty("--accent-glow", t.g);
+    document.querySelectorAll(".switcher button").forEach((b) => {
+      b.dataset.active = b.dataset.set === name ? "true" : "false";
+    });
+  }
+  document.querySelectorAll(".switcher button").forEach((b) => {
+    b.addEventListener("click", () => applyTheme(b.dataset.set));
+  });
+  const order = ["kanagawa", "everforest", "rose-pine", "rose-pine-alt", "original"];
+  window.addEventListener("keydown", (e) => {
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < order.length) applyTheme(order[i]);
+  });
+  applyTheme("rose-pine-alt");
+</script>
+</body>
+</html>

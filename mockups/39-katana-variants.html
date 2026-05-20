@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en" data-theme="rose-pine-alt">
+<head>
+<meta charset="utf-8" />
+<title>multiclaude — katana strike variants</title>
+<style>
+  /* ─── Theme tokens (rose-pine-alt default) ─── */
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #312e4a;
+    --line: #393552;
+    --line-2: #44415a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a4660;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.35);
+    --ok: #9ccfd8;
+    --warn: #eb6f92;
+    --sheen: rgba(224, 222, 244, 0.022);
+    --fz: 1;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body {
+    min-height: 100vh;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ─── Page header ─── */
+  .head {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .head .title b { color: var(--accent); font-weight: 500; }
+  .head .sep { color: var(--ink-4); }
+  .switcher { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .switcher button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    padding: 0;
+  }
+  .switcher button[data-set="kanagawa"]      { background: #c0a36e; }
+  .switcher button[data-set="everforest"]    { background: #a7c080; }
+  .switcher button[data-set="rose-pine"]     { background: #ea9a97; }
+  .switcher button[data-set="rose-pine-alt"] { background: #ea9a97; box-shadow: inset 0 0 0 2px #312e4a; }
+  .switcher button[data-set="original"]      { background: #f0a929; }
+  .switcher button[data-active="true"] {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .switcher button[data-active="true"][data-set="rose-pine-alt"] {
+    box-shadow: inset 0 0 0 2px #312e4a, 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+
+  /* ─── Grid (3 + 2) ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 22px;
+    flex: 1;
+  }
+  .grid > .tile:nth-child(1),
+  .grid > .tile:nth-child(2),
+  .grid > .tile:nth-child(3) { grid-column: span 2; }
+  .grid > .tile:nth-child(4),
+  .grid > .tile:nth-child(5) { grid-column: span 3; }
+
+  /* ─── Tile (mirrors App.css .tile) ─── */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    min-height: 240px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .label-pill {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    z-index: 6;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .label-pill b { color: var(--accent); font-weight: 500; }
+
+  .t-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 14px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    position: relative;
+    z-index: 2;
+  }
+  .t-head::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: var(--sheen);
+  }
+  .t-head .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: dot-pulse 0.9s infinite;
+  }
+  @keyframes dot-pulse { 50% { opacity: 0.4; } }
+  .t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t-head .meta {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+  .t-head .meta .jp { font-family: var(--jp); margin-right: 4px; color: var(--accent); }
+
+  .t-body {
+    padding: 14px 18px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+  .t-body::before {
+    content: ''; position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  }
+  .t-body .line { color: var(--ink-2); }
+  .t-body .line.dim { color: var(--ink-3); }
+  .t-body .line.acc { color: var(--accent); }
+  .t-body .cursor {
+    display: inline-block;
+    width: 7px; height: 1.05em;
+    background: var(--accent);
+    vertical-align: -2px;
+    margin-left: 2px;
+    animation: cur 1s steps(1) infinite;
+  }
+  @keyframes cur { 50% { opacity: 0; } }
+
+  /* All variants share the chrome treatment of the original samurai tile */
+  .tile.k {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234, 154, 151, 0.45),
+      inset 0 0 28px -10px var(--accent-glow);
+  }
+  /* Common SVG layer */
+  .tile .strike-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    overflow: hidden;
+    mix-blend-mode: screen;
+  }
+  .tile .strike-layer svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 01 — IAIJUTSU DRAW
+     A 1px hairline blade extends from the upper-left corner
+     down to the lower-right, holds at full length, then
+     retracts back into the corner. The path is drawn with
+     stroke-dasharray, the "tip" is a brighter dot riding the
+     blade. Faint scabbard glyphs flash at the start and end.
+     Cycle: 5s.
+     ───────────────────────────────────────────────────── */
+  .tile.k1 .blade-path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    /* path length ≈ 420 in user space: √(366² + 206²) */
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+    filter: drop-shadow(0 0 4px var(--accent-glow))
+            drop-shadow(0 0 12px var(--accent-glow));
+    animation: iai-draw 5s ease-in-out infinite;
+  }
+  .tile.k1 .blade-tip {
+    fill: var(--accent);
+    opacity: 0;
+    filter: drop-shadow(0 0 6px var(--accent))
+            drop-shadow(0 0 16px var(--accent-glow));
+    animation: iai-tip-fade 5s ease-in-out infinite;
+  }
+  .tile.k1 .saya-glyph {
+    position: absolute;
+    font-family: var(--jp);
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    z-index: 5;
+    text-shadow: 0 0 8px var(--accent-glow);
+    animation: saya-flash 5s ease-out infinite;
+  }
+  .tile.k1 .saya-glyph.tl { top: 10px;    left: 14px; }
+  .tile.k1 .saya-glyph.br { bottom: 32px; right: 14px; }
+  @keyframes iai-draw {
+    0%, 6%   { stroke-dashoffset: 420; }
+    34%      { stroke-dashoffset: 0;   }
+    62%      { stroke-dashoffset: 0;   }
+    92%, 100%{ stroke-dashoffset: -420;}
+  }
+  @keyframes iai-tip-fade {
+    0%, 6%   { opacity: 0; }
+    8%       { opacity: 1; }
+    34%      { opacity: 1; }
+    44%      { opacity: 0; }
+    62%      { opacity: 0; }
+    66%      { opacity: 1; }
+    92%      { opacity: 1; }
+    100%     { opacity: 0; }
+  }
+  /* The blade tip rides a wrapping <g> that translates from (0,0) to
+     (366,206) in SVG user coordinates — i.e., along the blade path
+     drawn from (14,14) to (380,220). */
+  .tile.k1 .blade-tip-wrap {
+    animation: iai-tip-travel 5s ease-in-out infinite;
+    transform-origin: 0 0;
+  }
+  @keyframes iai-tip-travel {
+    0%, 6%   { transform: translate(0, 0); }
+    34%      { transform: translate(366px, 206px); }
+    62%      { transform: translate(366px, 206px); }
+    92%      { transform: translate(0, 0); }
+    100%     { transform: translate(0, 0); }
+  }
+  @keyframes saya-flash {
+    0%, 6%   { opacity: 0; }
+    14%      { opacity: 0.7; }
+    34%      { opacity: 0; }
+    100%     { opacity: 0; }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 02 — VERTICAL CUT
+     A bright vertical bar falls from top to bottom, its head
+     leading slightly. After it exits the bottom, a faint
+     hairline seam glows down the strike line, then fades.
+     A brief warning shimmer in the head bar precedes the cut.
+     Cycle: 4s.
+     ───────────────────────────────────────────────────── */
+  .tile.k2 .vfall {
+    position: absolute;
+    top: 38px;     /* below header */
+    left: 64%;
+    width: 2px;
+    height: 0;
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      var(--accent) 30%,
+      #fff 50%,
+      var(--accent) 70%,
+      transparent 100%);
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 5;
+    box-shadow:
+      0 0 6px var(--accent),
+      0 0 14px var(--accent-glow),
+      0 0 32px var(--accent-glow);
+    animation: vfall 4s ease-in infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes vfall {
+    0%, 55%   { height: 0;    top: 38px;   opacity: 0; }
+    60%       { height: 0;    top: 38px;   opacity: 1; }
+    62%       { height: 60px; top: 38px;   opacity: 1; }
+    74%       { height: 60px; top: calc(100% - 60px); opacity: 1; }
+    78%       { height: 60px; top: 100%;   opacity: 1; }
+    82%       { height: 60px; top: 100%;   opacity: 0; }
+    100%      { height: 0;    top: 38px;   opacity: 0; }
+  }
+  /* Residual seam — full-height hairline that flares on after the cut */
+  .tile.k2 .vseam {
+    position: absolute;
+    top: 38px;
+    bottom: 0;
+    left: 64%;
+    width: 1px;
+    background: var(--accent);
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 4;
+    opacity: 0;
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: vseam 4s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes vseam {
+    0%, 76%  { opacity: 0; }
+    80%      { opacity: 0.85; }
+    100%     { opacity: 0; }
+  }
+  /* Pre-strike warning shimmer in the tile header above the cut line */
+  .tile.k2 .vmarker {
+    position: absolute;
+    top: 14px;
+    left: 64%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translateX(-50%);
+    z-index: 6;
+    box-shadow: 0 0 10px var(--accent-glow);
+    animation: vmarker 4s ease-out infinite;
+  }
+  @keyframes vmarker {
+    0%, 50%  { opacity: 0.45; transform: translateX(-50%) scale(0.7); }
+    58%      { opacity: 1;    transform: translateX(-50%) scale(1.4); }
+    62%      { opacity: 0.4;  transform: translateX(-50%) scale(0.7); }
+    100%     { opacity: 0.45; transform: translateX(-50%) scale(0.7); }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 03 — X-CUT / CROSS SLASH
+     Two diagonals sweep in succession. The first descends
+     from upper-left → lower-right, then ~250ms later the
+     second sweeps from upper-right → lower-left. After both
+     pass, a brief glow blooms at the intersection (tile
+     center), then fades. Cycle: 5s.
+     ───────────────────────────────────────────────────── */
+  .tile.k3 .slash {
+    position: absolute;
+    inset: -25%;
+    pointer-events: none;
+    background-size: 220% 220%;
+    opacity: 0;
+    z-index: 4;
+    mix-blend-mode: screen;
+  }
+  .tile.k3 .slash.s1 {
+    background: linear-gradient(135deg,
+      transparent 46%,
+      var(--accent-glow) 49%,
+      var(--accent) 50%,
+      var(--accent-glow) 51%,
+      transparent 54%);
+    background-position: -120% -120%;
+    animation: x-cut-1 5s ease-in-out infinite;
+  }
+  .tile.k3 .slash.s2 {
+    background: linear-gradient(45deg,
+      transparent 46%,
+      var(--accent-glow) 49%,
+      var(--accent) 50%,
+      var(--accent-glow) 51%,
+      transparent 54%);
+    background-position: -120% 120%;
+    animation: x-cut-2 5s ease-in-out infinite;
+  }
+  @keyframes x-cut-1 {
+    0%, 50%  { background-position: -120% -120%; opacity: 0; }
+    56%      { background-position: -50%  -50%;  opacity: 0; }
+    60%      { opacity: 1; }
+    72%      { background-position:  100% 100%;  opacity: 0; }
+    100%     { background-position:  100% 100%;  opacity: 0; }
+  }
+  @keyframes x-cut-2 {
+    0%, 64%  { background-position: -120% 120%;  opacity: 0; }
+    70%      { background-position: -50%  50%;   opacity: 0; }
+    74%      { opacity: 1; }
+    86%      { background-position:  100% -100%; opacity: 0; }
+    100%     { background-position:  100% -100%; opacity: 0; }
+  }
+  /* X intersection glow + tiny bright nucleus */
+  .tile.k3 .x-nexus {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 5;
+    box-shadow:
+      0 0 14px var(--accent),
+      0 0 30px var(--accent-glow),
+      0 0 64px var(--accent-glow);
+    animation: x-nexus 5s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes x-nexus {
+    0%, 84%  { transform: translate(-50%, -50%) scale(0);   opacity: 0; }
+    88%      { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100%     { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 04 — TRIPLE FLURRY
+     Three quick slashes from different directions in tight
+     succession (~140ms apart): SW→NE, then top→bottom-left,
+     then NE→SW. Long pause (~3.4s) so the burst feels
+     decisive, not noisy. Cycle: 5s.
+     ───────────────────────────────────────────────────── */
+  .tile.k4 .flurry {
+    position: absolute;
+    inset: -25%;
+    pointer-events: none;
+    background-size: 220% 220%;
+    opacity: 0;
+    z-index: 4;
+    mix-blend-mode: screen;
+  }
+  .tile.k4 .flurry.f1 {
+    background: linear-gradient(60deg,
+      transparent 47%,
+      var(--accent-glow) 49%,
+      var(--accent) 50%,
+      var(--accent-glow) 51%,
+      transparent 53%);
+    background-position: -120% 120%;
+    animation: f1-cut 5s linear infinite;
+  }
+  .tile.k4 .flurry.f2 {
+    background: linear-gradient(170deg,
+      transparent 47%,
+      var(--accent-glow) 49%,
+      var(--accent) 50%,
+      var(--accent-glow) 51%,
+      transparent 53%);
+    background-position: 50% -120%;
+    animation: f2-cut 5s linear infinite;
+  }
+  .tile.k4 .flurry.f3 {
+    background: linear-gradient(-60deg,
+      transparent 47%,
+      var(--accent-glow) 49%,
+      var(--accent) 50%,
+      var(--accent-glow) 51%,
+      transparent 53%);
+    background-position: 120% 120%;
+    animation: f3-cut 5s linear infinite;
+  }
+  @keyframes f1-cut {
+    0%   { background-position: -120% 120%;  opacity: 0; }
+    1%   { background-position: -120% 120%;  opacity: 1; }
+    8%   { background-position:  100% -100%; opacity: 1; }
+    9%, 100% { background-position: 100% -100%; opacity: 0; }
+  }
+  @keyframes f2-cut {
+    0%, 4%  { background-position: 50% -120%; opacity: 0; }
+    5%      { background-position: 50% -120%; opacity: 1; }
+    12%     { background-position: 50%  120%; opacity: 1; }
+    13%, 100% { background-position: 50% 120%; opacity: 0; }
+  }
+  @keyframes f3-cut {
+    0%, 8%  { background-position:  120% 120%; opacity: 0; }
+    9%      { background-position:  120% 120%; opacity: 1; }
+    16%     { background-position: -100% -100%; opacity: 1; }
+    17%, 100% { background-position: -100% -100%; opacity: 0; }
+  }
+  /* Lingering after-glow once the flurry is done */
+  .tile.k4 .flurry-burn {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%);
+    opacity: 0;
+    animation: flurry-burn 5s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes flurry-burn {
+    0%, 16% { opacity: 0; }
+    18%     { opacity: 0.6; }
+    35%     { opacity: 0; }
+    100%    { opacity: 0; }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     VARIANT 05 — SUMI-E BRUSH
+     Hand-drawn calligraphy stroke. A thick, tapered SVG path
+     (filled, not stroked) appears in stages: the brush enters
+     in the upper-left, sweeps down-right with mid-stroke
+     thickness, and tails off in the lower-right. After the
+     stroke completes, the ink "bleeds" outward (slight blur
+     bloom) and then fades. A subtle ink wash at the corner
+     reads as a name-stamp residue. Cycle: 6s.
+     ───────────────────────────────────────────────────── */
+  .tile.k5 .ink-stroke {
+    fill: var(--accent);
+    opacity: 0;
+    filter: drop-shadow(0 0 2px var(--accent-glow))
+            drop-shadow(0 0 12px var(--accent-glow));
+    transform-origin: 0% 0%;
+    /* clip-path reveal */
+    clip-path: inset(0 100% 0 0);
+    animation: ink-reveal 6s ease-out infinite;
+  }
+  @keyframes ink-reveal {
+    0%, 8%   { clip-path: inset(0 100% 0 0); opacity: 0; }
+    10%      { opacity: 0.95; }
+    38%      { clip-path: inset(0 0% 0 0);   opacity: 0.95; }
+    66%      { clip-path: inset(0 0% 0 0);   opacity: 0.85; }
+    88%      { clip-path: inset(0 0% 0 0);   opacity: 0; }
+    100%     { clip-path: inset(0 0% 0 0);   opacity: 0; }
+  }
+  /* Bleed bloom — soft accent halo around the stroke after it lands */
+  .tile.k5 .ink-bleed {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    background: radial-gradient(ellipse 60% 40% at 50% 50%,
+      var(--accent-glow) 0%,
+      transparent 70%);
+    opacity: 0;
+    animation: ink-bleed 6s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes ink-bleed {
+    0%, 38% { opacity: 0; transform: scale(0.85); }
+    44%     { opacity: 0.75; transform: scale(1.0); }
+    66%     { opacity: 0.45; transform: scale(1.05); }
+    88%     { opacity: 0; transform: scale(1.1); }
+    100%    { opacity: 0; transform: scale(1.1); }
+  }
+  /* Corner wash — a square of soft ink at the lower-right that
+     fills in as the stroke completes, like the artist's stamp
+     drying alongside the brushwork. */
+  .tile.k5 .ink-stamp {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    width: 26px; height: 26px;
+    background: var(--accent);
+    border-radius: 1px;
+    z-index: 5;
+    opacity: 0;
+    transform: scale(0.75);
+    box-shadow: 0 0 10px var(--accent-glow);
+    animation: ink-stamp 6s ease-out infinite;
+    display: grid;
+    place-items: center;
+    color: var(--bg);
+    font-family: var(--jp);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  @keyframes ink-stamp {
+    0%, 36%  { opacity: 0; transform: scale(0.7); }
+    44%      { opacity: 0.95; transform: scale(1); }
+    66%      { opacity: 0.95; transform: scale(1); }
+    90%      { opacity: 0; transform: scale(0.95); }
+    100%     { opacity: 0; transform: scale(0.7); }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Reduced motion fallback
+     ───────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .tile.k {
+      animation: none;
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 12px -2px var(--accent-glow);
+    }
+    .tile .blade-path,
+    .tile .blade-tip,
+    .tile .saya-glyph,
+    .tile .vfall,
+    .tile .vseam,
+    .tile .vmarker,
+    .tile .slash,
+    .tile .x-nexus,
+    .tile .flurry,
+    .tile .flurry-burn,
+    .tile .ink-stroke,
+    .tile .ink-bleed,
+    .tile .ink-stamp {
+      animation: none !important;
+      opacity: 0 !important;
+    }
+  }
+
+  /* Footer */
+  .foot {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex; gap: 18px; align-items: center;
+  }
+  .foot kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--tile);
+    color: var(--ink-2);
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <header class="head">
+    <span class="title">multiclaude · <b>katana strike — 5 variants</b></span>
+    <span class="sep">·</span>
+    <span>each tile shows a different katana-strike treatment, all on the accent token</span>
+    <div class="switcher" role="tablist" aria-label="Theme">
+      <button data-set="kanagawa" title="Kanagawa"></button>
+      <button data-set="everforest" title="Everforest"></button>
+      <button data-set="rose-pine" title="Rose Pine"></button>
+      <button data-set="rose-pine-alt" data-active="true" title="Rose Pine Moon (alt)"></button>
+      <button data-set="original" title="Original (amber)"></button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1. IAIJUTSU DRAW -->
+    <section class="tile k k1">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">iaijutsu-draw</span>
+        <span class="meta"><span class="jp">抜</span>unsheath</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Apply migration?</div>
+        <div class="line acc">[y/n]<span class="cursor"></span></div>
+      </div>
+      <div class="strike-layer" aria-hidden="true">
+        <svg viewBox="0 0 400 240" preserveAspectRatio="none">
+          <!-- Diagonal blade from upper-left to lower-right -->
+          <path class="blade-path" d="M 14 14 L 380 220" />
+          <!-- Blade tip — translates from (0,0) → (366,206), so the
+               circle anchored at (14,14) traces the blade endpoints. -->
+          <g class="blade-tip-wrap">
+            <circle class="blade-tip" cx="14" cy="14" r="3.5" />
+          </g>
+        </svg>
+      </div>
+      <span class="saya-glyph tl" aria-hidden="true">居</span>
+      <span class="saya-glyph br" aria-hidden="true">合</span>
+      <div class="label-pill"><b>01</b> &nbsp;·&nbsp; iaijutsu draw · 5.0s</div>
+    </section>
+
+    <!-- 2. VERTICAL CUT -->
+    <section class="tile k k2">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">vertical-cut</span>
+        <span class="meta"><span class="jp">縦</span>tate-giri</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Awaiting confirm.</div>
+        <div class="line acc">→ proceed<span class="cursor"></span></div>
+      </div>
+      <span class="vmarker" aria-hidden="true"></span>
+      <span class="vfall" aria-hidden="true"></span>
+      <span class="vseam" aria-hidden="true"></span>
+      <div class="label-pill"><b>02</b> &nbsp;·&nbsp; vertical cut · 4.0s</div>
+    </section>
+
+    <!-- 3. X-CUT / CROSS SLASH -->
+    <section class="tile k k3">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">cross-slash</span>
+        <span class="meta"><span class="jp">十</span>juu-monji</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Two paths queued.</div>
+        <div class="line acc">choose · merge<span class="cursor"></span></div>
+      </div>
+      <span class="slash s1" aria-hidden="true"></span>
+      <span class="slash s2" aria-hidden="true"></span>
+      <span class="x-nexus" aria-hidden="true"></span>
+      <div class="label-pill"><b>03</b> &nbsp;·&nbsp; cross slash · 5.0s</div>
+    </section>
+
+    <!-- 4. TRIPLE FLURRY -->
+    <section class="tile k k4">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">triple-flurry</span>
+        <span class="meta"><span class="jp">三</span>san-dan</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Three reviews waiting.</div>
+        <div class="line dim">▌ Tests · diff · plan.</div>
+        <div class="line acc">acknowledge<span class="cursor"></span></div>
+      </div>
+      <span class="flurry f1" aria-hidden="true"></span>
+      <span class="flurry f2" aria-hidden="true"></span>
+      <span class="flurry f3" aria-hidden="true"></span>
+      <span class="flurry-burn" aria-hidden="true"></span>
+      <div class="label-pill"><b>04</b> &nbsp;·&nbsp; triple flurry · 5.0s</div>
+    </section>
+
+    <!-- 5. SUMI-E BRUSH -->
+    <section class="tile k k5">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">sumi-e-brush</span>
+        <span class="meta"><span class="jp">墨</span>sumi-stroke</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Reading your draft.</div>
+        <div class="line dim">▌ One mark to make.</div>
+        <div class="line acc">approve<span class="cursor"></span></div>
+      </div>
+      <div class="strike-layer" aria-hidden="true">
+        <svg viewBox="0 0 400 240" preserveAspectRatio="none">
+          <!-- A tapered brush stroke: thin entry, fat middle, tapered exit.
+               Built as a closed filled path so we control the silhouette
+               directly rather than relying on stroke width. -->
+          <path class="ink-stroke" d="
+            M 28 36
+            C 70 38, 110 60, 150 92
+            C 190 124, 230 152, 270 168
+            C 310 180, 340 184, 372 184
+            C 350 192, 320 196, 286 192
+            C 246 186, 210 168, 170 140
+            C 130 110, 90 80, 50 56
+            Z
+          " />
+        </svg>
+      </div>
+      <span class="ink-bleed" aria-hidden="true"></span>
+      <span class="ink-stamp" aria-hidden="true">墨</span>
+      <div class="label-pill"><b>05</b> &nbsp;·&nbsp; sumi-e brush · 6.0s</div>
+    </section>
+
+  </div>
+
+  <footer class="foot">
+    <span>cycle theme <kbd>1</kbd>–<kbd>5</kbd></span>
+    <span>·</span>
+    <span>all motion respects <kbd>prefers-reduced-motion</kbd></span>
+    <span>·</span>
+    <span>accent token drives every blade — change the picker, every cut follows</span>
+  </footer>
+
+<script>
+  const THEMES = {
+    "kanagawa":      { bg:"#1f1f28", tile:"#25252e", t2:"#2a2a37", line:"#2f3043", l2:"#3a3b53", ink:"#dcd7ba", i2:"#a6a08a", i3:"#727169", i4:"#54546d", a:"#c0a36e", g:"rgba(192,163,110,0.32)" },
+    "everforest":    { bg:"#232a2e", tile:"#2d353b", t2:"#343f44", line:"#3d484d", l2:"#4f585e", ink:"#d3c6aa", i2:"#9da9a0", i3:"#7a8478", i4:"#56635f", a:"#a7c080", g:"rgba(167,192,128,0.32)" },
+    "rose-pine":     { bg:"#1f1d2e", tile:"#232136", t2:"#2a273f", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a475e", a:"#ea9a97", g:"rgba(234,154,151,0.30)" },
+    "rose-pine-alt": { bg:"#232136", tile:"#2a273f", t2:"#312e4a", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a4660", a:"#ea9a97", g:"rgba(234,154,151,0.35)" },
+    "original":      { bg:"#0a0c0e", tile:"#0e1114", t2:"#11141a", line:"#1a1f25", l2:"#232a32", ink:"#d8dde3", i2:"#9aa3ac", i3:"#5a636c", i4:"#353c44", a:"#f0a929", g:"rgba(240,169,41,0.40)" },
+  };
+  function applyTheme(name) {
+    const t = THEMES[name];
+    if (!t) return;
+    const r = document.documentElement;
+    r.dataset.theme = name;
+    r.style.setProperty("--bg", t.bg);
+    r.style.setProperty("--tile", t.tile);
+    r.style.setProperty("--tile-2", t.t2);
+    r.style.setProperty("--line", t.line);
+    r.style.setProperty("--line-2", t.l2);
+    r.style.setProperty("--ink", t.ink);
+    r.style.setProperty("--ink-2", t.i2);
+    r.style.setProperty("--ink-3", t.i3);
+    r.style.setProperty("--ink-4", t.i4);
+    r.style.setProperty("--accent", t.a);
+    r.style.setProperty("--accent-glow", t.g);
+    document.querySelectorAll(".switcher button").forEach((b) => {
+      b.dataset.active = b.dataset.set === name ? "true" : "false";
+    });
+  }
+  document.querySelectorAll(".switcher button").forEach((b) => {
+    b.addEventListener("click", () => applyTheme(b.dataset.set));
+  });
+  const order = ["kanagawa", "everforest", "rose-pine", "rose-pine-alt", "original"];
+  window.addEventListener("keydown", (e) => {
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < order.length) applyTheme(order[i]);
+  });
+  applyTheme("rose-pine-alt");
+</script>
+</body>
+</html>

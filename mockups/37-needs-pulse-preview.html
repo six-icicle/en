@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="en" data-theme="rose-pine-alt">
+<head>
+<meta charset="utf-8" />
+<title>multiclaude — needs-attention pulse preview</title>
+<style>
+  /* ─── Theme tokens (rose-pine-alt — matches App.css default) ─── */
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #312e4a;
+    --line: #393552;
+    --line-2: #44415a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a4660;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.35);
+    --ok: #9ccfd8;
+    --warn: #eb6f92;
+    --sheen: rgba(224, 222, 244, 0.022);
+    --fz: 1;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+  }
+  body {
+    min-height: 100vh;
+    padding: 36px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  /* Page chrome */
+  .head {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .head b { color: var(--accent); font-weight: 500; }
+  .legend {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .legend .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--tile);
+  }
+  .legend .pill .swatch {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  /* ─── Tile grid (mimics App.css .grid two-up) ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    flex: 1;
+    min-height: 540px;
+  }
+
+  /* ─── Tile (mirrors App.css .tile) ─── */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    transition: background 0.15s;
+  }
+  .t-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: calc(14px * var(--fz));
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    position: relative;
+  }
+  .t-head::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--sheen);
+  }
+  .t-head .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--ink-4);
+  }
+  .t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t-head .meta {
+    color: var(--ink-3);
+    font-size: calc(13.5px * var(--fz));
+    letter-spacing: 0.04em;
+    margin-left: auto;
+  }
+
+  .t-body {
+    padding: 14px 18px;
+    background: var(--tile);
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: calc(13px * var(--fz));
+    line-height: 1.7;
+    color: var(--ink);
+    position: relative;
+  }
+  .t-body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  }
+  .t-body .line { color: var(--ink-2); }
+  .t-body .line.dim { color: var(--ink-3); }
+  .t-body .accent { color: var(--accent); }
+  .t-body .cursor {
+    display: inline-block;
+    width: 8px; height: 1.05em;
+    background: var(--accent);
+    vertical-align: -2px;
+    margin-left: 2px;
+    animation: cur 1s steps(1) infinite;
+  }
+  @keyframes cur { 50% { opacity: 0; } }
+
+  /* ─── status: needs ─── */
+  .tile.needs .t-head .dot {
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: dot-pulse 0.9s infinite;
+  }
+  @keyframes dot-pulse { 50% { opacity: 0.4; } }
+
+  /* The exact two keyframes from App.css */
+  @keyframes needs-pulse {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 4px -1px var(--accent-glow);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 18px 1px var(--accent-glow);
+    }
+  }
+  @keyframes needs-pulse-active {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        inset 0 0 24px -8px var(--accent-glow),
+        0 0 6px -1px var(--accent-glow);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        inset 0 0 30px -6px var(--accent-glow),
+        0 0 24px 2px var(--accent-glow);
+    }
+  }
+  .tile.needs:not(.active) {
+    animation: needs-pulse 2.2s ease-in-out infinite;
+    border-color: transparent;
+  }
+  .tile.needs.active {
+    animation: needs-pulse-active 1.8s ease-in-out infinite;
+    border-color: transparent;
+  }
+
+  /* Active accent treatments (from App.css .tile.active) — only render the
+     non-pulse parts here, so we can see the pulse working in the active case
+     without the static box-shadow stomping the animated one. */
+  .tile.active .t-head .name { color: var(--accent); }
+  .tile.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    z-index: 3;
+    pointer-events: none;
+  }
+  .tile.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 100% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: 2;
+  }
+
+  /* Footer hint */
+  .foot {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .foot .keys {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 8px;
+  }
+  .foot kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--tile);
+    color: var(--ink-2);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  /* Theme switcher */
+  .switcher {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin-left: auto;
+  }
+  .switcher button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    background: var(--accent);
+    padding: 0;
+  }
+  .switcher button[data-active="true"] {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .switcher button[data-set="kanagawa"] { background: #c0a36e; }
+  .switcher button[data-set="everforest"] { background: #a7c080; }
+  .switcher button[data-set="rose-pine"] { background: #ea9a97; }
+  .switcher button[data-set="rose-pine-alt"] { background: #ea9a97; box-shadow: inset 0 0 0 2px #312e4a; }
+  .switcher button[data-set="original"] { background: #f0a929; }
+  .switcher button[data-active="true"][data-set="rose-pine-alt"] {
+    box-shadow:
+      inset 0 0 0 2px #312e4a,
+      0 0 0 2px var(--bg),
+      0 0 0 3px var(--accent);
+  }
+</style>
+</head>
+<body>
+  <div class="head">
+    <span>multiclaude · <b>needs-attention pulse preview</b> · two tiles, one active, both pulsing</span>
+    <div class="switcher">
+      <button data-set="kanagawa" title="Kanagawa"></button>
+      <button data-set="everforest" title="Everforest"></button>
+      <button data-set="rose-pine" title="Rose Pine"></button>
+      <button data-set="rose-pine-alt" data-active="true" title="Rose Pine Moon (alt)"></button>
+      <button data-set="original" title="Original (amber)"></button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="pill"><span class="swatch"></span> needs · 2.2s outer halo (inactive)</span>
+    <span class="pill"><span class="swatch"></span> needs · 1.8s active variant (layered)</span>
+  </div>
+
+  <div class="grid">
+    <!-- Inactive tile in needs state — subtle outer halo -->
+    <section class="tile needs">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">multiclaude</span>
+        <span class="meta">needs you</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="accent">claude</span></div>
+        <div class="line dim">▌ Reading App.css …</div>
+        <div class="line dim">▌ Editing 1 file</div>
+        <div class="line">▌ Apply this change?</div>
+        <div class="line accent">[y/n]<span class="cursor"></span></div>
+      </div>
+    </section>
+
+    <!-- Active tile in needs state — layered glow on top of active chrome -->
+    <section class="tile needs active">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">growthbook-api</span>
+        <span class="meta">needs you</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="accent">claude</span></div>
+        <div class="line dim">▌ I drafted the migration. Want me to run it?</div>
+        <div class="line dim">▌</div>
+        <div class="line">▌ <span class="accent">y</span> · run · <span class="accent">n</span> · cancel · <span class="accent">d</span> · diff</div>
+        <div class="line accent">&gt;<span class="cursor"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">
+    cycle theme to test accent pickup
+    <span class="keys">
+      <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd>
+    </span>
+    · animation respects <kbd>prefers-reduced-motion</kbd>
+  </div>
+
+<script>
+  // Theme switcher — clicking a swatch swaps data-theme on <html> AND inlines
+  // the matching --accent / --accent-glow / --bg / --tile / etc tokens, so
+  // the preview matches what App.css ships.
+  const THEMES = {
+    kanagawa: {
+      bg: "#1f1f28", tile: "#25252e", tile2: "#2a2a37",
+      line: "#2f3043", line2: "#3a3b53",
+      ink: "#dcd7ba", ink2: "#a6a08a", ink3: "#727169", ink4: "#54546d",
+      accent: "#c0a36e", accentGlow: "rgba(192,163,110,0.32)",
+      ok: "#76946a", warn: "#c34043",
+    },
+    everforest: {
+      bg: "#232a2e", tile: "#2d353b", tile2: "#343f44",
+      line: "#3d484d", line2: "#4f585e",
+      ink: "#d3c6aa", ink2: "#9da9a0", ink3: "#7a8478", ink4: "#56635f",
+      accent: "#a7c080", accentGlow: "rgba(167,192,128,0.32)",
+      ok: "#83c092", warn: "#e67e80",
+    },
+    "rose-pine": {
+      bg: "#1f1d2e", tile: "#232136", tile2: "#2a273f",
+      line: "#393552", line2: "#44415a",
+      ink: "#e0def4", ink2: "#908caa", ink3: "#6e6a86", ink4: "#4a475e",
+      accent: "#ea9a97", accentGlow: "rgba(234,154,151,0.30)",
+      ok: "#9ccfd8", warn: "#eb6f92",
+    },
+    "rose-pine-alt": {
+      bg: "#232136", tile: "#2a273f", tile2: "#312e4a",
+      line: "#393552", line2: "#44415a",
+      ink: "#e0def4", ink2: "#908caa", ink3: "#6e6a86", ink4: "#4a4660",
+      accent: "#ea9a97", accentGlow: "rgba(234,154,151,0.35)",
+      ok: "#9ccfd8", warn: "#eb6f92",
+    },
+    original: {
+      bg: "#0a0c0e", tile: "#0e1114", tile2: "#11141a",
+      line: "#1a1f25", line2: "#232a32",
+      ink: "#d8dde3", ink2: "#9aa3ac", ink3: "#5a636c", ink4: "#353c44",
+      accent: "#f0a929", accentGlow: "rgba(240,169,41,0.40)",
+      ok: "#6dd2a8", warn: "#ff5a3a",
+    },
+  };
+  function applyTheme(name) {
+    const t = THEMES[name];
+    if (!t) return;
+    const r = document.documentElement;
+    r.dataset.theme = name;
+    r.style.setProperty("--bg", t.bg);
+    r.style.setProperty("--tile", t.tile);
+    r.style.setProperty("--tile-2", t.tile2);
+    r.style.setProperty("--line", t.line);
+    r.style.setProperty("--line-2", t.line2);
+    r.style.setProperty("--ink", t.ink);
+    r.style.setProperty("--ink-2", t.ink2);
+    r.style.setProperty("--ink-3", t.ink3);
+    r.style.setProperty("--ink-4", t.ink4);
+    r.style.setProperty("--accent", t.accent);
+    r.style.setProperty("--accent-glow", t.accentGlow);
+    r.style.setProperty("--ok", t.ok);
+    r.style.setProperty("--warn", t.warn);
+    document.querySelectorAll(".switcher button").forEach((b) => {
+      b.dataset.active = b.dataset.set === name ? "true" : "false";
+    });
+  }
+  document.querySelectorAll(".switcher button").forEach((b) => {
+    b.addEventListener("click", () => applyTheme(b.dataset.set));
+  });
+  // Number keys 1–5 cycle themes
+  const order = ["kanagawa", "everforest", "rose-pine", "rose-pine-alt", "original"];
+  window.addEventListener("keydown", (e) => {
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < order.length) applyTheme(order[i]);
+  });
+  applyTheme("rose-pine-alt");
+</script>
+</body>
+</html>

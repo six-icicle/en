@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 03 — Control Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --factory-green: #73d802;
+  --factory-white: #FFFFFF;
+  --factory-canvas: #F4F4F4;
+  --factory-black: #000000;
+  --factory-ink: #111111;
+  --factory-label: #666666;
+  --factory-border: #E0E0E0;
+  --factory-silver: #CCCCCC;
+  --hazard-orange: #ff6b00;
+  --signal-yellow: #ffd400;
+  --voltage-blue: #3a7afe;
+  --circuit-violet: #7a3aff;
+  --deep-cyan: #00b3a6;
+  --iron-red: #cc1f3d;
+  --caution-pink: #ff2d92;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-sans: 'IBM Plex Sans', Helvetica, Arial, sans-serif;
+  --tracking-wide: 0.05em;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font-sans); background: var(--factory-canvas); color: var(--factory-ink); }
+
+.app {
+  display: grid;
+  grid-template-rows: 44px 130px 1fr 32px;
+  grid-template-columns: 1fr 88px;
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  grid-column: 1 / -1;
+  background: var(--factory-white);
+  border-bottom: 1px solid var(--factory-border);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: var(--tracking-wide);
+}
+.title-left { display: flex; align-items: center; gap: 16px; }
+.traffic-lights { display: flex; gap: 6px; }
+.tl { width: 12px; height: 12px; background: var(--factory-silver); border: 1px solid var(--factory-border); }
+.brand-line { display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; }
+.brand-mark {
+  width: 12px; height: 14px; background: var(--factory-green);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+.title-center { font-family: var(--font-mono); text-transform: uppercase; }
+.bc-dim { color: var(--factory-label); }
+.bc-sep { color: var(--factory-silver); margin: 0 6px; }
+.title-right {
+  display: flex; justify-content: flex-end; align-items: center; gap: 12px;
+  font-size: 10px; color: var(--factory-label);
+  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+}
+.health-pip {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--factory-green);
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+/* GAUGE PANEL */
+.gauges {
+  grid-column: 1 / -1;
+  background: var(--factory-white);
+  border-bottom: 1px solid var(--factory-border);
+  padding: 14px 24px 14px 24px;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  position: relative;
+}
+.gauges::before {
+  content: 'INSTRUMENTATION / READOUT PANEL';
+  position: absolute;
+  top: 4px; left: 24px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.gauges::after {
+  content: 'SECTOR-7';
+  position: absolute;
+  top: 4px; right: 24px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gauge {
+  flex: 1;
+  border-right: 1px solid var(--factory-border);
+  padding: 18px 20px 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.gauge:last-child { border-right: none; }
+
+.gauge-corner {
+  position: absolute;
+  width: 8px; height: 8px;
+  border: 1px solid var(--factory-green);
+}
+.gauge-corner.tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+.gauge-corner.tr { top: 4px; right: 4px; border-left: none; border-bottom: none; }
+.gauge-corner.bl { bottom: 4px; left: 4px; border-right: none; border-top: none; }
+.gauge-corner.br { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+
+.gauge-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.gauge-readout {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--factory-ink);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.gauge-readout.green { color: var(--factory-green); }
+.gauge-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-label);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: auto;
+}
+.gauge-arc { margin-top: 6px; height: 36px; }
+.gauge-arc svg { width: 100%; height: 100%; }
+.gauge-needle {
+  transform-origin: 50% 100%;
+}
+
+/* Switch-style chrome readout */
+.switch {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 6px;
+}
+.switch-light {
+  width: 10px; height: 10px;
+  background: var(--factory-green);
+  flex-shrink: 0;
+}
+.switch-light.amber { background: var(--signal-yellow); }
+.switch-track {
+  flex: 1; height: 10px;
+  background: var(--factory-canvas);
+  border: 1px solid var(--factory-border);
+  position: relative;
+}
+.switch-track::after {
+  content: '';
+  position: absolute; top: 1px; bottom: 1px;
+  left: 1px; right: 1px;
+  background: linear-gradient(90deg,
+    var(--factory-canvas) 0%, var(--factory-canvas) 33%,
+    var(--factory-silver) 33%, var(--factory-silver) 66%,
+    var(--factory-green) 66%, var(--factory-green) 100%);
+}
+
+/* MAIN TERMINAL */
+.terminal-frame {
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.terminal {
+  background: var(--factory-black);
+  height: 100%;
+  padding: 24px 28px;
+  position: relative;
+  border: 1px solid var(--factory-border);
+}
+.terminal-corners {
+  position: absolute; inset: -1px;
+  pointer-events: none;
+}
+.tcorner {
+  position: absolute;
+  width: 14px; height: 14px;
+  border: 1px solid var(--factory-green);
+}
+.tcorner.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.tcorner.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.tcorner.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.tcorner.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.terminal-pre {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #d4d4d4;
+  line-height: 1.55;
+  white-space: pre;
+}
+.term-prompt { color: var(--factory-green); font-weight: 500; }
+.term-claude { color: #ededed; }
+.term-tool { color: #6dd2e5; }
+.term-result { color: #888; }
+.term-edit { color: #c98aff; }
+.term-cursor {
+  display: inline-block; width: 8px; height: 14px;
+  background: var(--factory-green);
+  vertical-align: text-top;
+  animation: cursor-blink 1s step-end infinite;
+}
+@keyframes cursor-blink { 50% { background: transparent; } }
+
+/* INDICATOR STRIP */
+.indicator-strip {
+  background: var(--factory-white);
+  border-left: 1px solid var(--factory-border);
+  padding: 14px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+.indicator-strip::before {
+  content: 'BAY';
+  position: absolute;
+  top: 4px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-label);
+  letter-spacing: 0.1em;
+}
+.indicator-strip::after {
+  content: '8 / 8';
+  position: absolute;
+  bottom: 4px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--factory-green);
+  letter-spacing: 0.1em;
+}
+
+.ind-hex {
+  position: relative;
+  width: 64px;
+  height: 74px;
+  cursor: pointer;
+  margin-top: 16px;
+  flex-shrink: 0;
+}
+.ind-hex:first-of-type { margin-top: 24px; }
+.ind-hex svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ind-base { fill: var(--factory-white); stroke: var(--factory-border); stroke-width: 1.5; }
+.ind-hex.active .ind-base { stroke: var(--factory-green); stroke-width: 2.5; }
+.ind-shine {
+  fill: none; stroke: var(--factory-green); stroke-width: 3;
+  pathLength: 100; stroke-dasharray: 22 78; stroke-dashoffset: 100;
+  opacity: 0;
+}
+.ind-hex.active .ind-shine { opacity: 1; animation: shine-run 3.5s linear infinite; }
+@keyframes shine-run { to { stroke-dashoffset: 0; } }
+
+.ind-status {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+}
+.ind-stripe {
+  position: absolute;
+  bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 18px; height: 2px;
+  background: var(--stripe, var(--factory-label));
+}
+.ind-num {
+  position: absolute;
+  top: 8px; left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--factory-label);
+  letter-spacing: 0.05em;
+}
+
+.ind-hex .tooltip {
+  position: absolute;
+  right: 76px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--factory-black);
+  color: var(--factory-white);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 6px 10px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.ind-hex:hover .tooltip { opacity: 1; }
+.ind-hex .tooltip::after {
+  content: '';
+  position: absolute;
+  right: -4px; top: 50%; transform: translateY(-50%);
+  border: 4px solid transparent;
+  border-left-color: var(--factory-black);
+}
+
+.status-working { background: var(--factory-green); animation: pulse-dot 1.5s ease-in-out infinite; }
+.status-idle { background: var(--factory-label); opacity: 0.5; }
+.status-needs { background: var(--hazard-orange); animation: pulse-needs 0.9s ease-in-out infinite; }
+.status-stale { background: var(--factory-silver); opacity: 0.5; }
+@keyframes pulse-dot { 0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(0.7);} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.05);} }
+@keyframes pulse-needs { 0%,100%{opacity:0.7;box-shadow:0 0 0 0 rgba(255,107,0,0.5);} 50%{opacity:1;box-shadow:0 0 0 6px rgba(255,107,0,0);} }
+
+.ind-add .ind-base {
+  fill: transparent;
+  stroke-dasharray: 4 3;
+  stroke: var(--factory-silver);
+}
+.ind-add:hover .ind-base { stroke: var(--factory-green); }
+.ind-plus {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--factory-silver);
+  font-weight: 300;
+}
+.ind-add:hover .ind-plus { color: var(--factory-green); }
+
+/* KINETIC STATUS BAR */
+.status-bar {
+  grid-column: 1 / -1;
+  background: var(--factory-ink);
+  color: var(--factory-white);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 18px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+.status-bar::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 200px;
+  background: linear-gradient(90deg, transparent, rgba(115,216,2,0.25), transparent);
+  animation: shine-slide 4s linear infinite;
+}
+@keyframes shine-slide {
+  0% { transform: translateX(-200px); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+.sb-segment { display: flex; align-items: center; gap: 8px; position: relative; z-index: 1; }
+.sb-dot { width: 6px; height: 6px; background: var(--factory-green); border-radius: 50%; }
+.sb-dot.amber { background: var(--hazard-orange); animation: pulse-dot 0.8s ease-in-out infinite; }
+.sb-divider { color: rgba(255,255,255,0.3); }
+.sb-tail { margin-left: auto; color: var(--factory-green); }
+
+.variant-back {
+  position: fixed; top: 12px; right: 16px; z-index: 1000;
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: var(--tracking-wide); text-transform: uppercase;
+  color: var(--factory-label); background: var(--factory-white);
+  border: 1px solid var(--factory-border);
+  padding: 4px 10px; text-decoration: none; transition: all 0.15s;
+}
+.variant-back:hover { border-color: var(--factory-green); color: var(--factory-black); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="title-left">
+      <div class="traffic-lights"><span class="tl"></span><span class="tl"></span><span class="tl"></span></div>
+      <div class="brand-line"><span class="brand-mark"></span>MULTICLAUDE</div>
+    </div>
+    <div class="title-center"><span class="bc-dim">~/work</span><span class="bc-sep">/</span><span>multiclaude-hub</span></div>
+    <div class="title-right">
+      <span><span class="health-pip"></span>OPERATIONAL</span>
+    </div>
+  </div>
+
+  <!-- GAUGE PANEL -->
+  <div class="gauges">
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// MODEL</div>
+      <div class="gauge-readout">OPUS 4.7</div>
+      <div class="switch">
+        <div class="switch-light"></div>
+        <div class="switch-track"></div>
+      </div>
+      <div class="gauge-sub">CLAUDE-OPUS-4-7</div>
+    </div>
+
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// EFFORT</div>
+      <div class="gauge-readout green">MAX</div>
+      <div class="switch">
+        <div class="switch-light"></div>
+        <div class="switch-track"></div>
+      </div>
+      <div class="gauge-sub">DEEPEST REASONING</div>
+    </div>
+
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// MODE</div>
+      <div class="gauge-readout">DEFAULT</div>
+      <div class="switch">
+        <div class="switch-light amber"></div>
+        <div class="switch-track"></div>
+      </div>
+      <div class="gauge-sub">EXEC + PLAN AVAIL</div>
+    </div>
+
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// CONTEXT</div>
+      <div class="gauge-readout">47<span style="font-size:14px;color:var(--factory-label);">%</span></div>
+      <div class="gauge-arc">
+        <svg viewBox="0 0 100 50" preserveAspectRatio="none">
+          <path d="M 6 46 A 44 44 0 0 1 94 46" stroke="#E0E0E0" stroke-width="3" fill="none"/>
+          <path d="M 6 46 A 44 44 0 0 1 50 2" stroke="#73d802" stroke-width="3" fill="none"/>
+          <line class="gauge-needle" x1="50" y1="46" x2="50" y2="10" stroke="var(--factory-ink)" stroke-width="1.5" transform="rotate(-25 50 46)"/>
+          <circle cx="50" cy="46" r="3" fill="var(--factory-ink)"/>
+        </svg>
+      </div>
+      <div class="gauge-sub">94K / 200K TOKENS</div>
+    </div>
+
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// COST</div>
+      <div class="gauge-readout">$0.42</div>
+      <div class="gauge-arc">
+        <svg viewBox="0 0 100 50" preserveAspectRatio="none">
+          <path d="M 6 46 A 44 44 0 0 1 94 46" stroke="#E0E0E0" stroke-width="3" fill="none"/>
+          <path d="M 6 46 A 44 44 0 0 1 22 14" stroke="#73d802" stroke-width="3" fill="none"/>
+          <line class="gauge-needle" x1="50" y1="46" x2="50" y2="10" stroke="var(--factory-ink)" stroke-width="1.5" transform="rotate(-65 50 46)"/>
+          <circle cx="50" cy="46" r="3" fill="var(--factory-ink)"/>
+        </svg>
+      </div>
+      <div class="gauge-sub">14 MSGS · SESSION</div>
+    </div>
+
+    <div class="gauge">
+      <span class="gauge-corner tl"></span><span class="gauge-corner tr"></span>
+      <span class="gauge-corner bl"></span><span class="gauge-corner br"></span>
+      <div class="gauge-label">// ACTIVITY</div>
+      <div class="gauge-readout green" style="font-size:14px;">▶ BASH</div>
+      <div class="gauge-readout" style="font-size:11px;color:var(--factory-label);">npm run dev</div>
+      <div class="gauge-sub" style="margin-top: auto;">RUNNING · 4.2S</div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal-frame">
+    <div class="terminal">
+      <div class="terminal-corners">
+        <span class="tcorner tl"></span><span class="tcorner tr"></span>
+        <span class="tcorner bl"></span><span class="tcorner br"></span>
+      </div>
+<pre class="terminal-pre"><span class="term-prompt">&gt;</span> <span class="term-claude">claude</span>
+
+<span class="term-claude">⏺ Welcome back. What are we working on today?</span>
+
+<span class="term-prompt">&gt;</span> Add hex tile sparkline animation to the dock
+
+<span class="term-claude">⏺ Looking at the current Dock implementation...</span>
+
+<span class="term-tool">⏺ Bash(grep -r "sparkline" src/)</span>
+  <span class="term-result">⎿  src/components/Dock.tsx:42:  // sparkline placeholder
+     src/styles/dock.css:18:  .sparkline { ... }</span>
+
+<span class="term-claude">⏺ Found the placeholder. I'll wire up the CSS animations now —
+  staggered keyframes across 8 bars with the heartbeat we agreed on.</span>
+
+<span class="term-edit">⏺ Edit(src/styles/dock.css)</span>
+  <span class="term-result">⎿  Added @keyframes sparkline-pulse with 8-bar staggered delay
+     Added .hex-spark layout (flex, flex-end, 2px gap, 12px height)
+     Wired status-conditional fill colors</span>
+
+<span class="term-claude">⏺ Done. Each hex tile now shows a live activity heartbeat —
+  green when WORKING, dim when idle, orange when NEEDS YOU.</span>
+
+<span class="term-prompt">&gt;</span> <span class="term-cursor"></span></pre>
+    </div>
+  </div>
+
+  <!-- INDICATOR STRIP (right) -->
+  <div class="indicator-strip">
+    <div class="ind-hex active" style="--stripe: var(--voltage-blue);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none">
+        <polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/>
+        <polygon class="ind-shine" points="32,2 62,18 62,56 32,72 2,56 2,18"/>
+      </svg>
+      <div class="ind-num">01</div>
+      <div class="ind-status status-working"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">MULTICLAUDE · WORKING</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--caution-pink);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">02</div>
+      <div class="ind-status status-idle"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">CLAUDE-CLI · IDLE</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--hazard-orange);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">03</div>
+      <div class="ind-status status-needs"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">SDO-AUDIT · NEEDS YOU</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--circuit-violet);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">04</div>
+      <div class="ind-status status-idle"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">DEMO-PREP · IDLE</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--signal-yellow);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">05</div>
+      <div class="ind-status status-stale"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">STAG-DEPLOY · STALE</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--iron-red);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">06</div>
+      <div class="ind-status status-idle"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">PROD-MIGRATE · IDLE</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--deep-cyan);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">07</div>
+      <div class="ind-status status-working"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">EXPMT-A · WORKING</div>
+    </div>
+    <div class="ind-hex" style="--stripe: var(--factory-label);">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-num">08</div>
+      <div class="ind-status status-idle"></div>
+      <div class="ind-stripe"></div>
+      <div class="tooltip">EXPMT-B · IDLE</div>
+    </div>
+    <div class="ind-hex ind-add">
+      <svg viewBox="0 0 64 74" preserveAspectRatio="none"><polygon class="ind-base" points="32,2 62,18 62,56 32,72 2,56 2,18"/></svg>
+      <div class="ind-plus">+</div>
+      <div class="tooltip">NEW SESSION</div>
+    </div>
+  </div>
+
+  <!-- KINETIC STATUS BAR -->
+  <div class="status-bar">
+    <span class="sb-segment"><span class="sb-dot"></span>OPERATIONAL</span>
+    <span class="sb-divider">─</span>
+    <span class="sb-segment">3 ACTIVE</span>
+    <span class="sb-divider">─</span>
+    <span class="sb-segment">4 IDLE</span>
+    <span class="sb-divider">─</span>
+    <span class="sb-segment"><span class="sb-dot amber"></span>1 NEEDS YOU</span>
+    <span class="sb-divider">─</span>
+    <span class="sb-segment">1 STALE</span>
+    <span class="sb-tail">SECTOR-7 · BAY-01 · 2026.05.18 · 14:32:07</span>
+  </div>
+</div>
+
+<a class="variant-back" href="index.html">─ INDEX</a>
+</body>
+</html>

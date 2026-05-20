@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 18 — Dispatch Tower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #07090c;
+  --night-2: #0c1014;
+  --steel: #161b21;
+  --steel-2: #1f2730;
+  --hairline: #2a323d;
+  --ink: #d8dde3;
+  --ink-dim: #8b939c;
+  --ink-mute: #555c66;
+  --amber: #f4a826;
+  --amber-deep: #c47410;
+  --amber-glow: rgba(244,168,38,0.55);
+  --honey: #f6c845;
+  --signal: #ff5f3c;
+  --safe: #6dd2a8;
+  --voltage: #5cc4ff;
+  --violet: #b48cff;
+  --pink: #ff6db4;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--night);
+  color: var(--ink);
+  font-size: 13px;
+  background-image:
+    radial-gradient(ellipse at 22% 38%, rgba(244,168,38,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(92,196,255,0.04) 0%, transparent 55%),
+    linear-gradient(180deg, #0a0d11 0%, #050709 100%);
+}
+.app {
+  display: grid;
+  grid-template-rows: 38px 28px 1fr;
+  grid-template-columns: 1fr;
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  background: linear-gradient(180deg, #1a2028, #0d1217);
+  border-bottom: 1px solid #050709;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tb-l, .tb-r { display: flex; align-items: center; gap: 12px; }
+.tb-r { justify-content: flex-end; color: var(--ink-mute); }
+.lights { display: flex; gap: 5px; }
+.lights span { width: 9px; height: 9px; border-radius: 50%; background: #08090b; box-shadow: inset 0 0 0 1px #050709; }
+.lights span:nth-child(1) { background: radial-gradient(circle at 35% 35%, #ff6b4a, #5a1a08); }
+.lights span:nth-child(2) { background: radial-gradient(circle at 35% 35%, var(--amber), #5a3a08); box-shadow: 0 0 6px var(--amber-glow); }
+.lights span:nth-child(3) { background: radial-gradient(circle at 35% 35%, var(--safe), #1e4a30); }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; color: var(--ink); }
+.brand .mark {
+  width: 14px; height: 14px;
+  background: radial-gradient(circle at 35% 30%, var(--honey), var(--amber-deep) 60%, #4a2a06);
+  clip-path: polygon(50% 0, 100% 35%, 80% 100%, 20% 100%, 0 35%);
+  box-shadow: 0 0 6px var(--amber-glow);
+}
+.tb-c { color: var(--ink-dim); }
+.tb-c b { color: var(--ink); }
+
+/* TELEMETRY ribbon */
+.telemetry {
+  background: linear-gradient(180deg, #11161c, #0a0e12);
+  border-bottom: 1px solid #050709;
+  display: flex; align-items: center; padding: 0 18px; gap: 22px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+}
+.metric { display: flex; align-items: center; gap: 8px; }
+.metric b { color: var(--ink); font-weight: 500; }
+.metric .em { color: var(--amber); }
+.bar { display: inline-block; width: 50px; height: 4px; background: #050709; border: 1px solid #1f2730; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); }
+.live { margin-left: auto; color: var(--amber); display: flex; align-items: center; gap: 7px; }
+.live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+/* MAIN GRID — radar left, term right, strip rail bottom */
+.main {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  grid-template-rows: 1fr 150px;
+  gap: 0;
+  min-height: 0;
+}
+
+/* RADAR PANE (top-left) */
+.radar-pane {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 55%, rgba(244,168,38,0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #0a0d11 0%, #060809 100%);
+  border-right: 1px solid #1a1f25;
+  overflow: hidden;
+}
+.radar-pane::before {
+  content: 'TOWER · SECTOR ALPHA · 110nm RANGE';
+  position: absolute; top: 10px; left: 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.radar-pane::after {
+  content: 'BRG 000–360';
+  position: absolute; top: 10px; right: 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.scope {
+  position: absolute;
+  inset: 36px 24px 24px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(244,168,38,0.06) 0%, rgba(244,168,38,0.02) 35%, transparent 70%),
+    radial-gradient(circle at 50% 50%, #0a0d11 0%, #050709 80%);
+  border: 1px solid #2a323d;
+  box-shadow:
+    inset 0 0 0 1px #050709,
+    inset 0 0 60px rgba(244,168,38,0.06),
+    0 0 30px rgba(0,0,0,0.6);
+}
+/* concentric range rings */
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(244,168,38,0.08);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+.ring.r1 { width: 25%; height: 25%; }
+.ring.r2 { width: 50%; height: 50%; }
+.ring.r3 { width: 75%; height: 75%; }
+.ring.r4 { width: 100%; height: 100%; border-color: rgba(244,168,38,0.18); }
+/* crosshair */
+.cross-h, .cross-v {
+  position: absolute;
+  background: rgba(244,168,38,0.1);
+}
+.cross-h { left: 0; right: 0; top: 50%; height: 1px; }
+.cross-v { top: 0; bottom: 0; left: 50%; width: 1px; }
+/* sweep arm */
+.sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(244,168,38,0.32) 0deg, rgba(244,168,38,0.12) 18deg, transparent 60deg);
+  animation: sweep 7s linear infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+@keyframes sweep { to { transform: rotate(360deg); } }
+.bullseye {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 14px; height: 14px;
+  background: radial-gradient(circle at 35% 30%, var(--honey), var(--amber-deep) 60%, #2a1a04);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--amber-glow), inset 0 0 0 1px #050709;
+}
+.bullseye::after {
+  content: 'TWR'; position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.25em; color: var(--amber);
+}
+
+/* aircraft / droid blips */
+.blip {
+  position: absolute;
+  transform: translate(-50%,-50%);
+  cursor: pointer;
+  text-align: center;
+}
+.blip .body {
+  width: 16px; height: 16px;
+  position: relative;
+  margin: 0 auto;
+}
+.blip .body::before {
+  /* tiny droid dome */
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 50% 50% 30% 30%;
+  background: radial-gradient(circle at 35% 25%, #4a525c 0%, #2a323d 60%, #0e1115 100%);
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,0.6);
+}
+.blip .body::after {
+  /* eye */
+  content: '';
+  position: absolute;
+  top: 5px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--led, var(--amber));
+  box-shadow: 0 0 6px var(--led, var(--amber-glow));
+}
+.blip .vec {
+  /* vector line — heading/speed */
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 28px; height: 1px;
+  background: linear-gradient(90deg, var(--led, var(--amber)) 0%, transparent 100%);
+  transform-origin: 0 50%;
+  transform: rotate(var(--hdg, 0deg));
+  opacity: 0.7;
+}
+.blip .tag {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(0,0,0,0.9);
+}
+.blip .tag b { color: var(--ink); display: block; font-weight: 500; }
+.blip.working { --led: var(--amber); }
+.blip.working .body::after { animation: pulse 1.4s infinite; }
+.blip.needs { --led: var(--signal); }
+.blip.needs .body::after { animation: pulse 0.6s infinite; }
+.blip.needs .tag b { color: var(--signal); }
+.blip.idle { --led: #4a525c; opacity: 0.78; }
+.blip.idle .body::after { box-shadow: none; }
+.blip.stale { --led: #2a323d; opacity: 0.5; }
+.blip.active .body { transform: scale(1.25); }
+.blip.active::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--amber);
+  box-shadow: 0 0 12px var(--amber-glow);
+  animation: lock 1.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes lock {
+  0% { transform: translate(-50%,-50%) scale(0.7); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; }
+}
+
+/* TERMINAL PANE (top-right) */
+.term-pane {
+  position: relative;
+  padding: 14px 18px 8px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+  min-height: 0;
+}
+.term-head {
+  display: flex; align-items: center; gap: 14px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-mute);
+}
+.term-head .callsign {
+  font-size: 12px; color: var(--amber); letter-spacing: 0.18em;
+  text-shadow: 0 0 6px var(--amber-glow);
+}
+.term-head .seq { display: flex; gap: 8px; margin-left: auto; }
+.term-head .seq b { color: var(--ink); font-weight: 500; }
+.terminal {
+  background: #050709;
+  border: 1px solid #1a1f25;
+  box-shadow:
+    inset 0 0 0 1px #0e1115,
+    inset 0 0 80px rgba(244,168,38,0.025),
+    0 6px 20px rgba(0,0,0,0.6);
+  padding: 16px 22px;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+.terminal::before {
+  content: 'CHANNEL · TWR-CTL · 121.9';
+  position: absolute; top: 6px; right: 14px;
+  font-family: var(--mono); font-size: 9px;
+  color: var(--ink-mute); letter-spacing: 0.2em;
+}
+.term-pre {
+  margin-top: 8px;
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.7; color: #c8d2da;
+  white-space: pre-wrap;
+}
+.p { color: var(--amber); }
+.c { color: #e6edf3; }
+.t { color: #6dd2c5; }
+.r { color: var(--ink-mute); }
+.e { color: #b48cff; }
+.cur { display:inline-block; width:7px; height:13px; background: var(--amber);
+  vertical-align: text-top; animation: cur 1s steps(1) infinite;
+  box-shadow: 0 0 6px var(--amber-glow); }
+@keyframes cur { 50% { opacity: 0; } }
+
+/* STRIP RAIL (bottom, full width) — flight progress strips */
+.strip-rail {
+  grid-column: 1 / -1;
+  background:
+    repeating-linear-gradient(90deg, #0d1116 0 1px, transparent 1px 80px),
+    linear-gradient(180deg, #11161c 0%, #07090c 100%);
+  border-top: 2px solid #050709;
+  box-shadow: inset 0 1px 0 #2a323d, inset 0 4px 8px rgba(0,0,0,0.5);
+  padding: 14px 18px 10px;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.strip-rail::before {
+  content: 'PROGRESS STRIPS · ALL ACTIVE TRAFFIC · L→R = TIME ON STAND';
+  position: absolute; top: 4px; left: 18px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.strips {
+  display: flex; gap: 8px; margin-top: 18px;
+  height: 92px; align-items: stretch;
+}
+.strip {
+  flex: 0 0 168px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 14px, rgba(255,255,255,0.018) 14px 15px),
+    linear-gradient(180deg, #f3ead4 0%, #ddd0a8 100%);
+  color: #2a1a04;
+  font-family: var(--mono);
+  position: relative;
+  border: 1px solid #050709;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.04),
+    0 4px 8px rgba(0,0,0,0.4);
+  padding: 6px 8px 4px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.strip:hover { transform: translateY(-3px); }
+.strip.active { transform: translateY(-6px); box-shadow: 0 8px 14px rgba(244,168,38,0.3), 0 0 0 2px var(--amber); }
+.strip .top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-bottom: 1px dashed rgba(0,0,0,0.3);
+  padding-bottom: 3px; margin-bottom: 4px;
+}
+.strip .cs { font-weight: 700; font-size: 11.5px; letter-spacing: 0.08em; }
+.strip .sq { font-size: 9.5px; opacity: 0.7; }
+.strip .row2 {
+  display: flex; justify-content: space-between;
+  font-size: 9.5px; opacity: 0.85;
+}
+.strip .dest {
+  margin-top: 2px;
+  font-size: 9px;
+  opacity: 0.75;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.strip .progress {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.15);
+}
+.strip .progress > i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, var(--amber-deep), var(--amber));
+  width: var(--p, 50%);
+}
+.strip .stamp {
+  position: absolute;
+  top: 4px; right: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  padding: 1px 5px;
+  background: rgba(0,0,0,0.85);
+  color: var(--amber);
+}
+.strip.working .stamp { color: var(--amber); background: #1a140e; }
+.strip.needs .stamp { color: #fff; background: #b62a18; animation: needsblink 1s infinite; }
+@keyframes needsblink { 50% { background: #e05038; } }
+.strip.idle .stamp { color: #5a4a2a; background: rgba(0,0,0,0.4); }
+.strip.stale { opacity: 0.55; filter: grayscale(0.4); }
+.strip.stale .stamp { color: #6a5a3a; background: rgba(0,0,0,0.3); }
+/* corner clip — like real flight strip with corner cut */
+.strip::after {
+  content: '';
+  position: absolute;
+  bottom: 6px; left: 0;
+  width: 12px; height: 12px;
+  background: linear-gradient(135deg, transparent 50%, var(--night) 50%);
+}
+.strip .cs.tag-dot::before {
+  content: ''; display: inline-block;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--tag, var(--amber));
+  margin-right: 6px;
+  box-shadow: 0 0 4px var(--tag, var(--amber-glow));
+  vertical-align: middle;
+}
+
+.caption {
+  position: fixed;
+  bottom: 6px; right: 18px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.18em; color: var(--ink-mute); text-transform: uppercase;
+  pointer-events: none;
+}
+.back {
+  position: fixed; top: 8px; right: 14px; z-index: 50;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-mute); text-decoration: none;
+  background: #0a0d11; border: 1px solid #1f2730; padding: 4px 9px;
+}
+.back:hover { color: var(--amber); border-color: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="brand"><span class="mark"></span>MULTICLAUDE · TWR</div>
+    </div>
+    <div class="tb-c">~/work / <b>multiclaude-hub</b> · approach control</div>
+    <div class="tb-r">10 INBOUND · ⌘N CLEAR FOR APPROACH</div>
+  </div>
+
+  <div class="telemetry">
+    <span class="metric">CALLSIGN <b>HUB-03</b></span>
+    <span class="metric">MODEL <b>OPUS 4.7</b></span>
+    <span class="metric">EFFORT <b class="em">MAX</b></span>
+    <span class="metric">CTX <span class="bar"><i style="width:47%"></i></span> <b>47%</b></span>
+    <span class="metric">UPTIME <b>02:14:08</b></span>
+    <span class="metric">ATIS <b>INFO BRAVO</b></span>
+    <span class="live">SCOPE LIVE — 1 LOCK / 1 ALERT</span>
+  </div>
+
+  <div class="main">
+
+    <!-- RADAR -->
+    <section class="radar-pane">
+      <div class="scope">
+        <div class="ring r1"></div><div class="ring r2"></div>
+        <div class="ring r3"></div><div class="ring r4"></div>
+        <div class="cross-h"></div><div class="cross-v"></div>
+        <div class="sweep"></div>
+        <div class="bullseye"></div>
+
+        <!-- blips: positions in % within scope; closer to center = more urgent / hotter session -->
+        <div class="blip needs active" style="top: 38%; left: 56%;">
+          <div class="body"></div>
+          <div class="vec" style="--hdg: 200deg;"></div>
+          <div class="tag"><b>SDO-AUDIT</b>NEEDS · 2.1nm</div>
+        </div>
+        <div class="blip working active" style="top: 52%; left: 52%;">
+          <div class="body"></div>
+          <div class="vec" style="--hdg: 90deg;"></div>
+          <div class="tag"><b>HUB-03</b>WORKING · 0.4nm</div>
+        </div>
+        <div class="blip working" style="top: 30%; left: 38%;">
+          <div class="body"></div>
+          <div class="vec" style="--hdg: 130deg;"></div>
+          <div class="tag"><b>CLI-OSS</b>WORKING · 6.2nm</div>
+        </div>
+        <div class="blip working" style="top: 62%; left: 70%;">
+          <div class="body"></div>
+          <div class="vec" style="--hdg: 250deg;"></div>
+          <div class="tag"><b>TAURI-SPK</b>5.1nm</div>
+        </div>
+        <div class="blip working" style="top: 70%; left: 32%;">
+          <div class="body"></div>
+          <div class="vec" style="--hdg: 60deg;"></div>
+          <div class="tag"><b>API-PROBES</b>8.4nm</div>
+        </div>
+        <div class="blip idle" style="top: 22%; left: 70%;">
+          <div class="body"></div>
+          <div class="tag"><b>DEMO-PREP</b>HOLD · 14nm</div>
+        </div>
+        <div class="blip idle" style="top: 80%; left: 60%;">
+          <div class="body"></div>
+          <div class="tag"><b>DOCS-IDX</b>HOLD · 22nm</div>
+        </div>
+        <div class="blip idle" style="top: 18%; left: 24%;">
+          <div class="body"></div>
+          <div class="tag"><b>SCRATCH-B</b>HOLD · 28nm</div>
+        </div>
+        <div class="blip stale" style="top: 12%; left: 50%;">
+          <div class="body"></div>
+          <div class="tag"><b>STAG-DEPLOY</b>STALE · 48nm</div>
+        </div>
+        <div class="blip stale" style="top: 88%; left: 18%;">
+          <div class="body"></div>
+          <div class="tag"><b>PROD-MIG</b>STALE · 60nm</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TERMINAL -->
+    <section class="term-pane">
+      <div class="term-head">
+        <span class="callsign">▸ HUB-03</span>
+        <span>RUNWAY 03 · CLEARED</span>
+        <span class="seq">
+          <span>HDG <b>090</b></span>
+          <span>ALT <b>FL047</b></span>
+          <span>SPD <b>OPUS</b></span>
+        </span>
+      </div>
+      <div class="terminal">
+<pre class="term-pre"><span class="p">&gt;</span> <span class="c">claude</span>
+
+<span class="c">⏺ Tower, HUB-03 with you, ready to copy.</span>
+
+<span class="p">&gt;</span> Model the radar so a session that goes NEEDS YOU
+  drifts toward the bullseye automatically
+
+<span class="c">⏺ Reading the registry. Distance-from-center should map to
+  attention urgency, not real metrics.</span>
+
+<span class="t">⏺ Bash(rg "urgency" src/state/ -n)</span>
+  <span class="r">⎿  src/state/urgency.ts:14: const TIERS = ['STALE','HOLD','WORKING','NEEDS']
+     src/state/urgency.ts:22: export function radius(tier): number
+     src/components/Scope.tsx:38: blip.style.transform = polar(r, theta)</span>
+
+<span class="c">⏺ Right — radius() already returns 0..1; STALE sits at the edge,
+  NEEDS pulls to 0.15. I'll wire urgency → radius and tween over
+  600ms so the drift reads as motion, not a teleport.</span>
+
+<span class="e">⏺ Edit(src/components/Scope.tsx)</span>
+  <span class="r">⎿  Subscribed to useUrgency(); animated polar transform
+     Added vector line (heading = recent token velocity)
+     Bullseye locks pulse on tier change</span>
+
+<span class="c">⏺ Done. SDO-AUDIT just drifted from 6nm to 2nm and the lock
+  ring fired. The eye catches the inbound before the colour does.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+      </div>
+    </section>
+
+    <!-- STRIP RAIL -->
+    <section class="strip-rail">
+      <div class="strips">
+
+        <div class="strip working active">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#f4a826;">HUB-03</span>
+            <span class="sq">SQ 4471</span>
+          </div>
+          <div class="row2"><span>RWY 03</span><span>ETA 00:02</span></div>
+          <div class="dest">~/work/multiclaude-hub</div>
+          <div class="stamp">CLR APP</div>
+          <div class="progress"><i style="--p:78%"></i></div>
+        </div>
+
+        <div class="strip needs">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#ff5f3c;">SDO-AUDIT</span>
+            <span class="sq">SQ 4502</span>
+          </div>
+          <div class="row2"><span>RWY 04</span><span>ETA 00:46</span></div>
+          <div class="dest">~/sf/audit-runner</div>
+          <div class="stamp">HOLD ↯</div>
+          <div class="progress"><i style="--p:92%; background:linear-gradient(90deg,#7a1c10,#ff5f3c);"></i></div>
+        </div>
+
+        <div class="strip working">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#5cc4ff;">CLI-OSS</span>
+            <span class="sq">SQ 1224</span>
+          </div>
+          <div class="row2"><span>RWY 05</span><span>ETA 00:14</span></div>
+          <div class="dest">~/oss/claude-code</div>
+          <div class="stamp">EN RTE</div>
+          <div class="progress"><i style="--p:55%"></i></div>
+        </div>
+
+        <div class="strip working">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#6dd2a8;">TAURI-SPK</span>
+            <span class="sq">SQ 3318</span>
+          </div>
+          <div class="row2"><span>RWY 06</span><span>ETA 00:08</span></div>
+          <div class="dest">~/scratch/tauri-spike</div>
+          <div class="stamp">EN RTE</div>
+          <div class="progress"><i style="--p:42%"></i></div>
+        </div>
+
+        <div class="strip working">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#b48cff;">API-PROBES</span>
+            <span class="sq">SQ 2071</span>
+          </div>
+          <div class="row2"><span>RWY 07</span><span>ETA 00:31</span></div>
+          <div class="dest">~/platform/api</div>
+          <div class="stamp">EN RTE</div>
+          <div class="progress"><i style="--p:30%"></i></div>
+        </div>
+
+        <div class="strip idle">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#7a3aff;">DEMO-PREP</span>
+            <span class="sq">SQ 0140</span>
+          </div>
+          <div class="row2"><span>HOLD</span><span>04:21</span></div>
+          <div class="dest">~/sdo/spring-demo</div>
+          <div class="stamp">HOLD</div>
+          <div class="progress"><i style="--p:18%; background:#5a4a2a;"></i></div>
+        </div>
+
+        <div class="strip idle">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#ff6db4;">SCRATCH-B</span>
+            <span class="sq">SQ 0814</span>
+          </div>
+          <div class="row2"><span>HOLD</span><span>28:00</span></div>
+          <div class="dest">~/scratch/b</div>
+          <div class="stamp">HOLD</div>
+          <div class="progress"><i style="--p:12%; background:#5a4a2a;"></i></div>
+        </div>
+
+        <div class="strip idle">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#f6c845;">DOCS-IDX</span>
+            <span class="sq">SQ 0612</span>
+          </div>
+          <div class="row2"><span>HOLD</span><span>58:14</span></div>
+          <div class="dest">~/work/docs-site</div>
+          <div class="stamp">HOLD</div>
+          <div class="progress"><i style="--p:8%; background:#5a4a2a;"></i></div>
+        </div>
+
+        <div class="strip stale">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#5a636b;">STAG-DEPLOY</span>
+            <span class="sq">SQ 0001</span>
+          </div>
+          <div class="row2"><span>DIVERTED</span><span>2:14H</span></div>
+          <div class="dest">~/ops/stag</div>
+          <div class="stamp">STALE</div>
+          <div class="progress"><i style="--p:2%; background:#3a342a;"></i></div>
+        </div>
+
+        <div class="strip stale">
+          <div class="top">
+            <span class="cs tag-dot" style="--tag:#cc1f3d;">PROD-MIG</span>
+            <span class="sq">SQ 0023</span>
+          </div>
+          <div class="row2"><span>DIVERTED</span><span>5:02H</span></div>
+          <div class="dest">~/infra/migration-2026</div>
+          <div class="stamp">STALE</div>
+          <div class="progress"><i style="--p:1%; background:#3a342a;"></i></div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="caption">18 / DISPATCH TOWER — sessions as inbound traffic; distance-to-center = urgency, paper strips show stand time.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 20 — Signal Mast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Major+Mono+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #060809;
+  --night-2: #0a0d0f;
+  --steel: #1a2024;
+  --steel-2: #232a30;
+  --hairline: #2c343c;
+  --rivet-shadow: #050608;
+
+  --paper: #d8c89a;
+  --paper-faint: #6a5d44;
+
+  --ink: #d6dde2;
+  --ink-dim: #8a949c;
+  --ink-mute: #525a63;
+
+  --amber: #f0a929;
+  --amber-deep: #b87010;
+  --amber-glow: rgba(240,169,41,0.6);
+  --honey: #f6c845;
+
+  --signal: #ff5a3a;
+  --signal-glow: rgba(255,90,58,0.6);
+  --safe: #6dd2a8;
+  --voltage: #5cc4ff;
+  --violet: #b48cff;
+  --pink: #ff6db4;
+  --dim: #2a323a;
+
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display: 'Major Mono Display', monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--night);
+  color: var(--ink);
+  font-size: 13px;
+  background-image:
+    radial-gradient(ellipse at 18% 30%, rgba(240,169,41,0.04) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 80%, rgba(92,196,255,0.03) 0%, transparent 60%),
+    linear-gradient(180deg, #080b0d 0%, #040506 100%);
+}
+.app {
+  display: grid;
+  grid-template-rows: 38px 28px 1fr 22px;
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  background: linear-gradient(180deg, #1a2024 0%, #0c1014 100%);
+  border-bottom: 1px solid #050608;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tb-l, .tb-r { display: flex; align-items: center; gap: 12px; }
+.tb-r { justify-content: flex-end; color: var(--ink-mute); }
+.lights { display: flex; gap: 5px; }
+.lights span { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px #050608; }
+.lights span:nth-child(1) { background: radial-gradient(circle at 35% 35%, #ff6b4a, #5a1a08); }
+.lights span:nth-child(2) { background: radial-gradient(circle at 35% 35%, var(--amber), #5a3a08); box-shadow: 0 0 6px var(--amber-glow); }
+.lights span:nth-child(3) { background: radial-gradient(circle at 35% 35%, var(--safe), #1e4a30); }
+.brand { display: flex; align-items: center; gap: 9px; color: var(--honey);
+  font-family: var(--display); font-size: 13px; letter-spacing: 0.22em; }
+.brand .mark {
+  width: 16px; height: 14px;
+  background: var(--honey);
+  clip-path: polygon(50% 0, 100% 35%, 80% 100%, 20% 100%, 0 35%);
+  filter: drop-shadow(0 0 4px var(--amber-glow));
+}
+.tb-c { color: var(--ink-mute); font-family: var(--mono); }
+.tb-c b { color: var(--ink); }
+
+/* TELEMETRY */
+.telemetry {
+  background: linear-gradient(180deg, #11161a, #08090b);
+  border-bottom: 1px solid #050608;
+  display: flex; align-items: center; padding: 0 18px; gap: 22px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mute);
+}
+.metric { display: flex; align-items: center; gap: 8px; }
+.metric b { color: var(--ink); font-weight: 500; }
+.metric .em { color: var(--amber); }
+.bar { display: inline-block; width: 50px; height: 4px; background: #050608; border: 1px solid #1a2024; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--amber-deep), var(--amber)); }
+.live { margin-left: auto; color: var(--amber); display: flex; align-items: center; gap: 7px; }
+.live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
+
+/* MAIN — left: signal mast (vertical), center spacer, right: terminal */
+.main {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 0;
+  min-height: 0;
+}
+
+/* MAST PANE */
+.mast-pane {
+  position: relative;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 39px, rgba(240,169,41,0.04) 39px 40px),
+    linear-gradient(180deg, #08090b 0%, #050607 100%);
+  border-right: 1px solid #1a2024;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.mast-pane::before {
+  content: 'SIGNAL HIVE · MAST 03 · 11 LAMPS';
+  position: absolute; top: 10px; left: 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--ink-mute); z-index: 2;
+}
+.mast-pane::after {
+  content: 'TOP ↑';
+  position: absolute; top: 10px; right: 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; color: var(--ink-mute); z-index: 2;
+}
+
+.mast-head { height: 32px; }
+.mast-foot {
+  height: 36px; border-top: 1px solid #1a2024;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--ink-mute);
+  background: linear-gradient(180deg, #0c1014, #050608);
+}
+.mast-foot b { color: var(--honey); }
+
+/* THE MAST itself — vertical column with lamps clipped to it */
+.mast {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  padding: 8px 0 12px;
+  overflow: hidden;
+}
+/* the steel pole running down center */
+.mast::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 8px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #14181c 0%, #2c343c 50%, #14181c 100%);
+  border-left: 1px solid #050608;
+  border-right: 1px solid #050608;
+  box-shadow: 0 0 14px rgba(0,0,0,0.6);
+}
+/* mast cap at top */
+.mast::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  width: 28px; height: 6px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #4a525c, #1a2024);
+  border: 1px solid #050608;
+  border-radius: 2px 2px 0 0;
+}
+
+/* lamp row — alternating left/right arms off the mast */
+.lamp {
+  position: relative;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.lamp .arm {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  height: 3px;
+  background: linear-gradient(180deg, #4a525c, #1a2024);
+  border-top: 1px solid #5a636b;
+  border-bottom: 1px solid #050608;
+}
+.lamp.l .arm { left: 50%; width: 70px; }
+.lamp.r .arm { right: 50%; width: 70px; }
+.lamp .arm::before {
+  /* mounting bracket bolt */
+  content: '';
+  position: absolute;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #6a727b, #1a2024);
+  top: 50%;
+  transform: translateY(-50%);
+}
+.lamp.l .arm::before { left: -3px; }
+.lamp.r .arm::before { right: -3px; }
+
+/* lamp head — the droid lamp */
+.head {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 10px;
+}
+.lamp.l .head { left: calc(50% + 70px); }
+.lamp.r .head { right: calc(50% + 70px); flex-direction: row-reverse; }
+
+/* dome lamp — looks like a tiny droid head mounted as a signal lamp */
+.dome {
+  width: 38px; height: 30px;
+  background: radial-gradient(ellipse at 35% 25%, #4a525c 0%, #2a313a 60%, #14181c 100%);
+  border-radius: 38px 38px 4px 4px;
+  position: relative;
+  box-shadow:
+    inset 0 -3px 4px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.16),
+    0 4px 6px rgba(0,0,0,0.5);
+  flex-shrink: 0;
+}
+/* lens */
+.dome::before {
+  content: '';
+  position: absolute;
+  top: 9px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 14px;
+  border-radius: 16px 16px 4px 4px;
+  background: radial-gradient(ellipse at 35% 30%, #1a1d20, #050608);
+  box-shadow: inset 0 0 0 1px #2a2f33;
+}
+.dome::after {
+  content: '';
+  position: absolute;
+  top: 12px; left: 50%; transform: translateX(-50%);
+  width: 9px; height: 8px;
+  border-radius: 9px 9px 2px 2px;
+  background: var(--led, var(--amber));
+  box-shadow: 0 0 12px var(--led, var(--amber-glow)), inset 0 -1px 2px rgba(0,0,0,0.4);
+}
+.dome .ant {
+  position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  width: 1.5px; height: 10px; background: #5a636b;
+}
+.dome .ant::after {
+  content: ''; position: absolute; top: -3px; left: -2px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--led, var(--amber));
+  box-shadow: 0 0 6px var(--led, var(--amber-glow));
+}
+/* projected beam — the signal cone */
+.beam {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 90px; height: 22px;
+  background: linear-gradient(90deg, var(--led, var(--amber)) 0%, transparent 100%);
+  opacity: 0.18;
+  filter: blur(1px);
+  pointer-events: none;
+  clip-path: polygon(0 35%, 100% 0%, 100% 100%, 0 65%);
+}
+.lamp.l .beam { left: calc(50% + 88px); }
+.lamp.r .beam { right: calc(50% + 88px); transform: translateY(-50%) scaleX(-1); }
+
+/* nameplate */
+.plate {
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+}
+.plate b {
+  display: block; color: var(--ink); font-weight: 600;
+  font-size: 11px; letter-spacing: 0.1em;
+}
+.plate .meta {
+  color: var(--ink-mute); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
+  margin-top: 2px;
+}
+.lamp.l .plate { text-align: left; }
+.lamp.r .plate { text-align: right; }
+
+/* status bead column — small dots near pole on the same row, like a flag */
+.bead {
+  position: absolute;
+  top: 50%; transform: translateY(-50%);
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--led, var(--amber));
+  box-shadow: 0 0 6px var(--led, var(--amber-glow)), inset 0 -1px 1px rgba(0,0,0,0.3);
+  z-index: 3;
+}
+.lamp.l .bead { left: calc(50% + 5px); }
+.lamp.r .bead { right: calc(50% + 5px); }
+
+/* status modes — mapped to --led + animations */
+.lamp.working { --led: var(--amber); }
+.lamp.working .dome::after { animation: lamppulse 1.6s ease-in-out infinite; }
+.lamp.working .dome .ant::after { animation: blink 1.4s infinite; }
+.lamp.working .bead { animation: lamppulse 1.6s ease-in-out infinite; }
+
+.lamp.needs { --led: var(--signal); }
+.lamp.needs .dome::after { animation: morse 0.9s steps(1) infinite; }
+.lamp.needs .dome .ant::after { animation: morse 0.9s steps(1) infinite; }
+.lamp.needs .bead { animation: morse 0.9s steps(1) infinite; }
+.lamp.needs .plate b { color: var(--signal); }
+
+.lamp.idle { --led: #3a4148; }
+.lamp.idle .dome::after { box-shadow: none; opacity: 0.7; }
+.lamp.idle .dome .ant::after { box-shadow: none; opacity: 0.7; }
+.lamp.idle .plate { opacity: 0.7; }
+.lamp.idle .beam { display: none; }
+
+.lamp.stale { --led: #1f262c; }
+.lamp.stale .dome::after { box-shadow: none; opacity: 0.5; }
+.lamp.stale .dome .ant::after { box-shadow: none; opacity: 0.5; }
+.lamp.stale .plate { opacity: 0.45; }
+.lamp.stale .beam { display: none; }
+
+.lamp.active .dome { transform: scale(1.15); }
+.lamp.active .plate b { color: var(--honey); text-shadow: 0 0 6px var(--amber-glow); }
+.lamp.active .beam { opacity: 0.42; }
+
+@keyframes lamppulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+/* morse: long-short blink */
+@keyframes morse {
+  0%, 18% { opacity: 1; }
+  20%, 32% { opacity: 0.18; }
+  34%, 42% { opacity: 1; }
+  44%, 56% { opacity: 0.18; }
+  58%, 70% { opacity: 1; }
+  72%, 100% { opacity: 0.18; }
+}
+
+/* per-session tag dot to the very inside */
+.tag {
+  width: 4px; height: 28px;
+  background: var(--tagcolor, var(--amber));
+  box-shadow: 0 0 4px var(--tagcolor, var(--amber-glow));
+}
+
+/* RIGHT pane: terminal + ledger strip */
+.right-pane {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+}
+
+.banner {
+  background: linear-gradient(180deg, #0c1014, #06090b);
+  border-bottom: 1px solid #1a2024;
+  padding: 14px 22px 12px;
+  position: relative;
+}
+.banner h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: 0.32em;
+  color: var(--honey);
+  text-shadow: 0 0 12px var(--amber-glow);
+  font-weight: normal;
+}
+.banner h2 small {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  color: var(--ink-mute);
+  margin-left: 14px;
+  text-shadow: none;
+}
+.banner .row {
+  display: flex; gap: 22px; margin-top: 8px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.banner .row b { color: var(--ink); }
+.banner .row .em { color: var(--honey); }
+.banner .row .alarm { color: var(--signal); }
+
+/* legend strip — tiny morse code key */
+.legend {
+  display: flex; gap: 18px;
+  margin-top: 8px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-mute);
+  align-items: center;
+}
+.legend .l { display: flex; align-items: center; gap: 6px; }
+.legend .swatch {
+  width: 9px; height: 9px; border-radius: 50%;
+  box-shadow: 0 0 4px var(--c, transparent);
+}
+.legend .l.work .swatch { background: var(--amber); --c: var(--amber-glow); }
+.legend .l.need .swatch { background: var(--signal); --c: var(--signal-glow); }
+.legend .l.idle .swatch { background: #3a4148; }
+.legend .l.stal .swatch { background: #1f262c; }
+
+/* TERMINAL */
+.term-frame {
+  padding: 12px 22px 18px;
+  position: relative;
+  min-height: 0;
+}
+.terminal {
+  background: #050608;
+  border: 1px solid #1a2024;
+  height: 100%;
+  padding: 16px 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 0 1px #0c1014,
+    inset 0 0 100px rgba(240,169,41,0.025),
+    0 8px 24px rgba(0,0,0,0.6);
+}
+.terminal::before {
+  content: 'LAMP-03 · MULTICLAUDE-HUB · LIVE';
+  position: absolute; top: 6px; left: 14px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--ink-mute);
+}
+.terminal::after {
+  content: 'BEAM ON · 0.4s';
+  position: absolute; top: 6px; right: 14px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--amber);
+}
+/* faint scanlines */
+.terminal > .scan {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0) 0 2px, rgba(255,255,255,0.012) 2px 3px);
+  pointer-events: none;
+}
+.term-pre {
+  margin-top: 16px;
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.7; color: #c8d2da; white-space: pre-wrap;
+  position: relative; z-index: 1;
+}
+.p { color: var(--amber); }
+.c { color: #e6edf3; }
+.t { color: #6dd2c5; }
+.r { color: var(--ink-mute); }
+.e { color: #b48cff; }
+.cur { display:inline-block; width:7px; height:13px; background: var(--amber);
+  vertical-align: text-top; animation: cur 1s steps(1) infinite;
+  box-shadow: 0 0 6px var(--amber-glow); }
+@keyframes cur { 50% { opacity: 0; } }
+
+/* footer */
+.foot {
+  background: linear-gradient(180deg, #0a0d0f, #050607);
+  border-top: 1px solid #1a2024;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.foot .right { margin-left: auto; }
+.foot b { color: var(--honey); }
+.foot .alarm { color: var(--signal); }
+
+.caption {
+  position: absolute;
+  bottom: 28px; right: 22px;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--ink-mute);
+  pointer-events: none;
+}
+.caption b { color: var(--amber); }
+
+.back {
+  position: fixed; top: 8px; right: 14px; z-index: 50;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-mute); text-decoration: none;
+  background: #0c1014; border: 1px solid #1a2024; padding: 4px 9px;
+}
+.back:hover { color: var(--amber); border-color: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="brand"><span class="mark"></span>multiclaude · hive</div>
+    </div>
+    <div class="tb-c">~/work / <b>multiclaude-hub</b> · signal mast</div>
+    <div class="tb-r">11 LAMPS · ⌘N RAISE LAMP</div>
+  </div>
+
+  <div class="telemetry">
+    <span class="metric">LAMP <b>03 · MULTICLAUDE</b></span>
+    <span class="metric">MODEL <b>OPUS 4.7</b></span>
+    <span class="metric">EFFORT <b class="em">MAX</b></span>
+    <span class="metric">CTX <span class="bar"><i style="width:47%"></i></span> <b>47%</b></span>
+    <span class="metric">UPTIME <b>00:42:18</b></span>
+    <span class="metric">BEAT <b>0.4s</b></span>
+    <span class="live">LIVE — BASH(NPM RUN DEV)</span>
+  </div>
+
+  <div class="main">
+
+    <!-- MAST -->
+    <section class="mast-pane">
+      <div class="mast-head"></div>
+
+      <div class="mast">
+
+        <!-- LAMP 01 — top -->
+        <div class="lamp r working" style="--tagcolor:#5cc4ff;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>CLI-OSS</b>
+              <div class="meta">~/oss/claude-code · 14s</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 02 -->
+        <div class="lamp l idle" style="--tagcolor:#7a3aff;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="tag"></div>
+            <div class="plate">
+              <b>DEMO-PREP</b>
+              <div class="meta">~/sdo/spring · 4m</div>
+            </div>
+          </div>
+          <div class="bead"></div>
+        </div>
+
+        <!-- LAMP 03 — ACTIVE / WORKING -->
+        <div class="lamp r working active" style="--tagcolor:#f6c845;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>MULTICLAUDE</b>
+              <div class="meta">~/work/multiclaude · NOW</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 04 — NEEDS YOU -->
+        <div class="lamp l needs" style="--tagcolor:var(--signal);">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="tag"></div>
+            <div class="plate">
+              <b>SDO-AUDIT</b>
+              <div class="meta">PERMIT? · 46s</div>
+            </div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 05 -->
+        <div class="lamp r working" style="--tagcolor:#6dd2a8;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>TAURI-SPK</b>
+              <div class="meta">~/scratch/tauri · 8s</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 06 -->
+        <div class="lamp l idle" style="--tagcolor:#cc1f3d;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="tag"></div>
+            <div class="plate">
+              <b>PROD-MIGRATE</b>
+              <div class="meta">~/infra/migration · 12m</div>
+            </div>
+          </div>
+          <div class="bead"></div>
+        </div>
+
+        <!-- LAMP 07 -->
+        <div class="lamp r working" style="--tagcolor:#b48cff;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>API-PROBES</b>
+              <div class="meta">~/platform/api · 31s</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 08 -->
+        <div class="lamp l working" style="--tagcolor:#f0a929;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="tag"></div>
+            <div class="plate">
+              <b>PAPER-WIRE</b>
+              <div class="meta">~/decks/release · 31s</div>
+            </div>
+          </div>
+          <div class="bead"></div>
+          <div class="beam"></div>
+        </div>
+
+        <!-- LAMP 09 -->
+        <div class="lamp r idle" style="--tagcolor:#ff6db4;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>SCRATCH-B</b>
+              <div class="meta">~/scratch/b · 28m</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+        </div>
+
+        <!-- LAMP 10 -->
+        <div class="lamp l idle" style="--tagcolor:#8a6a1a;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="tag"></div>
+            <div class="plate">
+              <b>DOCS-INDEX</b>
+              <div class="meta">~/work/docs-site · 58m</div>
+            </div>
+          </div>
+          <div class="bead"></div>
+        </div>
+
+        <!-- LAMP 11 — STALE bottom -->
+        <div class="lamp r stale" style="--tagcolor:#5a636b;">
+          <div class="arm"></div>
+          <div class="head">
+            <div class="dome"><span class="ant"></span></div>
+            <div class="plate">
+              <b>STAG-DEPLOY</b>
+              <div class="meta">stale · 2h 14m</div>
+            </div>
+            <div class="tag"></div>
+          </div>
+          <div class="bead"></div>
+        </div>
+
+      </div>
+
+      <div class="mast-foot">
+        <span>MAST GROUNDED <b>OK</b></span>
+        <span>BEAT <b>0.4s</b></span>
+        <span>NEXT FLIP <b>12s</b></span>
+      </div>
+    </section>
+
+    <!-- TERMINAL pane -->
+    <section class="right-pane">
+      <div class="banner">
+        <h2>LAMP·03 <small>MULTICLAUDE-HUB</small></h2>
+        <div class="row">
+          <span>STATE <b class="em">WORKING</b></span>
+          <span>BEAM <b>FOCUSED</b></span>
+          <span>NEIGHBOURS <b>↑ TAURI-SPK</b> · <b>↓ SDO-AUDIT</b> <span class="alarm">!</span></span>
+          <span>QUEUE <b>0</b></span>
+        </div>
+        <div class="legend">
+          <span>SIGNAL CODE:</span>
+          <span class="l work"><span class="swatch"></span>STEADY GLOW · WORKING</span>
+          <span class="l need"><span class="swatch"></span>SHORT-LONG MORSE · NEEDS YOU</span>
+          <span class="l idle"><span class="swatch"></span>DARK · IDLE</span>
+          <span class="l stal"><span class="swatch"></span>OFF · STALE &gt;15m</span>
+        </div>
+      </div>
+
+      <div class="term-frame">
+        <div class="terminal">
+          <div class="scan"></div>
+<pre class="term-pre"><span class="p">&gt;</span> <span class="c">claude</span>
+
+<span class="c">⏺ Lamp 03 lit. What signal are we sending?</span>
+
+<span class="p">&gt;</span> The mast lamps should encode status as a blink pattern,
+  not just a colour. A glance from across the room should tell
+  me if anything needs me.
+
+<span class="c">⏺ Right — colour alone fails when the screen is in peripheral
+  vision. A morse-style cadence carries through. Reading the
+  status reducer to map states to blink patterns.</span>
+
+<span class="t">⏺ Bash(rg "blinkPattern" src/ -n)</span>
+  <span class="r">⎿  src/lamp/blink.ts:12: const PATTERNS = { WORKING: [1.6,'pulse'],
+                                  NEEDS:  [0.9,'morse'],
+                                  IDLE:   [0,'off'],
+                                  STALE:  [0,'off'] }
+     src/components/Lamp.tsx:24: el.style.animation = ...</span>
+
+<span class="c">⏺ The patterns exist; they just aren't bound. I'll wire each
+  lamp's --led + animation to the live status, and add a soft
+  beam projection so a NEEDS lamp casts visibly even when the
+  pole is at the edge of vision.</span>
+
+<span class="e">⏺ Edit(src/components/Lamp.tsx)</span>
+  <span class="r">⎿  Subscribed to useStatus(); mapped → animation
+     Added .beam element, opacity tied to attention
+     STALE lamps go fully dark after 15m</span>
+
+<span class="c">⏺ Done. Lamp 04 (sdo-audit) is now flashing short-long-short
+  in red — the morse drag pulls your eye even from peripheral.
+  The mast itself stays calm; only the lamp that needs you
+  moves.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot">
+    <span>HIVE · MAST 03</span>
+    <span>11 LAMPS</span>
+    <span>·</span>
+    <span><b>5 LIT</b> WORKING</span>
+    <span class="alarm">1 MORSE NEEDS</span>
+    <span>4 DARK</span>
+    <span>1 OFF</span>
+    <span class="right">BEAT 0.4s · MAST REV 2026.05.19</span>
+  </div>
+</div>
+
+<div class="caption">20 / <b>SIGNAL MAST</b> — vertical lamp tower; status is a blink pattern, not just a colour.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

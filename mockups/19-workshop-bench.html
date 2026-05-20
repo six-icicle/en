@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 19 — Workshop Bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Special+Elite&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bench: #1a140e;
+  --bench-2: #221a10;
+  --bench-grain: #2a2014;
+  --bench-shadow: #0d0905;
+  --paper: #d8c89a;
+  --paper-ink: #2a1a06;
+  --paper-faint: #6a5028;
+
+  --steel: #2a313a;
+  --steel-2: #393f48;
+  --steel-edge: #1a1f25;
+  --rivet: #0a0c0e;
+
+  --amber: #f0a929;
+  --amber-deep: #c47410;
+  --amber-glow: rgba(240,169,41,0.55);
+  --honey: #f6c845;
+  --signal: #ff5a3a;
+  --safe: #6dd2a8;
+  --voltage: #5cc4ff;
+  --violet: #b48cff;
+
+  --ink: #d6dde2;
+  --ink-dim: #8a949c;
+  --ink-mute: #5a636b;
+
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --hand: 'Special Elite', 'Courier New', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--bench);
+  color: var(--ink);
+  font-size: 13px;
+  background-image:
+    /* wood grain */
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.04) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 11px),
+    radial-gradient(ellipse at 30% 20%, #2c2014 0%, #1a140e 60%, #0d0905 100%);
+}
+.app {
+  display: grid;
+  grid-template-rows: 38px 28px 1fr;
+  height: 100vh;
+}
+
+/* TITLEBAR — like a brass plate on the workshop door */
+.titlebar {
+  background: linear-gradient(180deg, #2a2014 0%, #1a140e 100%);
+  border-bottom: 1px solid #050403;
+  box-shadow: inset 0 1px 0 rgba(255,180,80,0.08), inset 0 -1px 0 #000;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tb-l, .tb-r { display: flex; align-items: center; gap: 12px; }
+.tb-r { justify-content: flex-end; color: var(--paper-faint); }
+.lights { display: flex; gap: 5px; }
+.lights span { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px #050403, 0 0 0 1px #4a3618; }
+.lights span:nth-child(1) { background: radial-gradient(circle at 35% 35%, #ff6b4a, #5a1a08); }
+.lights span:nth-child(2) { background: radial-gradient(circle at 35% 35%, var(--amber), #5a3a08); box-shadow: 0 0 6px var(--amber-glow), inset 0 0 0 1px #050403; }
+.lights span:nth-child(3) { background: radial-gradient(circle at 35% 35%, var(--safe), #1e4a30); }
+.brand {
+  display: flex; align-items: center; gap: 9px; color: var(--honey);
+  font-family: var(--hand); font-size: 14px; letter-spacing: 0.18em;
+}
+.brand .mark {
+  width: 16px; height: 14px;
+  background: var(--honey);
+  clip-path: polygon(50% 0, 100% 35%, 80% 100%, 20% 100%, 0 35%);
+  filter: drop-shadow(0 0 4px var(--amber-glow));
+}
+.tb-c { color: var(--paper-faint); }
+.tb-c b { color: var(--paper); }
+
+/* TOOL RAIL */
+.toolrail {
+  background: linear-gradient(180deg, #14110b 0%, #0a0805 100%);
+  border-bottom: 1px solid #050403;
+  display: flex; align-items: center; padding: 0 18px; gap: 22px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper-faint);
+}
+.metric { display: flex; align-items: center; gap: 8px; }
+.metric b { color: var(--paper); font-weight: 500; }
+.metric .em { color: var(--honey); }
+.bar { display: inline-block; width: 50px; height: 4px; background: #050403; border: 1px solid #2a2014; }
+.bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--amber-deep), var(--honey)); }
+.live { margin-left: auto; color: var(--honey); display: flex; align-items: center; gap: 7px; }
+.live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--honey); box-shadow: 0 0 6px var(--honey); animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: 0.35; } }
+
+/* MAIN — left: bench schematic; right: terminal+notes */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  min-height: 0;
+}
+
+/* WORKBENCH — exploded schematic of one droid + parts bin row */
+.bench {
+  position: relative;
+  padding: 16px 18px 16px;
+  border-right: 2px solid #0a0805;
+  box-shadow: inset -3px 0 8px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 12px;
+}
+.bench::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    /* paper specks */
+    radial-gradient(circle at 12% 30%, rgba(255,200,100,0.025) 0, transparent 12%),
+    radial-gradient(circle at 80% 70%, rgba(255,200,100,0.02) 0, transparent 14%);
+  pointer-events: none;
+}
+.bench-head {
+  display: flex; align-items: baseline; gap: 18px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper-faint);
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #4a3618;
+  position: relative;
+  z-index: 1;
+}
+.bench-head h1 {
+  font-family: var(--hand); font-size: 18px; letter-spacing: 0.16em;
+  color: var(--honey); font-weight: normal;
+}
+.bench-head .stamp {
+  margin-left: auto;
+  border: 1.5px solid var(--signal);
+  color: var(--signal);
+  padding: 3px 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  transform: rotate(-3deg);
+  background: rgba(255,90,58,0.04);
+}
+
+/* SCHEMATIC AREA */
+.schematic {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #4a3618;
+  background:
+    linear-gradient(180deg, rgba(216,200,154,0.04) 0%, rgba(216,200,154,0.02) 100%);
+  z-index: 1;
+}
+/* blueprint grid overlay */
+.schematic::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(0deg, rgba(216,200,154,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(216,200,154,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+/* exploded droid — center column */
+.exploded {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  padding: 14px 0;
+}
+.exploded .label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--honey);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  position: absolute;
+}
+/* dashed connector lines */
+.exploded::before {
+  content: '';
+  position: absolute;
+  top: 14px; bottom: 14px; left: 50%;
+  width: 1px;
+  background: repeating-linear-gradient(180deg, var(--honey) 0 4px, transparent 4px 8px);
+  opacity: 0.35;
+}
+
+.x-dome {
+  width: 84px; height: 52px;
+  background: radial-gradient(ellipse at 35% 25%, #6a727b 0%, #353a3f 55%, #1a1d20 100%);
+  border-radius: 84px 84px 6px 6px;
+  position: relative;
+  box-shadow: inset 0 -3px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.18), 0 6px 12px rgba(0,0,0,0.6);
+}
+.x-dome::before {
+  /* eye */
+  content: '';
+  position: absolute;
+  top: 16px; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1a1d20, #050708);
+  box-shadow: inset 0 0 0 1px #2a2f33, 0 0 0 2px #4a3618;
+}
+.x-dome::after {
+  content: '';
+  position: absolute;
+  top: 19.5px; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 10px var(--signal);
+  animation: pulse 0.8s infinite;
+}
+@keyframes pulse { 50% { opacity: 0.5; } }
+.x-dome .ant {
+  position: absolute;
+  top: -16px; left: 50%; transform: translateX(-50%);
+  width: 1.5px; height: 14px; background: #6a727b;
+}
+.x-dome .ant::after {
+  content: ''; position: absolute; top: -4px; left: -2px;
+  width: 5.5px; height: 5.5px; border-radius: 50%;
+  background: var(--signal); box-shadow: 0 0 6px var(--signal);
+  animation: blink 0.6s infinite;
+}
+.x-dome .led-l, .x-dome .led-r {
+  position: absolute; top: 10px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--signal); box-shadow: 0 0 5px var(--signal);
+}
+.x-dome .led-l { left: 12px; } .x-dome .led-r { right: 12px; }
+
+.x-chassis {
+  width: 100px; height: 110px;
+  background: linear-gradient(180deg, #393f48 0%, #2a313a 30%, #1f2630 65%, #14181f 100%);
+  position: relative;
+  border-radius: 8px 8px 4px 4px;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.12),
+    inset 0 -2px 4px rgba(0,0,0,0.5),
+    0 6px 12px rgba(0,0,0,0.5);
+}
+/* honey stripe */
+.x-chassis::before {
+  content: '';
+  position: absolute;
+  top: 10px; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--amber-deep), var(--honey), var(--amber-deep));
+  box-shadow: 0 0 6px var(--amber-glow);
+}
+/* readout window */
+.x-chassis .readout {
+  position: absolute;
+  top: 28px; left: 10px; right: 10px;
+  height: 36px;
+  background: #050708;
+  border: 1px solid #2a2f33;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.7);
+  padding: 5px;
+  display: flex; align-items: flex-end; gap: 2px;
+}
+.x-chassis .readout span {
+  flex: 1;
+  background: var(--signal);
+  height: var(--h, 60%);
+  box-shadow: 0 0 4px rgba(255,90,58,0.5);
+  animation: barflux 1.6s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes barflux {
+  0%,100% { transform: scaleY(0.4); transform-origin: bottom; opacity: 0.5; }
+  50% { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+}
+.x-chassis .panel {
+  position: absolute;
+  bottom: 12px; left: 10px; right: 10px;
+  height: 22px;
+  border: 1px solid #050708;
+  background: linear-gradient(180deg, #14181f, #0a0c10);
+  display: flex; gap: 6px; align-items: center; justify-content: center;
+}
+.x-chassis .panel b {
+  width: 5px; height: 5px; border-radius: 50%; background: #4a525c;
+  box-shadow: 0 0 0 1px #050708;
+}
+.x-chassis .panel b:nth-child(2) { background: var(--signal); box-shadow: 0 0 4px var(--signal); }
+/* rivets */
+.x-chassis .rv {
+  position: absolute;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #6a727b, #1a1d20);
+}
+.x-chassis .rv.tl { top: 22px; left: 4px; }
+.x-chassis .rv.tr { top: 22px; right: 4px; }
+.x-chassis .rv.bl { bottom: 8px; left: 4px; }
+.x-chassis .rv.br { bottom: 8px; right: 4px; }
+
+.x-feet {
+  width: 116px; height: 14px;
+  background: linear-gradient(180deg, #393f48, #14181f);
+  border-radius: 3px;
+  border: 1px solid #050708;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.5);
+  position: relative;
+}
+.x-feet::before, .x-feet::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; width: 30px; height: 4px;
+  background: #14181f; border: 1px solid #050708;
+}
+.x-feet::before { left: 6px; } .x-feet::after { right: 6px; }
+
+/* annotation labels with leader lines */
+.note {
+  position: absolute;
+  font-family: var(--hand);
+  font-size: 11px;
+  color: var(--honey);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.note .leader {
+  position: absolute;
+  width: var(--lw, 60px); height: 1px;
+  background: var(--honey);
+  opacity: 0.5;
+  top: 50%;
+}
+.note.left { right: 100%; padding-right: 70px; text-align: right; }
+.note.left .leader { right: 0; }
+.note.left::before { content: ''; position: absolute; right: -3px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--honey); }
+.note.right { left: 100%; padding-left: 70px; }
+.note.right .leader { left: 0; }
+.note.right::before { content: ''; position: absolute; left: -3px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--honey); }
+.note small { display: block; font-family: var(--mono); font-size: 8.5px; color: var(--paper-faint); letter-spacing: 0.16em; text-transform: uppercase; margin-top: 1px; }
+
+/* SPEC SHEETS — left and right columns */
+.spec {
+  background:
+    repeating-linear-gradient(180deg, rgba(216,200,154,0.04) 0 22px, transparent 22px 23px),
+    linear-gradient(180deg, rgba(216,200,154,0.06), rgba(216,200,154,0.02));
+  border: 1px solid #4a3618;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper);
+  position: relative;
+  z-index: 1;
+}
+.spec h2 {
+  font-family: var(--hand);
+  font-size: 14px;
+  color: var(--honey);
+  letter-spacing: 0.16em;
+  font-weight: normal;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #4a3618;
+  padding-bottom: 4px;
+}
+.spec dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 10.5px; }
+.spec dt { color: var(--paper-faint); letter-spacing: 0.1em; text-transform: uppercase; font-size: 9.5px; }
+.spec dd { color: var(--paper); }
+.spec dd.em { color: var(--honey); }
+.spec dd.alarm { color: var(--signal); }
+.spec ul { margin-top: 8px; list-style: none; font-size: 10.5px; }
+.spec li { padding: 3px 0; border-bottom: 1px dotted #4a3618; display: flex; justify-content: space-between; }
+.spec li b { color: var(--honey); font-weight: 500; }
+
+/* PARTS BIN — bottom row, like a long flat drawer with each session as a "part" */
+.parts-row {
+  position: relative;
+  z-index: 1;
+}
+.parts-head {
+  display: flex; align-items: center;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper-faint);
+  padding-bottom: 6px;
+}
+.parts-head .right { margin-left: auto; color: var(--honey); }
+
+.parts-bin {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 0;
+  background:
+    repeating-linear-gradient(0deg, #14110b 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #2a2014 0%, #14110b 100%);
+  border: 2px solid #0a0805;
+  border-bottom: 4px solid #050403;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), inset 0 -2px 4px rgba(255,180,80,0.04);
+  padding: 8px;
+  height: 130px;
+}
+.cell {
+  border-right: 1px dashed #4a3618;
+  padding: 6px 5px 4px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+.cell:last-child { border-right: none; }
+.cell:hover { background: rgba(240,169,41,0.05); }
+.cell.active { background: rgba(240,169,41,0.1); }
+.cell.active::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 5px solid transparent; border-right: 5px solid transparent;
+  border-top: 6px solid var(--honey);
+}
+
+/* mini-droid in each cell */
+.mini {
+  width: 30px; height: 38px;
+  position: relative;
+  margin-bottom: 4px;
+}
+.mini .d {
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 14px;
+  background: radial-gradient(ellipse at 35% 25%, #5a636b 0%, #353a3f 60%, #1a1d20 100%);
+  border-radius: 22px 22px 2px 2px;
+}
+.mini .d::after {
+  content: ''; position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--led, var(--amber));
+  box-shadow: 0 0 4px var(--led, var(--amber-glow));
+}
+.mini .ant {
+  position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+  width: 1px; height: 5px; background: #4a525c;
+}
+.mini .ant::after {
+  content: ''; position: absolute; top: -2px; left: -1px;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--led, var(--amber));
+}
+.mini .c {
+  position: absolute; top: 13px; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 22px;
+  background: linear-gradient(180deg, #353a3f, #14181a);
+  border-radius: 3px 3px 1px 1px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 0 rgba(0,0,0,0.6);
+}
+.mini .c::before {
+  content: ''; position: absolute; top: 3px; left: 0; right: 0; height: 2px;
+  background: var(--tag, var(--amber));
+  box-shadow: 0 0 3px var(--tag, var(--amber-glow));
+}
+.mini .c::after {
+  content: ''; position: absolute; bottom: 3px; left: 4px; right: 4px; height: 6px;
+  background: #050708;
+  border: 1px solid #2a2f33;
+}
+.mini .f {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 30px; height: 4px;
+  background: #14181a; border: 1px solid #050708;
+  border-radius: 1px;
+}
+.cell.idle .mini .d::after { background: #4a525c; box-shadow: none; }
+.cell.idle .mini .ant::after { background: #4a525c; box-shadow: none; }
+.cell.idle { opacity: 0.7; }
+.cell.stale { opacity: 0.45; filter: grayscale(0.5); }
+.cell.stale .mini .d::after { background: #2a2f33; }
+.cell.needs .mini .d::after { background: var(--signal); animation: pulse 0.6s infinite; }
+.cell.needs .mini .ant::after { background: var(--signal); box-shadow: 0 0 4px var(--signal); }
+.cell.working .mini .d::after { animation: pulse 1.4s infinite; }
+
+.cell .pn {
+  font-family: var(--mono); font-size: 8.5px;
+  color: var(--paper-faint); letter-spacing: 0.16em;
+}
+.cell .name {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  color: var(--paper); letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.cell.needs .name { color: var(--signal); }
+.cell .stat {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--paper-faint);
+}
+.cell.working .stat { color: var(--honey); }
+.cell.needs .stat { color: var(--signal); }
+
+/* RIGHT PANE — terminal + foreman's notes */
+.right {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+}
+
+.notes {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 19px, rgba(106,80,40,0.18) 19px 20px),
+    var(--paper);
+  color: var(--paper-ink);
+  padding: 14px 18px 16px 30px;
+  font-family: var(--hand);
+  font-size: 13px;
+  line-height: 20px;
+  position: relative;
+  border-bottom: 4px solid #0a0805;
+  box-shadow: inset 6px 0 0 #c63a2a, inset 7px 0 0 rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4);
+}
+.notes::before {
+  /* margin red line */
+  content: '';
+  position: absolute;
+  left: 22px; top: 0; bottom: 0;
+  width: 1px;
+  background: rgba(198,58,42,0.5);
+}
+.notes h3 {
+  font-family: var(--hand);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: #6a1c10;
+  margin-bottom: 4px;
+  font-weight: normal;
+  text-transform: uppercase;
+}
+.notes h3 small { color: var(--paper-faint); font-size: 10px; letter-spacing: 0.18em; margin-left: 8px; }
+.notes p { margin: 4px 0; }
+.notes .tick { color: #2a6a1a; font-weight: bold; }
+.notes .x { color: #6a1c10; font-weight: bold; }
+.notes .stamp {
+  position: absolute;
+  top: 10px; right: 18px;
+  border: 2px solid #6a1c10;
+  color: #6a1c10;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  font-weight: 600;
+  transform: rotate(8deg);
+  background: rgba(198,58,42,0.06);
+}
+
+.term-frame {
+  padding: 12px 16px 14px;
+  position: relative;
+  min-height: 0;
+}
+.terminal {
+  background: #050708;
+  border: 1px solid #1a1f25;
+  height: 100%;
+  padding: 14px 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 80px rgba(244,168,38,0.025), 0 6px 14px rgba(0,0,0,0.5);
+}
+.terminal::before {
+  content: 'BENCH-03 · UNIT SDO-AUDIT · MAINT LOG';
+  position: absolute; top: 6px; left: 14px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--paper-faint);
+}
+.terminal::after {
+  content: 'PRIORITY · NEEDS ATTN';
+  position: absolute; top: 6px; right: 14px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--signal);
+}
+.term-pre {
+  margin-top: 16px;
+  font-family: var(--mono); font-size: 12px;
+  line-height: 1.7; color: #c8d2da; white-space: pre-wrap;
+}
+.p { color: var(--honey); }
+.c { color: #e6edf3; }
+.t { color: #6dd2c5; }
+.r { color: var(--paper-faint); }
+.e { color: #b48cff; }
+.cur { display: inline-block; width: 7px; height: 13px; background: var(--honey);
+  vertical-align: text-top; animation: cur 1s steps(1) infinite;
+  box-shadow: 0 0 6px var(--amber-glow); }
+@keyframes cur { 50% { opacity: 0; } }
+
+.caption {
+  position: fixed;
+  bottom: 6px; left: 18px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.18em; color: var(--paper-faint); text-transform: uppercase;
+  pointer-events: none;
+}
+.back {
+  position: fixed; top: 8px; right: 14px; z-index: 50;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--paper-faint); text-decoration: none;
+  background: #14110b; border: 1px solid #4a3618; padding: 4px 9px;
+}
+.back:hover { color: var(--honey); border-color: var(--honey); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="brand"><span class="mark"></span>Multiclaude · Workshop</div>
+    </div>
+    <div class="tb-c">~/work / <b>multiclaude-hub</b> · bench 03</div>
+    <div class="tb-r">11 UNITS · ⌘N NEW WORK ORDER</div>
+  </div>
+
+  <div class="toolrail">
+    <span class="metric">UNIT <b>SDO-AUDIT</b></span>
+    <span class="metric">MODEL <b>OPUS 4.7</b></span>
+    <span class="metric">EFFORT <b class="em">MAX</b></span>
+    <span class="metric">CTX <span class="bar"><i style="width:71%"></i></span> <b>71%</b></span>
+    <span class="metric">UPTIME <b>00:46:14</b></span>
+    <span class="metric">FOREMAN <b>AUSTIN</b></span>
+    <span class="live">BENCH OPEN — WAITING ON INPUT</span>
+  </div>
+
+  <div class="main">
+
+    <!-- LEFT: BENCH -->
+    <section class="bench">
+      <div class="bench-head">
+        <h1>Bench 03 · Exploded View</h1>
+        <span>WORK ORDER #00471</span>
+        <span>ISSUED 14:28</span>
+        <span class="stamp">NEEDS ATTN</span>
+      </div>
+
+      <!-- SCHEMATIC -->
+      <div class="schematic">
+        <!-- LEFT spec -->
+        <div class="spec">
+          <h2>Unit Spec</h2>
+          <dl>
+            <dt>Designation</dt><dd class="em">SDO-AUDIT</dd>
+            <dt>Class</dt><dd>BD-7 Auditor</dd>
+            <dt>Model</dt><dd>Opus 4.7</dd>
+            <dt>Effort</dt><dd class="em">MAX</dd>
+            <dt>Tag</dt><dd>SF · sf-cli</dd>
+            <dt>State</dt><dd class="alarm">PERMIT?</dd>
+          </dl>
+          <ul>
+            <li>Spawn time <b>14:28:02</b></li>
+            <li>Last token <b>00:30 ago</b></li>
+            <li>Tools called <b>14</b></li>
+            <li>Last cmd <b>sf data query</b></li>
+          </ul>
+        </div>
+
+        <!-- CENTER — exploded droid -->
+        <div class="exploded">
+          <div class="x-dome">
+            <span class="ant"></span>
+            <span class="led-l"></span><span class="led-r"></span>
+          </div>
+
+          <div class="note left" style="top: 30px; --lw: 70px;">
+            <span class="leader" style="width: 70px;"></span>
+            Photoreceptor<br><small>STATUS LED · RED</small>
+          </div>
+          <div class="note right" style="top: 12px;">
+            <span class="leader" style="width: 70px;"></span>
+            Beacon antenna<br><small>BLINK 0.6s · ALARM</small>
+          </div>
+
+          <div class="x-chassis">
+            <div class="readout">
+              <span style="--h:80%; --d:0s"></span>
+              <span style="--h:90%; --d:0.05s"></span>
+              <span style="--h:70%; --d:0.1s"></span>
+              <span style="--h:95%; --d:0.15s"></span>
+              <span style="--h:85%; --d:0.2s"></span>
+              <span style="--h:78%; --d:0.25s"></span>
+            </div>
+            <div class="panel"><b></b><b></b><b></b><b></b></div>
+            <span class="rv tl"></span><span class="rv tr"></span>
+            <span class="rv bl"></span><span class="rv br"></span>
+          </div>
+
+          <div class="note left" style="top: 175px;">
+            <span class="leader" style="width: 70px;"></span>
+            Honey stripe<br><small>SESSION TAG · SF/RED</small>
+          </div>
+          <div class="note right" style="top: 200px;">
+            <span class="leader" style="width: 70px;"></span>
+            Token amplitude<br><small>EWMA · 850 t/min</small>
+          </div>
+
+          <div class="x-feet"></div>
+
+          <div class="note right" style="top: 280px;">
+            <span class="leader" style="width: 70px;"></span>
+            Chassis plate<br><small>~/sf/audit-runner</small>
+          </div>
+        </div>
+
+        <!-- RIGHT spec -->
+        <div class="spec">
+          <h2>Pending Tools</h2>
+          <ul>
+            <li><b>Bash</b><span>sf org list</span></li>
+            <li><b>Bash</b><span>sf data query</span></li>
+            <li><b>Read</b><span>permset.xml</span></li>
+            <li><b>Edit</b><span>audit/run.sh</span></li>
+          </ul>
+          <h2 style="margin-top: 14px;">Diagnostics</h2>
+          <dl>
+            <dt>Heartbeat</dt><dd class="em">OK</dd>
+            <dt>PTY</dt><dd class="em">attached</dd>
+            <dt>Hooks</dt><dd>3 fired</dd>
+            <dt>Permit ask</dt><dd class="alarm">YES (1)</dd>
+            <dt>Last err</dt><dd>none</dd>
+            <dt>Bench since</dt><dd>00:46</dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- PARTS BIN -->
+      <div class="parts-row">
+        <div class="parts-head">
+          <span>PARTS BIN · 11 UNITS ON FLOOR · CLICK TO MOUNT TO BENCH</span>
+          <span class="right">⌘N NEW UNIT</span>
+        </div>
+        <div class="parts-bin">
+
+          <div class="cell working" style="--led: var(--amber); --tag: #5cc4ff;">
+            <span class="pn">PN-01</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">CLI-OSS</span>
+            <span class="stat">WORKING</span>
+          </div>
+
+          <div class="cell working" style="--led: var(--amber); --tag: #6dd2a8;">
+            <span class="pn">PN-02</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">EXPMT-A</span>
+            <span class="stat">WORKING</span>
+          </div>
+
+          <div class="cell needs active" style="--led: var(--signal); --tag: var(--signal);">
+            <span class="pn">PN-03</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">SDO-AUDIT</span>
+            <span class="stat">PERMIT?</span>
+          </div>
+
+          <div class="cell idle" style="--led: #4a525c; --tag: #7a3aff;">
+            <span class="pn">PN-04</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">DEMO-PREP</span>
+            <span class="stat">IDLE 4M</span>
+          </div>
+
+          <div class="cell idle" style="--led: #4a525c; --tag: #ff6db4;">
+            <span class="pn">PN-05</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">SCRATCH-B</span>
+            <span class="stat">IDLE 28M</span>
+          </div>
+
+          <div class="cell working" style="--led: var(--amber); --tag: #b48cff;">
+            <span class="pn">PN-06</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">API-PROBES</span>
+            <span class="stat">WORKING</span>
+          </div>
+
+          <div class="cell working" style="--led: var(--amber); --tag: var(--honey);">
+            <span class="pn">PN-07</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">PAPER-WIRE</span>
+            <span class="stat">WORKING</span>
+          </div>
+
+          <div class="cell idle" style="--led: #4a525c; --tag: #f0a929;">
+            <span class="pn">PN-08</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">DOCS-IDX</span>
+            <span class="stat">IDLE 58M</span>
+          </div>
+
+          <div class="cell stale" style="--led: #2a2f33; --tag: #5a636b;">
+            <span class="pn">PN-09</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">STAG-DEPLOY</span>
+            <span class="stat">STALE 2H</span>
+          </div>
+
+          <div class="cell stale" style="--led: #2a2f33; --tag: #cc1f3d;">
+            <span class="pn">PN-10</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">PROD-MIG</span>
+            <span class="stat">STALE 5H</span>
+          </div>
+
+          <div class="cell working" style="--led: var(--amber); --tag: #00b3a6;">
+            <span class="pn">PN-11</span>
+            <div class="mini"><span class="ant"></span><span class="d"></span><span class="c"></span><span class="f"></span></div>
+            <span class="name">TAURI-SPK</span>
+            <span class="stat">WORKING</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: notes + terminal -->
+    <section class="right">
+      <div class="notes">
+        <span class="stamp">PERMIT?</span>
+        <h3>Foreman's Note <small>14:28 · BENCH 03</small></h3>
+        <p><span class="tick">✓</span> Bench cleared, unit mounted.</p>
+        <p><span class="tick">✓</span> Read of <i>permset.xml</i> approved.</p>
+        <p><span class="x">✗</span> <b>sf data query</b> — needs your OK.</p>
+        <p>— hits Salesforce; running full audit pull.</p>
+      </div>
+
+      <div class="term-frame">
+        <div class="terminal">
+<pre class="term-pre"><span class="p">&gt;</span> <span class="c">claude</span>
+
+<span class="c">⏺ Mounted on bench. Ready to continue the audit.</span>
+
+<span class="p">&gt;</span> Continue — pull the org's permission sets and diff
+  against the baseline you wrote yesterday.
+
+<span class="c">⏺ I have the baseline at .audit/baseline.json. To pull live
+  permsets I need to run:</span>
+
+<span class="t">  sf data query --query "SELECT Id, Name FROM PermissionSet"
+              --target-org sdo-prod --json</span>
+
+<span class="c">⏺ This isn't on the allow-list (it hits the org). Approve?</span>
+
+<span class="r">  ⎿  [y]es / [n]o / [a]lways for this session</span>
+
+<span class="e">⏺ Awaiting input...</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="caption">19 / WORKSHOP BENCH — exploded schematic of the active droid; parts bin below holds the rest of the floor.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

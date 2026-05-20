@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 21 — Astromech Trench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bay: #0f1214;
+  --bay-2: #161a1d;
+  --steel: #2a2f33;
+  --steel-2: #353a3f;
+  --rivet: #1a1d20;
+  --hairline: #444a50;
+  --ink: #d6dde2;
+  --ink-dim: #8a949c;
+  --ink-mute: #565e66;
+  --honey: #f0a929;
+  --honey-deep: #c47a14;
+  --honey-glow: rgba(240,169,41,0.55);
+  --signal: #ff5a3a;
+  --safe: #6dd2a8;
+  --voltage: #4cb8ff;
+  --violet: #b48cff;
+  --pink: #ff6db4;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--bay);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 38px 1fr 270px 22px;
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  background: linear-gradient(180deg, #2a2f33, #181c1f);
+  border-bottom: 1px solid #050708;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 #0a0c0e;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tb-l { display:flex; align-items:center; gap:14px; }
+.tb-r { display:flex; justify-content:flex-end; align-items:center; gap:14px; color: var(--ink-mute); }
+.lights { display:flex; gap:5px; }
+.lt { width:10px; height:10px; border-radius:50%; background:#0a0c0e;
+  box-shadow: inset 0 0 0 1px #050708, inset 0 -1px 1px rgba(255,255,255,0.04); }
+.lt:nth-child(1) { background: radial-gradient(circle at 35% 35%, #ff6b4a, #5a1a08); }
+.lt:nth-child(2) { background: radial-gradient(circle at 35% 35%, #f0a929, #5a3a08); }
+.lt:nth-child(3) { background: radial-gradient(circle at 35% 35%, #6dd2a8, #1e4a30); }
+.brand { display:flex; align-items:center; gap:9px; font-weight:600; color: var(--ink); letter-spacing: 0.14em; }
+.brand .mark {
+  width:14px; height:14px; border-radius:50% 50% 30% 30%;
+  background: radial-gradient(circle at 35% 30%, #f0a929 0%, #c47a14 60%, #6a4008 100%);
+  box-shadow: 0 0 8px var(--honey-glow), inset 0 -2px 1px rgba(0,0,0,0.4);
+  position: relative;
+}
+.tb-c { color: var(--ink-dim); font-family: var(--mono); }
+.tb-c b { color: var(--ink); }
+
+/* MAIN VIEWPORT — terminal + minimap */
+.viewport {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  min-height: 0;
+  background: var(--bay);
+  border-bottom: 1px solid #050708;
+}
+
+.term-wrap {
+  padding: 14px 16px;
+  min-height: 0;
+}
+.terminal {
+  height: 100%;
+  background: #07090a;
+  border: 1px solid #050708;
+  box-shadow:
+    inset 0 0 0 1px #2a2f33,
+    inset 0 0 80px rgba(76,184,255,0.025),
+    0 6px 24px rgba(0,0,0,0.7);
+  padding: 30px 22px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.term-tag {
+  position: absolute; top: 9px; left: 18px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.18em; color: var(--ink-mute); text-transform: uppercase;
+}
+.term-tag b { color: var(--honey); }
+.term-meta {
+  position: absolute; top: 9px; right: 18px;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.18em; color: var(--ink-mute); text-transform: uppercase;
+  display: flex; gap: 14px;
+}
+.term-meta b { color: var(--ink); }
+.term-pre {
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.7; color: #c8d2da; white-space: pre-wrap;
+}
+.p { color: var(--honey); } .c { color: #e6edf3; }
+.t { color: #6dd2c5; } .r { color: var(--ink-mute); }
+.e { color: #b48cff; }
+.cur { display:inline-block; width:7px; height:13px; background: var(--honey);
+  vertical-align: text-top; animation: cur 1s steps(1) infinite;
+  box-shadow: 0 0 6px var(--honey-glow); }
+@keyframes cur { 50% { opacity: 0; } }
+
+/* MINIMAP — overhead trench radar */
+.minimap {
+  background: linear-gradient(180deg, #131618 0%, #0a0c0e 100%);
+  border-left: 1px solid #050708;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+.mm-head {
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase;
+  display: flex; justify-content: space-between;
+}
+.mm-head b { color: var(--honey); }
+.mm-radar {
+  flex: 1;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(240,169,41,0.04), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 19px, rgba(255,255,255,0.025) 19px 20px),
+    repeating-linear-gradient(90deg, transparent 0 19px, rgba(255,255,255,0.025) 19px 20px),
+    #0a0c0e;
+  border: 1px solid #1a1d20;
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.6);
+}
+.mm-radar::before {
+  content:''; position:absolute; left: 50%; top: 0; bottom: 0;
+  width: 1px; background: rgba(240,169,41,0.18);
+}
+.mm-pip {
+  position: absolute;
+  width: 10px; height: 10px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--pip, var(--honey));
+  box-shadow: 0 0 6px var(--pip, var(--honey-glow));
+}
+.mm-pip::after {
+  content: attr(data-n);
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em;
+  color: var(--ink-dim); white-space: nowrap;
+}
+.mm-pip.dim { background: var(--ink-mute); box-shadow: none; }
+.mm-pip.needs { background: var(--signal); box-shadow: 0 0 10px var(--signal); animation: pulse 0.7s infinite; }
+.mm-pip.active {
+  width: 14px; height: 14px;
+  box-shadow: 0 0 12px var(--honey), 0 0 0 3px rgba(240,169,41,0.18);
+}
+@keyframes pulse { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+.mm-leg {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.12em; color: var(--ink-mute); text-transform: uppercase;
+}
+.mm-leg span { display: flex; align-items: center; gap: 6px; }
+.mm-leg i { width: 6px; height: 6px; border-radius: 50%; }
+
+/* TRENCH — overhead view */
+.trench {
+  background:
+    linear-gradient(180deg, #14181a 0%, #0a0c0e 60%, #050708 100%);
+  border-top: 2px solid #050708;
+  box-shadow: inset 0 1px 0 #444a50, inset 0 6px 14px rgba(0,0,0,0.6);
+  position: relative;
+  padding: 32px 18px 26px 78px;
+  overflow: hidden;
+}
+.trench-head {
+  position: absolute; top: 9px; left: 22px; right: 22px;
+  display: flex; justify-content: space-between;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-mute);
+}
+.trench-head b { color: var(--honey); }
+
+/* left side: track numbers + station marker */
+.station {
+  position: absolute;
+  left: 14px; top: 32px; bottom: 26px;
+  width: 54px;
+  display: flex; flex-direction: column;
+  justify-content: space-around;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.18em; color: var(--ink-mute); text-transform: uppercase;
+  border-right: 1px dashed #2a2f33;
+  padding-right: 8px;
+  text-align: right;
+}
+
+/* the trench rails */
+.trench-rails {
+  position: absolute;
+  left: 78px; right: 22px;
+  top: 32px; bottom: 26px;
+  background:
+    linear-gradient(180deg, #1c2024 0%, #14181a 50%, #0a0c0e 100%);
+  border-top: 1px solid #353a3f;
+  border-bottom: 1px solid #050708;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
+}
+.trench-rails::before, .trench-rails::after {
+  /* horizontal rails */
+  content:''; position: absolute; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #5a636b 8%, #5a636b 92%, transparent);
+  opacity: 0.5;
+}
+.trench-rails::before { top: 22%; }
+.trench-rails::after { bottom: 22%; }
+
+/* tick marks */
+.ticks {
+  position: absolute;
+  left: 78px; right: 22px;
+  bottom: 8px;
+  height: 14px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 39px, #353a3f 39px 40px);
+  font-family: var(--mono); font-size: 8px;
+  color: var(--ink-mute); letter-spacing: 0.14em;
+}
+
+/* lanes container */
+.lanes {
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 6px;
+  padding: 6px 4px;
+}
+.lane {
+  position: relative;
+  background: rgba(255,255,255,0.012);
+  border-top: 1px solid rgba(68,74,80,0.3);
+  border-bottom: 1px solid rgba(68,74,80,0.3);
+}
+.lane-label {
+  position: absolute; left: -64px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.2em; color: var(--ink-mute); text-transform: uppercase;
+}
+.lane-label b { color: var(--ink); display: block; font-size: 11px; }
+
+/* DROID — top-down view */
+.droid {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 62px;
+  cursor: pointer;
+  font-family: var(--mono);
+}
+.droid:hover .chassis { transform: scale(1.04); }
+
+.chassis {
+  position: relative;
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #353a3f 0%, #2a2f33 40%, #14181a 100%);
+  box-shadow:
+    inset 0 0 0 1px #050708,
+    inset 0 0 0 4px #1a1d20,
+    inset 0 0 14px rgba(0,0,0,0.7),
+    0 4px 10px rgba(0,0,0,0.6);
+  transition: transform 0.18s ease;
+}
+/* central dome lens */
+.chassis::before {
+  content:''; position: absolute; left: 50%; top: 50%;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, #5a636b, #1a1d20 70%);
+  box-shadow: inset 0 0 0 1px #050708;
+}
+/* eye light on lens */
+.chassis::after {
+  content:''; position: absolute; left: 50%; top: 50%;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--led, var(--honey));
+  box-shadow: 0 0 8px var(--led, var(--honey-glow));
+}
+/* ring of 6 mini-LEDs around dome */
+.ring {
+  position: absolute; inset: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.ring i {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--led-side, var(--ink-mute));
+  box-shadow: 0 0 4px var(--led-side, transparent);
+  left: 50%; top: 50%;
+  margin: -2px 0 0 -2px;
+  --r: 22px;
+}
+.ring i:nth-child(1) { transform: rotate(0deg) translateY(calc(-1 * var(--r))); }
+.ring i:nth-child(2) { transform: rotate(60deg) translateY(calc(-1 * var(--r))); }
+.ring i:nth-child(3) { transform: rotate(120deg) translateY(calc(-1 * var(--r))); }
+.ring i:nth-child(4) { transform: rotate(180deg) translateY(calc(-1 * var(--r))); }
+.ring i:nth-child(5) { transform: rotate(240deg) translateY(calc(-1 * var(--r))); }
+.ring i:nth-child(6) { transform: rotate(300deg) translateY(calc(-1 * var(--r))); }
+
+/* status colors */
+.droid.working { --led: var(--honey); --led-side: var(--safe); }
+.droid.working .chassis::after { animation: pulse 1.6s infinite; }
+.droid.idle { --led: #2a2f33; --led-side: #1a1d20; }
+.droid.idle .chassis::after { box-shadow: none; }
+.droid.idle .chassis { opacity: 0.85; }
+.droid.stale { --led: #1a1d20; --led-side: #1a1d20; opacity: 0.55; }
+.droid.needs { --led: var(--signal); --led-side: var(--signal); }
+.droid.needs .chassis::after { animation: pulse 0.7s infinite; }
+.droid.active .chassis {
+  box-shadow:
+    inset 0 0 0 1px var(--honey),
+    inset 0 0 0 4px #1a1d20,
+    inset 0 0 14px rgba(0,0,0,0.7),
+    0 0 0 2px rgba(240,169,41,0.4),
+    0 4px 16px rgba(240,169,41,0.3);
+}
+
+/* color tag stripe — wedge across chassis */
+.tagstripe {
+  position: absolute; left: 50%; top: 50%;
+  width: 62px; height: 6px;
+  background: var(--tag, var(--honey));
+  box-shadow: 0 0 6px var(--tag, var(--honey-glow));
+  transform: translate(-50%, -50%) rotate(35deg);
+  opacity: 0.9;
+  pointer-events: none;
+  border-radius: 1px;
+}
+
+/* slot index badge */
+.slot {
+  position: absolute;
+  bottom: -22px; left: 50%; transform: translateX(-50%);
+  font-size: 8.5px; letter-spacing: 0.18em;
+  color: var(--ink-dim); text-transform: uppercase;
+  white-space: nowrap;
+  text-align: center;
+}
+.slot b { display: block; color: var(--ink); font-size: 9px; }
+.droid.needs .slot b { color: var(--signal); }
+
+.callout-active {
+  position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+  font-size: 8px; letter-spacing: 0.22em; color: var(--honey);
+  text-transform: uppercase;
+}
+
+/* heading stripe under each droid (motion vector) */
+.vector {
+  position: absolute;
+  bottom: -2px; left: 50%; transform: translateX(-50%);
+  width: 70px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--led, var(--honey)) 50%, transparent);
+  opacity: 0.4;
+}
+.droid.idle .vector, .droid.stale .vector { opacity: 0; }
+
+/* deploy slot */
+.deploy {
+  position: absolute; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 62px; height: 62px; border-radius: 50%;
+  border: 1px dashed #353a3f;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-family: var(--mono); color: var(--ink-mute);
+  cursor: pointer;
+}
+.deploy:hover { border-color: var(--honey); color: var(--honey); }
+
+/* FOOT */
+.foot {
+  background: linear-gradient(180deg, #0c0e10, #050708);
+  border-top: 1px solid #1a1d20;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.16em; color: var(--ink-mute); text-transform: uppercase;
+}
+.foot .right { margin-left: auto; }
+.foot .live::before {
+  content:''; display:inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--honey); box-shadow: 0 0 6px var(--honey); margin-right: 6px;
+  animation: pulse 1.2s infinite;
+}
+
+.caption {
+  position: fixed;
+  bottom: 28px; right: 18px;
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.18em; color: var(--ink-mute); text-transform: uppercase;
+  pointer-events: none;
+}
+.caption b { color: var(--honey); }
+.back {
+  position: fixed; top: 9px; right: 14px; z-index: 20;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-mute); text-decoration: none;
+  background: #0a0c0e; border: 1px solid #2a2f33; padding: 4px 9px;
+}
+.back:hover { color: var(--honey); border-color: var(--honey); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TITLE -->
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span class="lt"></span><span class="lt"></span><span class="lt"></span></div>
+      <div class="brand"><span class="mark"></span>MULTICLAUDE · TRENCH-A</div>
+    </div>
+    <div class="tb-c">~/work / <b>multiclaude-hub</b> · overhead view</div>
+    <div class="tb-r">
+      <span>10 UNITS · 2 LANES</span>
+      <span style="color:var(--honey);">⌘N DEPLOY</span>
+    </div>
+  </div>
+
+  <!-- VIEWPORT: terminal + radar minimap -->
+  <div class="viewport">
+    <div class="term-wrap">
+      <div class="terminal">
+        <div class="term-tag">UNIT <b>R2-MC</b> · LANE A · POS 04</div>
+        <div class="term-meta">
+          <span>OPUS <b>4.7</b></span>
+          <span>EFFORT <b style="color:var(--honey);">MAX</b></span>
+          <span>CTX <b>47%</b></span>
+          <span>UPTIME <b>04:21:08</b></span>
+        </div>
+<pre class="term-pre"><span class="p">&gt;</span> <span class="c">claude</span>
+
+<span class="c">⏺ Welcome back. What are we wiring up?</span>
+
+<span class="p">&gt;</span> Render the trench overhead with droid pips on a 2-lane track
+
+<span class="c">⏺ Mapping each session to (lane, position) and rendering chassis as
+  top-down circles. Lane A = WORKING/NEEDS, Lane B = IDLE/STALE.</span>
+
+<span class="t">⏺ Bash(rg "lane" src/trench/ -n)</span>
+  <span class="r">⎿  src/trench/Trench.tsx:14:  const lanes = group(sessions, by.status)
+     src/trench/Droid.tsx:22:   <Chassis status={s.status}/>
+     src/trench/radar.css:6:    .mm-pip { ... }</span>
+
+<span class="c">⏺ The minimap radar mirrors the trench 1:1 — pips share x-position.
+  Hover a pip → corresponding chassis lifts. Clicking either focuses
+  the diagnostic feed here.</span>
+
+<span class="e">⏺ Edit(src/trench/Trench.tsx)</span>
+  <span class="r">⎿  Synced lane positions between trench + radar
+     Active unit highlighted with honey ring (chassis + pip)
+     Empty lane B slot 06 reserved for ⌘N deploy</span>
+
+<span class="c">⏺ Done. Try clicking pip 7 on the radar — it pans the trench focus.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+      </div>
+    </div>
+
+    <!-- RADAR MINIMAP -->
+    <aside class="minimap">
+      <div class="mm-head">
+        <span>RADAR · OVERHEAD</span>
+        <b>10 PIP</b>
+      </div>
+      <div class="mm-radar">
+        <!-- pips at varied lane (top/bot) and pos (left/right %) -->
+        <span class="mm-pip" style="left:8%; top:30%; --pip:var(--honey);" data-n="01·CLAUDE-CLI"></span>
+        <span class="mm-pip dim" style="left:18%; top:74%;" data-n="02·DEMO-PREP"></span>
+        <span class="mm-pip" style="left:30%; top:32%; --pip:var(--safe);" data-n="03·EXPMT-A"></span>
+        <span class="mm-pip needs" style="left:42%; top:28%;" data-n="04·SDO-AUDIT"></span>
+        <span class="mm-pip active" style="left:56%; top:30%;" data-n="05·R2-MC"></span>
+        <span class="mm-pip dim" style="left:65%; top:72%;" data-n="06·SCRATCH-B"></span>
+        <span class="mm-pip" style="left:74%; top:32%; --pip:var(--voltage);" data-n="07·API-PROBES"></span>
+        <span class="mm-pip dim" style="left:82%; top:74%;" data-n="08·DOCS-IDX"></span>
+        <span class="mm-pip" style="left:90%; top:30%; --pip:var(--violet);" data-n="09·PAPER-WIRE"></span>
+        <span class="mm-pip" style="left:50%; top:74%; --pip:#5a636b; opacity:0.5;" data-n="10·STAG-DEPLOY"></span>
+      </div>
+      <div class="mm-leg">
+        <span><i style="background:var(--honey);box-shadow:0 0 4px var(--honey);"></i>WORKING</span>
+        <span><i style="background:var(--signal);box-shadow:0 0 4px var(--signal);"></i>NEEDS YOU</span>
+        <span><i style="background:var(--ink-mute);"></i>IDLE</span>
+        <span><i style="background:#3a3f44;"></i>STALE</span>
+      </div>
+    </aside>
+  </div>
+
+  <!-- TRENCH OVERHEAD -->
+  <section class="trench">
+    <div class="trench-head">
+      <span>TRENCH · LANE A / LANE B · TOP-DOWN</span>
+      <b>POS 00 → 99 · ⌥1/⌥2 SWAP LANE</b>
+    </div>
+
+    <div class="station">
+      <div>LANE A<br><span style="color:var(--honey);">▲ HOT</span></div>
+      <div>LANE B<br><span style="color:var(--ink-mute);">▼ COOL</span></div>
+    </div>
+
+    <div class="trench-rails"></div>
+
+    <div class="lanes">
+      <!-- LANE A (top): WORKING / NEEDS -->
+      <div class="lane">
+
+        <div class="droid working" style="left:8%; --tag:#3a7afe;">
+          <span class="callout-active"></span>
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span>
+          <span class="vector"></span>
+          <span class="slot">A·01<br><b>CLAUDE-CLI</b></span>
+        </div>
+
+        <div class="droid working" style="left:22%; --tag:#6dd2c5;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span><span class="vector"></span>
+          <span class="slot">A·02<br><b>EXPMT-A</b></span>
+        </div>
+
+        <div class="droid needs" style="left:38%; --tag:#ff5a3a;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span><span class="vector"></span>
+          <span class="slot">A·03<br><b>SDO-AUDIT</b></span>
+        </div>
+
+        <div class="droid working active" style="left:54%; --tag:#f0a929;">
+          <span class="callout-active">▼ FOCUS</span>
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span><span class="vector"></span>
+          <span class="slot">A·04<br><b>R2-MC</b></span>
+        </div>
+
+        <div class="droid working" style="left:70%; --tag:#4cb8ff;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span><span class="vector"></span>
+          <span class="slot">A·05<br><b>API-PROBES</b></span>
+        </div>
+
+        <div class="droid working" style="left:88%; --tag:#b48cff;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe"></span><span class="vector"></span>
+          <span class="slot">A·06<br><b>PAPER-WIRE</b></span>
+        </div>
+
+      </div>
+
+      <!-- LANE B (bottom): IDLE / STALE -->
+      <div class="lane">
+
+        <div class="droid idle" style="left:14%; --tag:#7a3aff;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe" style="opacity:0.5;"></span>
+          <span class="slot">B·01<br><b>DEMO-PREP</b></span>
+        </div>
+
+        <div class="droid idle" style="left:30%; --tag:#ff2d92;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe" style="opacity:0.5;"></span>
+          <span class="slot">B·02<br><b>SCRATCH-B</b></span>
+        </div>
+
+        <div class="droid idle" style="left:46%; --tag:#8a6a1a;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe" style="opacity:0.5;"></span>
+          <span class="slot">B·03<br><b>DOCS-IDX</b></span>
+        </div>
+
+        <div class="deploy" style="left:62%;" title="Deploy unit (⌘N)">+</div>
+
+        <div class="droid stale" style="left:80%; --tag:#5a636b;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe" style="opacity:0.4;"></span>
+          <span class="slot">B·05<br><b>STAG-DEPLOY</b></span>
+        </div>
+
+        <div class="droid stale" style="left:94%; --tag:#5a636b;">
+          <div class="chassis"><span class="ring"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+          <span class="tagstripe" style="opacity:0.4;"></span>
+          <span class="slot">B·06<br><b>OLD-SPIKE</b></span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="ticks"></div>
+  </section>
+
+  <div class="foot">
+    <span class="live">TRENCH LIVE</span>
+    <span>10 UNITS</span>
+    <span style="color:var(--honey);">·</span>
+    <span style="color:var(--safe);">WORKING 6</span>
+    <span style="color:var(--signal);">NEEDS 1</span>
+    <span style="color:var(--ink-dim);">IDLE 3</span>
+    <span style="color:var(--ink-mute);">STALE 2</span>
+    <span class="right">REV 2026.05.19 · ⌥R RECENTER · ⌘N DEPLOY</span>
+  </div>
+</div>
+
+<div class="caption"><b>21 ·</b> ASTROMECH TRENCH — bay rotated overhead; droids as top-down chassis on two lanes, mirrored on a side radar.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

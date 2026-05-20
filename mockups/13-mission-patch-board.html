@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 13 — Mission Patch Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Cork/felt board with NASA-flightroom influence + bee/droid amber */
+  --felt-deep:      #1c2326;       /* dark navy-slate felt */
+  --felt-mid:       #232b2f;
+  --felt-light:     #2a3438;
+  --board-frame:    #0d1214;
+  --metal-rim:      #2a2d31;
+  --metal-rim-2:    #4a4f55;
+
+  --amber:          #f4a72b;       /* bee amber */
+  --amber-deep:     #c47200;
+  --amber-soft:     rgba(244,167,43,0.18);
+  --hive-cream:     #f1e7d6;
+
+  --signal-green:   #4ec97a;
+  --signal-red:     #e0524a;
+  --signal-yellow:  #ffb420;
+  --signal-grey:    #6a737a;
+  --signal-cyan:    #5cc4d8;
+  --signal-violet:  #a487e0;
+  --signal-rose:    #e08a9e;
+  --signal-blue:    #6da2e0;
+
+  --ink:            #e8ebed;
+  --ink-dim:        #9aa3a8;
+  --ink-faint:      #6a737a;
+
+  --thread-gold:    #d9b04a;       /* embroidery thread */
+  --thread-cream:   #ddd2b6;
+
+  --terminal-bg:    #0e1316;
+
+  --font-display: 'Space Grotesk', Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font-display);
+  background: var(--board-frame);
+  color: var(--ink);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 38px 1fr;
+  grid-template-columns: 1fr 480px;
+  grid-template-areas:
+    "title title"
+    "stage board";
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  grid-area: title;
+  background: linear-gradient(180deg, #1a2024 0%, #11161a 100%);
+  border-bottom: 1px solid #050709;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+.tl-left { display: flex; align-items: center; gap: 14px; }
+.dots { display: flex; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; background: #1a2024; box-shadow: inset 0 0 0 1px #000; }
+.dot.r { background: #c8523e; }
+.dot.y { background: #d8a82a; }
+.dot.g { background: #4e9c5e; }
+.brand {
+  display: flex; gap: 9px; align-items: center;
+  font-family: var(--font-display);
+  color: var(--amber);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+.brand-mark {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffce5e 0%, var(--amber) 50%, var(--amber-deep) 100%);
+  box-shadow: 0 0 8px rgba(244,167,43,0.45), inset 0 0 0 1px rgba(0,0,0,0.4);
+}
+.tl-center { font-family: var(--font-mono); }
+.tl-center .sep { color: #3b4549; margin: 0 8px; }
+.tl-center .active { color: var(--amber); }
+.tl-right { display: flex; justify-content: flex-end; gap: 18px; align-items: center; }
+.tl-stat { display: flex; align-items: center; gap: 6px; }
+.led-tiny { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 4px currentColor; }
+.led-tiny.ok { background: var(--signal-green); color: var(--signal-green); }
+.led-tiny.warn { background: var(--signal-yellow); color: var(--signal-yellow); }
+
+/* STAGE / TERMINAL */
+.stage {
+  grid-area: stage;
+  display: flex; flex-direction: column;
+  background: var(--terminal-bg);
+  overflow: hidden;
+  border-right: 1px solid #050709;
+}
+.stage-head {
+  height: 64px;
+  background: linear-gradient(180deg, #161c20 0%, #10151a 100%);
+  border-bottom: 1px solid #050709;
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 0 22px;
+}
+
+/* Active patch — circular embroidered emblem (a stylized droid bee) */
+.active-patch {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 30%, #2a3034 0%, #1a1f23 70%),
+    var(--felt-mid);
+  box-shadow:
+    inset 0 0 0 2px var(--thread-gold),
+    inset 0 0 0 3px #1a1206,
+    inset 0 0 0 5px var(--thread-cream),
+    0 0 0 1px #000,
+    0 0 14px rgba(244,167,43,0.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.active-patch::before {
+  content: 'F-04';
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--thread-gold);
+  bottom: 4px;
+  text-shadow: 0 0 1px #000;
+}
+.active-patch .glyph {
+  /* small bee silhouette */
+  width: 22px; height: 22px;
+  margin-top: -6px;
+  background:
+    radial-gradient(ellipse at 50% 50%, var(--amber) 0 38%, transparent 39%),
+    repeating-linear-gradient(90deg, var(--amber) 0 3px, #2a1500 3px 5px);
+  border-radius: 50%;
+  position: relative;
+}
+.active-patch .glyph::after {
+  /* wings */
+  content: '';
+  position: absolute;
+  top: -3px; left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 8px;
+  background:
+    radial-gradient(ellipse at 25% 60%, rgba(220,235,240,0.85) 0 4px, transparent 5px),
+    radial-gradient(ellipse at 75% 60%, rgba(220,235,240,0.85) 0 4px, transparent 5px);
+}
+.stage-id {
+  font-family: var(--font-display);
+}
+.stage-id .name {
+  font-size: 16px; font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+.stage-id .meta {
+  display: flex; gap: 14px;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.stage-id .meta b { color: var(--ink-dim); font-weight: 600; }
+.stage-id .meta .ok { color: var(--signal-green); }
+
+.stage-actions { display: flex; gap: 6px; }
+.icon-btn {
+  width: 32px; height: 32px;
+  background: #0d1216;
+  border: 1px solid #1f262b;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { color: var(--amber); border-color: var(--amber-deep); }
+
+.terminal {
+  flex: 1;
+  padding: 22px 26px 26px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.65;
+  color: #cfd6db;
+}
+.term-line { white-space: pre-wrap; word-break: break-word; }
+.term-prompt { color: var(--amber); }
+.term-user { color: #6dc5ff; }
+.term-assistant { color: #cfd6db; }
+.term-tool { color: #c9b990; }
+.term-dim { color: var(--ink-faint); }
+.term-ok { color: var(--signal-green); }
+.term-warn { color: var(--signal-yellow); }
+.term-cursor { display: inline-block; width: 8px; height: 15px; background: var(--amber); vertical-align: -2px; animation: cursorBlink 1s step-end infinite; box-shadow: 0 0 6px rgba(244,167,43,0.6); }
+@keyframes cursorBlink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
+
+/* ============= MISSION PATCH BOARD ============= */
+.board {
+  grid-area: board;
+  position: relative;
+  background:
+    /* felt fiber texture */
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,0.02) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 30%, rgba(255,255,255,0.02) 0 1px, transparent 2px),
+    radial-gradient(circle at 40% 60%, rgba(255,255,255,0.02) 0 1px, transparent 2px),
+    radial-gradient(circle at 85% 75%, rgba(255,255,255,0.02) 0 1px, transparent 2px),
+    radial-gradient(circle at 30% 85%, rgba(255,255,255,0.02) 0 1px, transparent 2px),
+    repeating-linear-gradient(45deg,
+      rgba(0,0,0,0.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg,
+      rgba(0,0,0,0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, var(--felt-mid) 0%, var(--felt-deep) 100%);
+  border-left: 4px solid var(--board-frame);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.board::before {
+  /* metal rim shadow inside the frame */
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.6),
+    inset 0 0 0 2px rgba(255,255,255,0.02),
+    inset 0 0 60px rgba(0,0,0,0.5);
+}
+
+.board-head {
+  position: relative;
+  z-index: 1;
+  padding: 14px 20px 10px;
+  border-bottom: 1px dashed rgba(244,167,43,0.18);
+}
+.board-head h2 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+.board-head .sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  display: flex; gap: 14px; flex-wrap: wrap;
+}
+.board-head .sub b { color: var(--ink-dim); font-weight: 600; }
+
+.legend {
+  display: flex; gap: 14px;
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  flex-wrap: wrap;
+}
+.legend .lg { display: flex; align-items: center; gap: 6px; }
+.legend .ring {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid var(--c, var(--signal-grey));
+  background: transparent;
+}
+
+.patches {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 8px;
+  align-content: start;
+}
+.patches::-webkit-scrollbar { width: 8px; }
+.patches::-webkit-scrollbar-thumb { background: #11161a; border-radius: 4px; }
+
+/* PATCH = one session */
+.patch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding-top: 18px;
+}
+.patch::before {
+  /* pushpin */
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #f6c270 0%, var(--amber) 50%, var(--amber-deep) 100%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.3) inset,
+    0 -1px 1px rgba(0,0,0,0.4) inset,
+    0 2px 3px rgba(0,0,0,0.6);
+  z-index: 3;
+}
+.patch::after {
+  /* pin shadow on the felt */
+  content: '';
+  position: absolute;
+  top: 8px; left: calc(50% + 6px);
+  width: 28px; height: 4px;
+  background: rgba(0,0,0,0.35);
+  filter: blur(2px);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.emblem {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 28%, #303a40 0%, #1c2428 70%);
+  box-shadow:
+    /* outer thread ring */
+    inset 0 0 0 2px var(--ring, var(--signal-grey)),
+    /* dark groove */
+    inset 0 0 0 3px #0a0d0f,
+    /* inner cream stitching ring */
+    inset 0 0 0 5px var(--thread-cream),
+    /* outer crisp edge */
+    0 0 0 1px #000,
+    /* drop shadow on felt */
+    0 6px 14px rgba(0,0,0,0.55),
+    0 1px 2px rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease;
+}
+.patch:hover .emblem { transform: rotate(-2deg); }
+
+.emblem-inner {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: var(--inner, #1a2024);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.emblem-inner::before {
+  /* faint stripe pattern — bee abdomen reference */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(244,167,43,0.08) 0 4px,
+      transparent 4px 12px);
+  opacity: 0.6;
+}
+.emblem-callsign {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--thread-cream);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 0 #000;
+}
+.emblem-num {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ring, var(--signal-grey));
+  position: relative;
+  z-index: 2;
+  margin-top: -2px;
+  letter-spacing: 0.02em;
+}
+.emblem-glyph {
+  /* small motif: hex/star/etc. inside patch */
+  position: absolute;
+  bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  color: var(--thread-gold);
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+/* status indicator: a tiny LED in the patch's lower-right rim */
+.emblem-led {
+  position: absolute;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  bottom: 4px; right: 4px;
+  background: var(--led, var(--signal-grey));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -1px 1px rgba(0,0,0,0.4),
+    0 0 0 2px #0a0d0f,
+    0 0 8px var(--led-glow, transparent);
+  z-index: 3;
+}
+.emblem-led.working { animation: pulse 1.6s ease-in-out infinite; }
+.emblem-led.needs { animation: blink 0.9s steps(2) infinite; }
+@keyframes pulse { 0%,100% { filter: brightness(1);} 50% { filter: brightness(1.4);} }
+@keyframes blink { 0%, 50% { filter: brightness(1.6);} 50.01%, 100% { filter: brightness(0.5);} }
+
+.patch-label {
+  margin-top: 8px;
+  text-align: center;
+  width: 130px;
+}
+.patch-label .title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.patch-label .repo {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--ink-faint);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.04em;
+}
+.patch-label .stamp {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  color: var(--ring, var(--signal-grey));
+  font-weight: 600;
+}
+
+.patch.active .emblem {
+  box-shadow:
+    inset 0 0 0 2px var(--amber),
+    inset 0 0 0 3px #1a1206,
+    inset 0 0 0 5px var(--thread-cream),
+    0 0 0 1px #000,
+    0 0 0 4px rgba(244,167,43,0.18),
+    0 8px 18px rgba(0,0,0,0.6),
+    0 0 26px rgba(244,167,43,0.25);
+  transform: rotate(0deg);
+}
+.patch.active .emblem-num { color: var(--amber); }
+.patch.active .patch-label .stamp { color: var(--amber); }
+
+/* board footer */
+.board-foot {
+  position: relative;
+  z-index: 1;
+  height: 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18px;
+  border-top: 1px dashed rgba(244,167,43,0.18);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.add-mission {
+  background: var(--amber);
+  color: #2a1500;
+  border: none;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.add-mission:hover { background: #ffce5e; }
+
+.caption {
+  position: absolute;
+  bottom: 8px; left: 18px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4a525a;
+  pointer-events: none;
+  z-index: 5;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="tl-left">
+      <div class="dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+      <div class="brand"><span class="brand-mark"></span><span>MULTICLAUDE</span></div>
+    </div>
+    <div class="tl-center">
+      Fleet Roster <span class="sep">/</span> Patch <span class="active">F-04 · DRONE-ONE</span> <span class="sep">/</span> stripe-checkout-refactor
+    </div>
+    <div class="tl-right">
+      <span class="tl-stat"><span class="led-tiny ok"></span>9 active</span>
+      <span class="tl-stat"><span class="led-tiny warn"></span>2 need you</span>
+      <span>14:32:08</span>
+    </div>
+  </div>
+
+  <!-- STAGE -->
+  <main class="stage">
+    <div class="stage-head">
+      <div class="active-patch">
+        <span class="glyph"></span>
+      </div>
+      <div class="stage-id">
+        <div class="name">DRONE-ONE · stripe-checkout-refactor</div>
+        <div class="meta">
+          <span>STATUS <b class="ok">WORKING</b></span>
+          <span>PATH <b>~/work/billing/checkout-svc</b></span>
+          <span>TOKENS <b>14.2K</b></span>
+          <span>LAST EDIT <b>0:03 AGO</b></span>
+        </div>
+      </div>
+      <div class="stage-actions">
+        <button class="icon-btn" title="Search scrollback">/</button>
+        <button class="icon-btn" title="Edit patch">✎</button>
+        <button class="icon-btn" title="Detach">⤴</button>
+      </div>
+    </div>
+    <div class="terminal">
+<div class="term-line term-dim">────  patch F-04 · drone-one · pty 0x4a · claude-3.7-sonnet  ────</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line"><span class="term-prompt">▸</span> <span class="term-user">refactor checkout to use idempotency keys for the stripe payment_intent flow.
+  every retry from the client should be safe — same outcome, no double charges.</span></div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-assistant">I'll trace the call sites first so the keys are scoped correctly.</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-tool">● Grep <span class="term-dim">pattern: "payment_intents.create"</span></div>
+<div class="term-line term-dim">  ⎿  4 matches across 3 files</div>
+<div class="term-line term-dim">     services/checkout/charge.ts:42</div>
+<div class="term-line term-dim">     services/checkout/charge.ts:118</div>
+<div class="term-line term-dim">     services/checkout/retry.ts:27</div>
+<div class="term-line term-dim">     services/billing/subscription.ts:204</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-tool">● Read <span class="term-dim">services/checkout/charge.ts</span></div>
+<div class="term-line term-dim">  ⎿  Read 168 lines</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-assistant">The charge handler doesn't pass an idempotency key today — Stripe's SDK
+will accept one through the second argument <span style="color:#f4a72b">{idempotencyKey}</span>. The natural
+key is the cart's checkout-session id, which is already deterministic.</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-tool">● Edit <span class="term-dim">services/checkout/charge.ts</span></div>
+<div class="term-line term-dim">  ⎿  +6 / -2 lines</div>
+<div class="term-line term-ok">  ✓ patch applied</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-tool">● Bash <span class="term-dim">pnpm test charge.spec.ts</span></div>
+<div class="term-line term-dim">  ⎿  running 14 specs…</div>
+<div class="term-line term-ok">  ✓ 14 passed in 2.41s</div>
+<div class="term-line">&nbsp;</div>
+<div class="term-line term-assistant">Keys wired in <span style="color:#f4a72b">charge.ts</span>. Doing the same in <span style="color:#f4a72b">retry.ts</span> next so the
+retry path reuses the original key instead of minting a new one<span class="term-cursor"></span></div>
+    </div>
+  </main>
+
+  <!-- BOARD -->
+  <aside class="board">
+    <div class="board-head">
+      <h2>FLEET ROSTER</h2>
+      <div class="sub">
+        <span><b>11</b> Patches</span>
+        <span><b>9</b> Working</span>
+        <span><b>2</b> Need You</span>
+      </div>
+      <div class="legend">
+        <span class="lg"><span class="ring" style="--c: #4ec97a"></span>Working</span>
+        <span class="lg"><span class="ring" style="--c: #ffb420"></span>Needs You</span>
+        <span class="lg"><span class="ring" style="--c: #6a737a"></span>Idle</span>
+        <span class="lg"><span class="ring" style="--c: #e0524a"></span>Stale</span>
+      </div>
+    </div>
+
+    <div class="patches">
+
+      <!-- PATCH 1 -->
+      <div class="patch" style="--ring: #4ec97a; --led: #4ec97a; --led-glow: rgba(78,201,122,0.7);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #1c2630;">
+            <span class="emblem-callsign">API-GATE</span>
+            <span class="emblem-num">F-01</span>
+            <span class="emblem-glyph">· auth ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">api-gateway</div>
+          <div class="repo">platform-core/api-gateway</div>
+          <div class="stamp">WORKING · 0:14</div>
+        </div>
+      </div>
+
+      <!-- PATCH 2 — needs you -->
+      <div class="patch" style="--ring: #ffb420; --led: #ffb420; --led-glow: rgba(255,180,32,0.8);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #2a2418;">
+            <span class="emblem-callsign">CUTOVER</span>
+            <span class="emblem-num">F-02</span>
+            <span class="emblem-glyph">· db migr ·</span>
+          </div>
+          <span class="emblem-led needs"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">migration-runbook</div>
+          <div class="repo">db-migration/scripts</div>
+          <div class="stamp">NEEDS YOU · 2m</div>
+        </div>
+      </div>
+
+      <!-- PATCH 3 — needs you -->
+      <div class="patch" style="--ring: #ffb420; --led: #ffb420; --led-glow: rgba(255,180,32,0.8);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #2a2418;">
+            <span class="emblem-callsign">TRIAGE</span>
+            <span class="emblem-num">F-03</span>
+            <span class="emblem-glyph">· support ·</span>
+          </div>
+          <span class="emblem-led needs"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">support-tooling</div>
+          <div class="repo">side/support-cli</div>
+          <div class="stamp">NEEDS YOU · 5m</div>
+        </div>
+      </div>
+
+      <!-- PATCH 4 — ACTIVE -->
+      <div class="patch active" style="--ring: #f4a72b; --led: #4ec97a; --led-glow: rgba(78,201,122,0.7);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #2a2010;">
+            <span class="emblem-callsign">DRONE-ONE</span>
+            <span class="emblem-num">F-04</span>
+            <span class="emblem-glyph">· billing ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">stripe-checkout-refactor</div>
+          <div class="repo">billing/checkout-svc</div>
+          <div class="stamp">WORKING · 0:03</div>
+        </div>
+      </div>
+
+      <!-- PATCH 5 -->
+      <div class="patch" style="--ring: #4ec97a; --led: #4ec97a; --led-glow: rgba(78,201,122,0.6);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #182028;">
+            <span class="emblem-callsign">COHORT</span>
+            <span class="emblem-num">F-05</span>
+            <span class="emblem-glyph">· dbt ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">growth-dashboard</div>
+          <div class="repo">analytics/dbt-models</div>
+          <div class="stamp">WORKING · 0:22</div>
+        </div>
+      </div>
+
+      <!-- PATCH 6 -->
+      <div class="patch" style="--ring: #a487e0; --led: #4ec97a; --led-glow: rgba(78,201,122,0.6);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #1f1a28;">
+            <span class="emblem-callsign">VPC</span>
+            <span class="emblem-num">F-06</span>
+            <span class="emblem-glyph">· tf ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">infra-terraform</div>
+          <div class="repo">infra/networking</div>
+          <div class="stamp">WORKING · 0:41</div>
+        </div>
+      </div>
+
+      <!-- PATCH 7 — idle -->
+      <div class="patch" style="--ring: #6a737a; --led: #6a737a;">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #1a1f23;">
+            <span class="emblem-callsign">PRICING</span>
+            <span class="emblem-num">F-07</span>
+            <span class="emblem-glyph">· web ·</span>
+          </div>
+          <span class="emblem-led"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">marketing-site</div>
+          <div class="repo">web/marketing</div>
+          <div class="stamp">IDLE · 12m</div>
+        </div>
+      </div>
+
+      <!-- PATCH 8 -->
+      <div class="patch" style="--ring: #5cc4d8; --led: #4ec97a; --led-glow: rgba(78,201,122,0.6);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #15252a;">
+            <span class="emblem-callsign">PUSH-IOS</span>
+            <span class="emblem-num">F-08</span>
+            <span class="emblem-glyph">· mobile ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">mobile-ios</div>
+          <div class="repo">mobile/ios-app</div>
+          <div class="stamp">WORKING · 0:08</div>
+        </div>
+      </div>
+
+      <!-- PATCH 9 — stale -->
+      <div class="patch" style="--ring: #e0524a; --led: #e0524a;">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #28181a;">
+            <span class="emblem-callsign">PHP-PORT</span>
+            <span class="emblem-num">F-09</span>
+            <span class="emblem-glyph">· legacy ·</span>
+          </div>
+          <span class="emblem-led"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">legacy-php-port</div>
+          <div class="repo">legacy/php-port</div>
+          <div class="stamp">STALE · 3h</div>
+        </div>
+      </div>
+
+      <!-- PATCH 10 -->
+      <div class="patch" style="--ring: #e08a9e; --led: #4ec97a; --led-glow: rgba(78,201,122,0.6);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #2a1c20;">
+            <span class="emblem-callsign">AIRFLOW</span>
+            <span class="emblem-num">F-10</span>
+            <span class="emblem-glyph">· dags ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">data-pipeline</div>
+          <div class="repo">data-platform/dags</div>
+          <div class="stamp">WORKING · 0:19</div>
+        </div>
+      </div>
+
+      <!-- PATCH 11 -->
+      <div class="patch" style="--ring: #6da2e0; --led: #4ec97a; --led-glow: rgba(78,201,122,0.6);">
+        <div class="emblem">
+          <div class="emblem-inner" style="--inner: #181e2a;">
+            <span class="emblem-callsign">HANDBOOK</span>
+            <span class="emblem-num">F-11</span>
+            <span class="emblem-glyph">· docs ·</span>
+          </div>
+          <span class="emblem-led working"></span>
+        </div>
+        <div class="patch-label">
+          <div class="title">internal-docs</div>
+          <div class="repo">docs/handbook</div>
+          <div class="stamp">WORKING · 0:33</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="board-foot">
+      <span>11 PATCHES · ROSTER A</span>
+      <button class="add-mission">+ NEW PATCH</button>
+    </div>
+
+    <span class="caption">13 / Mission Patch Board — each session is an embroidered emblem with call-sign, status ring, and pin.</span>
+  </aside>
+
+</div>
+</body>
+</html>

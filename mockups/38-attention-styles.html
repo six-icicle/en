@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="en" data-theme="rose-pine-alt">
+<head>
+<meta charset="utf-8" />
+<title>multiclaude — attention pulse styles</title>
+<style>
+  /* ─── Theme tokens (rose-pine-alt default) ─── */
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #312e4a;
+    --line: #393552;
+    --line-2: #44415a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a4660;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.35);
+    --ok: #9ccfd8;
+    --warn: #eb6f92;
+    --sheen: rgba(224, 222, 244, 0.022);
+    --fz: 1;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body {
+    min-height: 100vh;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ─── Page header ─── */
+  .head {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .head .title b { color: var(--accent); font-weight: 500; }
+  .head .sep { color: var(--ink-4); }
+  .switcher { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .switcher button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    padding: 0;
+  }
+  .switcher button[data-set="kanagawa"]      { background: #c0a36e; }
+  .switcher button[data-set="everforest"]    { background: #a7c080; }
+  .switcher button[data-set="rose-pine"]     { background: #ea9a97; }
+  .switcher button[data-set="rose-pine-alt"] { background: #ea9a97; box-shadow: inset 0 0 0 2px #312e4a; }
+  .switcher button[data-set="original"]      { background: #f0a929; }
+  .switcher button[data-active="true"] {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .switcher button[data-active="true"][data-set="rose-pine-alt"] {
+    box-shadow: inset 0 0 0 2px #312e4a, 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+
+  /* ─── Grid ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+    flex: 1;
+  }
+
+  /* ─── Tile (mirrors App.css .tile) ─── */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    min-height: 240px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .label-pill {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    z-index: 6;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .label-pill b { color: var(--accent); font-weight: 500; }
+
+  .t-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 14px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    position: relative;
+    z-index: 1;
+  }
+  .t-head::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: var(--sheen);
+  }
+  .t-head .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: dot-pulse 0.9s infinite;
+  }
+  @keyframes dot-pulse { 50% { opacity: 0.4; } }
+  .t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t-head .meta {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+  .t-head .meta .jp { font-family: var(--jp); margin-right: 4px; color: var(--accent); }
+
+  .t-body {
+    padding: 14px 18px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+  .t-body::before {
+    content: ''; position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  }
+  .t-body .line { color: var(--ink-2); }
+  .t-body .line.dim { color: var(--ink-3); }
+  .t-body .line.acc { color: var(--accent); }
+  .t-body .cursor {
+    display: inline-block;
+    width: 7px; height: 1.05em;
+    background: var(--accent);
+    vertical-align: -2px;
+    margin-left: 2px;
+    animation: cur 1s steps(1) infinite;
+  }
+  @keyframes cur { 50% { opacity: 0; } }
+
+  /* ─────────────────────────────────────────────────────
+     STYLE 1 — SUBTLE PULSE  (current implementation)
+     ───────────────────────────────────────────────────── */
+  .tile.pulse {
+    border-color: transparent;
+    animation: pulse-halo 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse-halo {
+    0%, 100% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 4px -1px var(--accent-glow);
+    }
+    50% {
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 18px 1px var(--accent-glow);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     STYLE 2 — TRON LASER  (single bright dot, no trail)
+     One large luminous head circumnavigates the tile every
+     4s. The .tile wears a faint accent track so it reads
+     as racing along a circuit.
+     ───────────────────────────────────────────────────── */
+  .tile.tron {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234, 154, 151, 0.20),
+      inset 0 0 24px -16px var(--accent-glow);
+  }
+  .tile.tron .laser {
+    position: absolute;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    transform: translate(-50%, -50%);
+    animation: tron-lap 4s linear infinite;
+    z-index: 5;
+    box-shadow:
+      0 0 6px var(--accent),
+      0 0 14px var(--accent),
+      0 0 28px var(--accent-glow),
+      0 0 56px var(--accent-glow);
+  }
+  @keyframes tron-lap {
+    0%   { top: 0%;   left: 0%;   }
+    25%  { top: 0%;   left: 100%; }
+    50%  { top: 100%; left: 100%; }
+    75%  { top: 100%; left: 0%;   }
+    100% { top: 0%;   left: 0%;   }
+  }
+  /* Optional faint grid floor for full Tron flavor */
+  .tile.tron .t-body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(0deg,  rgba(234,154,151,0.045) 1px, transparent 1px) 0 0/100% 26px,
+      linear-gradient(90deg, rgba(234,154,151,0.045) 1px, transparent 1px) 0 0/40px 100%;
+    mask-image: linear-gradient(180deg, transparent 0%, black 60%, black 100%);
+  }
+
+  /* ─────────────────────────────────────────────────────
+     STYLE 3 — SAMURAI  (decisive katana cut + hanko stamp)
+     ───────────────────────────────────────────────────── */
+  .tile.samurai {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.45),
+      inset 0 0 28px -10px var(--accent-glow);
+  }
+  .tile.samurai::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    background: linear-gradient(135deg,
+      transparent 44%,
+      var(--accent-glow) 50%,
+      transparent 56%);
+    background-size: 220% 220%;
+    background-position: -120% -120%;
+    opacity: 0;
+    animation: katana-cut 4s ease-in-out infinite;
+    z-index: 4;
+    mix-blend-mode: screen;
+  }
+  @keyframes katana-cut {
+    0%, 70%   { background-position: -120% -120%; opacity: 0; }
+    78%       { background-position: -50% -50%;  opacity: 0; }
+    82%       { opacity: 1; }
+    100%      { background-position: 100% 100%;  opacity: 0; }
+  }
+  .tile.samurai .hanko {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 30px; height: 30px;
+    background: var(--accent);
+    color: var(--bg);
+    font-family: var(--jp);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 2px;
+    line-height: 1;
+    z-index: 5;
+    animation: hanko-stamp 4s ease-out infinite;
+  }
+  @keyframes hanko-stamp {
+    0%, 78%   { box-shadow: 0 0 0 0 var(--accent-glow); transform: scale(1); }
+    82%       { box-shadow: 0 0 36px 6px var(--accent-glow); transform: scale(1.08); }
+    100%      { box-shadow: 0 0 0 0 var(--accent-glow); transform: scale(1); }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     STYLE 4 — SAKURA  (petals fall and pile up at the bottom)
+     12 petals fall once and settle into a tilted heap on the
+     terminal floor (staggered delays so the pile builds over
+     ~7 seconds). 6 more keep raining indefinitely so the tile
+     stays alive after the pile is built. CSS-only, no JS.
+     ───────────────────────────────────────────────────── */
+  .tile.sakura {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.30),
+      inset 0 0 36px -12px var(--accent-glow);
+  }
+  .tile.sakura .petals {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 4;
+  }
+  /* Floor highlight — a faint accent glow along the terminal
+     bottom suggests accumulated depth under the pile. */
+  .tile.sakura .petals::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 18px;
+    background: linear-gradient(to top, var(--accent-glow), transparent);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  /* Common petal silhouette */
+  .tile.sakura .petal {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 80% 0 80% 0;
+    filter: drop-shadow(0 0 4px var(--accent-glow));
+    will-change: transform, top;
+  }
+
+  /* Drifting petals — infinite loop, the ambient layer that
+     keeps falling forever. They reach the actual floor of the
+     tile body, hold for an instant, then dissipate (fade) —
+     so once the pile is built they look absorbed by it rather
+     than stacking endlessly. */
+  .tile.sakura .petal.drift {
+    top: -16px;
+    opacity: 0;
+    animation:
+      drift-fall  var(--fall, 9s) linear infinite,
+      petal-drift var(--drift, 3.2s) ease-in-out infinite alternate;
+  }
+  @keyframes drift-fall {
+    0%   { top: -16px;               opacity: 0;    transform: rotate(0deg);   }
+    5%   {                            opacity: var(--op, 0.55); }
+    88%  { top: calc(100% - 12px);   opacity: var(--op, 0.55); transform: rotate(500deg); }
+    96%  { top: calc(100% - 6px);    opacity: var(--op, 0.55); transform: rotate(530deg); }
+    100% { top: calc(100% - 6px);    opacity: 0;    transform: rotate(540deg); }
+  }
+  @keyframes petal-drift {
+    0%   { margin-left: -8px; }
+    100% { margin-left: 8px;  }
+  }
+
+  /* 6 drifters — varied left, fall duration, drift period, opacity */
+  .tile.sakura .petal.drift:nth-of-type(1) { left:  8%; --fall:  9.0s; --drift: 2.8s; --op: 0.50; animation-delay: -1.2s, -1.4s; }
+  .tile.sakura .petal.drift:nth-of-type(2) { left: 28%; --fall: 10.5s; --drift: 3.6s; --op: 0.70; animation-delay: -3.5s, -0.4s; }
+  .tile.sakura .petal.drift:nth-of-type(3) { left: 45%; --fall:  8.2s; --drift: 3.0s; --op: 0.60; animation-delay: -0.8s, -2.0s; }
+  .tile.sakura .petal.drift:nth-of-type(4) { left: 60%; --fall:  9.8s; --drift: 2.4s; --op: 0.45; animation-delay: -4.6s, -0.9s; }
+  .tile.sakura .petal.drift:nth-of-type(5) { left: 78%; --fall:  7.8s; --drift: 3.4s; --op: 0.75; animation-delay: -2.2s, -2.6s; }
+  .tile.sakura .petal.drift:nth-of-type(6) { left: 92%; --fall: 10.0s; --drift: 2.6s; --op: 0.55; animation-delay: -3.0s, -1.6s; }
+
+  /* Piling petals — fall once at constant speed (linear), settle, hold
+     final position forever. 36 of them cascade in over ~21s, varying
+     left% / rest height / final rotation so they overlap into a natural
+     tilted heap. After the pile is built, the heap remains; only the
+     drifters keep moving and they dissipate at the floor. */
+  .tile.sakura .petal.pile {
+    top: -16px;
+    opacity: 0;
+    animation: petal-settle var(--dur, 7s) linear 1 both;
+  }
+  @keyframes petal-settle {
+    0%   {
+      top: -16px;
+      transform: translateX(0px) rotate(0deg);
+      opacity: 0;
+    }
+    4%   { opacity: 0.85; }
+    90%, 100% {
+      top: var(--rest, calc(100% - 16px));
+      transform: translateX(var(--dx, 0px)) rotate(var(--rot, 720deg));
+      opacity: 0.85;
+    }
+  }
+
+  /* 36 pilers — non-sequential left% so the pile builds organically,
+     not bottom-row left-to-right. rest-top spans -8px (floor) to -28px
+     (deeper in heap). Delays cascade every ~0.4s for ~14s of arrivals,
+     last petal lands around the 21s mark. */
+  .tile.sakura .petal.pile:nth-of-type(7)  { left:  6%; --rest: calc(100% - 10px); --dx: -3px; --rot:  540deg; --dur: 7.4s; animation-delay:  0.2s; }
+  .tile.sakura .petal.pile:nth-of-type(8)  { left: 32%; --rest: calc(100% -  9px); --dx:  4px; --rot:  720deg; --dur: 7.0s; animation-delay:  0.6s; }
+  .tile.sakura .petal.pile:nth-of-type(9)  { left: 56%; --rest: calc(100% - 10px); --dx: -5px; --rot:  660deg; --dur: 7.2s; animation-delay:  1.0s; }
+  .tile.sakura .petal.pile:nth-of-type(10) { left: 80%; --rest: calc(100% -  8px); --dx:  3px; --rot:  840deg; --dur: 6.8s; animation-delay:  1.4s; }
+  .tile.sakura .petal.pile:nth-of-type(11) { left: 14%; --rest: calc(100% - 12px); --dx: -2px; --rot:  600deg; --dur: 7.3s; animation-delay:  1.8s; }
+  .tile.sakura .petal.pile:nth-of-type(12) { left: 40%; --rest: calc(100% - 11px); --dx:  6px; --rot:  780deg; --dur: 7.1s; animation-delay:  2.2s; }
+  .tile.sakura .petal.pile:nth-of-type(13) { left: 64%; --rest: calc(100% - 13px); --dx: -4px; --rot:  900deg; --dur: 6.9s; animation-delay:  2.6s; }
+  .tile.sakura .petal.pile:nth-of-type(14) { left: 88%; --rest: calc(100% - 10px); --dx:  2px; --rot:  720deg; --dur: 7.4s; animation-delay:  3.0s; }
+  .tile.sakura .petal.pile:nth-of-type(15) { left: 22%; --rest: calc(100% - 14px); --dx: -7px; --rot:  660deg; --dur: 7.0s; animation-delay:  3.4s; }
+  .tile.sakura .petal.pile:nth-of-type(16) { left: 48%; --rest: calc(100% - 14px); --dx:  3px; --rot:  840deg; --dur: 7.2s; animation-delay:  3.8s; }
+  .tile.sakura .petal.pile:nth-of-type(17) { left: 72%; --rest: calc(100% - 15px); --dx: -3px; --rot:  720deg; --dur: 6.8s; animation-delay:  4.2s; }
+  .tile.sakura .petal.pile:nth-of-type(18) { left: 96%; --rest: calc(100% - 12px); --dx:  4px; --rot:  600deg; --dur: 7.3s; animation-delay:  4.6s; }
+  .tile.sakura .petal.pile:nth-of-type(19) { left: 10%; --rest: calc(100% - 16px); --dx:  5px; --rot:  780deg; --dur: 7.1s; animation-delay:  5.0s; }
+  .tile.sakura .petal.pile:nth-of-type(20) { left: 36%; --rest: calc(100% - 17px); --dx: -4px; --rot:  660deg; --dur: 7.0s; animation-delay:  5.4s; }
+  .tile.sakura .petal.pile:nth-of-type(21) { left: 60%; --rest: calc(100% - 18px); --dx:  6px; --rot:  900deg; --dur: 6.9s; animation-delay:  5.8s; }
+  .tile.sakura .petal.pile:nth-of-type(22) { left: 84%; --rest: calc(100% - 16px); --dx: -2px; --rot:  540deg; --dur: 7.2s; animation-delay:  6.2s; }
+  .tile.sakura .petal.pile:nth-of-type(23) { left: 18%; --rest: calc(100% - 19px); --dx: -8px; --rot:  840deg; --dur: 7.4s; animation-delay:  6.6s; }
+  .tile.sakura .petal.pile:nth-of-type(24) { left: 44%; --rest: calc(100% - 20px); --dx:  3px; --rot:  720deg; --dur: 6.8s; animation-delay:  7.0s; }
+  .tile.sakura .petal.pile:nth-of-type(25) { left: 68%; --rest: calc(100% - 21px); --dx: -5px; --rot:  660deg; --dur: 7.0s; animation-delay:  7.4s; }
+  .tile.sakura .petal.pile:nth-of-type(26) { left: 92%; --rest: calc(100% - 18px); --dx:  4px; --rot:  780deg; --dur: 7.2s; animation-delay:  7.8s; }
+  .tile.sakura .petal.pile:nth-of-type(27) { left:  4%; --rest: calc(100% - 22px); --dx:  3px; --rot:  900deg; --dur: 7.4s; animation-delay:  8.2s; }
+  .tile.sakura .petal.pile:nth-of-type(28) { left: 28%; --rest: calc(100% - 23px); --dx: -6px; --rot:  600deg; --dur: 6.9s; animation-delay:  8.6s; }
+  .tile.sakura .petal.pile:nth-of-type(29) { left: 52%; --rest: calc(100% - 22px); --dx:  7px; --rot:  840deg; --dur: 7.1s; animation-delay:  9.0s; }
+  .tile.sakura .petal.pile:nth-of-type(30) { left: 76%; --rest: calc(100% - 20px); --dx: -4px; --rot:  720deg; --dur: 7.0s; animation-delay:  9.4s; }
+  .tile.sakura .petal.pile:nth-of-type(31) { left: 12%; --rest: calc(100% - 24px); --dx:  2px; --rot:  660deg; --dur: 7.3s; animation-delay:  9.8s; }
+  .tile.sakura .petal.pile:nth-of-type(32) { left: 38%; --rest: calc(100% - 25px); --dx: -3px; --rot:  780deg; --dur: 6.8s; animation-delay: 10.2s; }
+  .tile.sakura .petal.pile:nth-of-type(33) { left: 62%; --rest: calc(100% - 24px); --dx:  6px; --rot:  660deg; --dur: 7.2s; animation-delay: 10.6s; }
+  .tile.sakura .petal.pile:nth-of-type(34) { left: 86%; --rest: calc(100% - 22px); --dx: -7px; --rot:  540deg; --dur: 7.4s; animation-delay: 11.0s; }
+  .tile.sakura .petal.pile:nth-of-type(35) { left: 24%; --rest: calc(100% - 26px); --dx:  4px; --rot:  900deg; --dur: 7.0s; animation-delay: 11.4s; }
+  .tile.sakura .petal.pile:nth-of-type(36) { left: 50%; --rest: calc(100% - 26px); --dx: -5px; --rot:  720deg; --dur: 6.9s; animation-delay: 11.8s; }
+  .tile.sakura .petal.pile:nth-of-type(37) { left: 70%; --rest: calc(100% - 25px); --dx:  3px; --rot:  840deg; --dur: 7.1s; animation-delay: 12.2s; }
+  .tile.sakura .petal.pile:nth-of-type(38) { left: 94%; --rest: calc(100% - 23px); --dx: -2px; --rot:  660deg; --dur: 7.3s; animation-delay: 12.6s; }
+  .tile.sakura .petal.pile:nth-of-type(39) { left: 30%; --rest: calc(100% - 27px); --dx:  5px; --rot:  780deg; --dur: 6.8s; animation-delay: 13.0s; }
+  .tile.sakura .petal.pile:nth-of-type(40) { left: 54%; --rest: calc(100% - 28px); --dx: -4px; --rot:  540deg; --dur: 7.2s; animation-delay: 13.4s; }
+  .tile.sakura .petal.pile:nth-of-type(41) { left: 74%; --rest: calc(100% - 27px); --dx:  6px; --rot:  900deg; --dur: 7.0s; animation-delay: 13.8s; }
+  .tile.sakura .petal.pile:nth-of-type(42) { left: 16%; --rest: calc(100% - 26px); --dx: -3px; --rot:  720deg; --dur: 7.4s; animation-delay: 14.2s; }
+
+  /* ─────────────────────────────────────────────────────
+     STYLE 5 — NINJA  (silent, then shuriken strike)
+     5s of stillness, then a sudden flash + the shuriken
+     spins through the corner. Tile border stays calm — the
+     event is in the corner, not the chrome.
+     ───────────────────────────────────────────────────── */
+  .tile.ninja {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.20),
+      inset 0 0 30px -16px rgba(0,0,0,0.35);
+  }
+  .tile.ninja::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60%; height: 60%;
+    pointer-events: none;
+    background: radial-gradient(circle at 80% 20%, var(--accent-glow) 0%, transparent 65%);
+    opacity: 0;
+    transform: scale(0.6);
+    transform-origin: 80% 20%;
+    animation: ninja-smoke 5s ease-out infinite;
+    z-index: 3;
+    mix-blend-mode: screen;
+  }
+  @keyframes ninja-smoke {
+    0%   { opacity: 0; transform: scale(0.6); }
+    3%   { opacity: 1; transform: scale(1); }
+    25%  { opacity: 0; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.4); }
+  }
+  .tile.ninja .shuriken {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 22px; height: 22px;
+    color: var(--accent);
+    z-index: 5;
+    opacity: 0;
+    animation: ninja-shuri 5s ease-out infinite;
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+  }
+  .tile.ninja .shuriken svg { width: 100%; height: 100%; display: block; }
+  @keyframes ninja-shuri {
+    0%   { opacity: 0; transform: rotate(0deg) scale(0.6); }
+    3%   { opacity: 1; transform: rotate(0deg) scale(1); }
+    20%  { opacity: 0.4; transform: rotate(220deg) scale(1.05); }
+    35%  { opacity: 0; transform: rotate(360deg) scale(0.9); }
+    100% { opacity: 0; transform: rotate(360deg) scale(0.9); }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Reduced motion fallback
+     ───────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .tile.pulse, .tile.tron, .tile.samurai, .tile.sakura, .tile.ninja {
+      animation: none;
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 12px -2px var(--accent-glow);
+    }
+    .tile .laser, .tile .hanko, .tile .shuriken,
+    .tile.samurai::before, .tile.ninja::before,
+    .tile.sakura .petal {
+      animation: none !important;
+    }
+    .tile.sakura .petal.drift { display: none; }
+    /* Show piled petals as a static heap when motion is disabled */
+    .tile.sakura .petal.pile {
+      top: var(--rest, calc(100% - 16px));
+      transform: translateX(var(--dx, 0px)) rotate(var(--rot, 720deg));
+      opacity: 0.85;
+    }
+  }
+
+  /* Footer */
+  .foot {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex; gap: 18px; align-items: center;
+  }
+  .foot kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--tile);
+    color: var(--ink-2);
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <header class="head">
+    <span class="title">multiclaude · <b>attention pulse — 5 styles</b></span>
+    <span class="sep">·</span>
+    <span>each tile shows a different "needs you" treatment, all on the accent token</span>
+    <div class="switcher" role="tablist" aria-label="Theme">
+      <button data-set="kanagawa" title="Kanagawa"></button>
+      <button data-set="everforest" title="Everforest"></button>
+      <button data-set="rose-pine" title="Rose Pine"></button>
+      <button data-set="rose-pine-alt" data-active="true" title="Rose Pine Moon (alt)"></button>
+      <button data-set="original" title="Original (amber)"></button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1. SUBTLE PULSE -->
+    <section class="tile pulse">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">multiclaude</span>
+        <span class="meta">needs you</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ Apply this change?</div>
+        <div class="line acc">[y/n]<span class="cursor"></span></div>
+      </div>
+      <div class="label-pill"><b>01</b> &nbsp;·&nbsp; subtle pulse · 2.2s</div>
+    </section>
+
+    <!-- 2. TRON LASER (single dot) -->
+    <section class="tile tron">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">tron-systems</span>
+        <span class="meta">circuit · 4.0s</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ &gt; awaiting input</div>
+        <div class="line acc">[y/n]<span class="cursor"></span></div>
+      </div>
+      <span class="laser"></span>
+      <div class="label-pill"><b>02</b> &nbsp;·&nbsp; tron · single laser dot</div>
+    </section>
+
+    <!-- 3. SAMURAI -->
+    <section class="tile samurai">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">growthbook-api</span>
+        <span class="meta"><span class="jp">待</span>awaiting</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ I drafted the migration.</div>
+        <div class="line acc">run · cancel · diff<span class="cursor"></span></div>
+      </div>
+      <div class="hanko" aria-hidden="true">待</div>
+      <div class="label-pill"><b>03</b> &nbsp;·&nbsp; samurai · katana + hanko</div>
+    </section>
+
+    <!-- 4. SAKURA (petals raining) -->
+    <section class="tile sakura">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">sakura</span>
+        <span class="meta"><span class="jp">桜</span>petals</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ ready when you are.</div>
+        <div class="line dim">▌ no rush.</div>
+        <div class="line acc">▌<span class="cursor"></span></div>
+      </div>
+      <div class="petals" aria-hidden="true">
+        <!-- 6 drifters (infinite — fall to floor and dissipate) -->
+        <span class="petal drift"></span><span class="petal drift"></span>
+        <span class="petal drift"></span><span class="petal drift"></span>
+        <span class="petal drift"></span><span class="petal drift"></span>
+        <!-- 36 pilers (fall once, settle, stay) -->
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+        <span class="petal pile"></span><span class="petal pile"></span><span class="petal pile"></span>
+      </div>
+      <div class="label-pill"><b>04</b> &nbsp;·&nbsp; sakura · falling petals</div>
+    </section>
+
+    <!-- 5. NINJA (no border effect) -->
+    <section class="tile ninja">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">shadow-clone</span>
+        <span class="meta">silent strike</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ silent until struck</div>
+        <div class="line acc">→ acknowledge<span class="cursor"></span></div>
+      </div>
+      <div class="shuriken" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="currentColor">
+          <path d="M16 2 L19 13 L30 16 L19 19 L16 30 L13 19 L2 16 L13 13 Z"/>
+          <circle cx="16" cy="16" r="2.5" fill="var(--bg)"/>
+        </svg>
+      </div>
+      <div class="label-pill"><b>05</b> &nbsp;·&nbsp; ninja · corner strike</div>
+    </section>
+
+  </div>
+
+  <footer class="foot">
+    <span>cycle theme <kbd>1</kbd>–<kbd>5</kbd></span>
+    <span>·</span>
+    <span>all motion respects <kbd>prefers-reduced-motion</kbd></span>
+    <span>·</span>
+    <span>accent token drives every glow — change the picker, every style follows</span>
+  </footer>
+
+<script>
+  const THEMES = {
+    "kanagawa":      { bg:"#1f1f28", tile:"#25252e", t2:"#2a2a37", line:"#2f3043", l2:"#3a3b53", ink:"#dcd7ba", i2:"#a6a08a", i3:"#727169", i4:"#54546d", a:"#c0a36e", g:"rgba(192,163,110,0.32)" },
+    "everforest":    { bg:"#232a2e", tile:"#2d353b", t2:"#343f44", line:"#3d484d", l2:"#4f585e", ink:"#d3c6aa", i2:"#9da9a0", i3:"#7a8478", i4:"#56635f", a:"#a7c080", g:"rgba(167,192,128,0.32)" },
+    "rose-pine":     { bg:"#1f1d2e", tile:"#232136", t2:"#2a273f", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a475e", a:"#ea9a97", g:"rgba(234,154,151,0.30)" },
+    "rose-pine-alt": { bg:"#232136", tile:"#2a273f", t2:"#312e4a", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a4660", a:"#ea9a97", g:"rgba(234,154,151,0.35)" },
+    "original":      { bg:"#0a0c0e", tile:"#0e1114", t2:"#11141a", line:"#1a1f25", l2:"#232a32", ink:"#d8dde3", i2:"#9aa3ac", i3:"#5a636c", i4:"#353c44", a:"#f0a929", g:"rgba(240,169,41,0.40)" },
+  };
+  function applyTheme(name) {
+    const t = THEMES[name];
+    if (!t) return;
+    const r = document.documentElement;
+    r.dataset.theme = name;
+    r.style.setProperty("--bg", t.bg);
+    r.style.setProperty("--tile", t.tile);
+    r.style.setProperty("--tile-2", t.t2);
+    r.style.setProperty("--line", t.line);
+    r.style.setProperty("--line-2", t.l2);
+    r.style.setProperty("--ink", t.ink);
+    r.style.setProperty("--ink-2", t.i2);
+    r.style.setProperty("--ink-3", t.i3);
+    r.style.setProperty("--ink-4", t.i4);
+    r.style.setProperty("--accent", t.a);
+    r.style.setProperty("--accent-glow", t.g);
+    document.querySelectorAll(".switcher button").forEach((b) => {
+      b.dataset.active = b.dataset.set === name ? "true" : "false";
+    });
+  }
+  document.querySelectorAll(".switcher button").forEach((b) => {
+    b.addEventListener("click", () => applyTheme(b.dataset.set));
+  });
+  const order = ["kanagawa", "everforest", "rose-pine", "rose-pine-alt", "original"];
+  window.addEventListener("keydown", (e) => {
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < order.length) applyTheme(order[i]);
+  });
+  applyTheme("rose-pine-alt");
+</script>
+</body>
+</html>

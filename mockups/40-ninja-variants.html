@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="en" data-theme="rose-pine-alt">
+<head>
+<meta charset="utf-8" />
+<title>multiclaude — ninja strike (5 variants)</title>
+<style>
+  /* ─── Theme tokens (rose-pine-alt default) ─── */
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #312e4a;
+    --line: #393552;
+    --line-2: #44415a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a4660;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.35);
+    --ok: #9ccfd8;
+    --warn: #eb6f92;
+    --sheen: rgba(224, 222, 244, 0.022);
+    --fz: 1;
+    --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --jp: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body {
+    min-height: 100vh;
+    padding: 32px 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* ─── Page header ─── */
+  .head {
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .head .title b { color: var(--accent); font-weight: 500; }
+  .head .sep { color: var(--ink-4); }
+  .switcher { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  .switcher button {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    padding: 0;
+  }
+  .switcher button[data-set="kanagawa"]      { background: #c0a36e; }
+  .switcher button[data-set="everforest"]    { background: #a7c080; }
+  .switcher button[data-set="rose-pine"]     { background: #ea9a97; }
+  .switcher button[data-set="rose-pine-alt"] { background: #ea9a97; box-shadow: inset 0 0 0 2px #312e4a; }
+  .switcher button[data-set="original"]      { background: #f0a929; }
+  .switcher button[data-active="true"] {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+  .switcher button[data-active="true"][data-set="rose-pine-alt"] {
+    box-shadow: inset 0 0 0 2px #312e4a, 0 0 0 2px var(--bg), 0 0 0 3px var(--accent);
+  }
+
+  /* ─── Grid (3 across top, 2 across bottom) ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 22px;
+    flex: 1;
+  }
+  .grid > .tile:nth-child(1) { grid-column: span 2; }
+  .grid > .tile:nth-child(2) { grid-column: span 2; }
+  .grid > .tile:nth-child(3) { grid-column: span 2; }
+  .grid > .tile:nth-child(4) { grid-column: span 3; }
+  .grid > .tile:nth-child(5) { grid-column: span 3; }
+
+  /* ─── Tile (mirrors App.css .tile) ─── */
+  .tile {
+    position: relative;
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    min-height: 260px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .label-pill {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    z-index: 6;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 4px 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .label-pill b { color: var(--accent); font-weight: 500; }
+
+  .t-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 14px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    position: relative;
+    z-index: 1;
+  }
+  .t-head::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: var(--sheen);
+  }
+  .t-head .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: dot-pulse 0.9s infinite;
+  }
+  @keyframes dot-pulse { 50% { opacity: 0.4; } }
+  .t-head .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t-head .meta {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+  .t-head .meta .jp { font-family: var(--jp); margin-right: 4px; color: var(--accent); }
+
+  .t-body {
+    padding: 14px 18px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+  .t-body::before {
+    content: ''; position: absolute; inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+      rgba(255,255,255,0.012) 0 1px,
+      transparent 1px 3px);
+  }
+  .t-body .line { color: var(--ink-2); }
+  .t-body .line.dim { color: var(--ink-3); }
+  .t-body .line.acc { color: var(--accent); }
+  .t-body .cursor {
+    display: inline-block;
+    width: 7px; height: 1.05em;
+    background: var(--accent);
+    vertical-align: -2px;
+    margin-left: 2px;
+    animation: cur 1s steps(1) infinite;
+  }
+  @keyframes cur { 50% { opacity: 0; } }
+
+  /* ─────────────────────────────────────────────────────
+     COMMON — shuriken SVG primitive
+     ───────────────────────────────────────────────────── */
+  .shuriken-svg {
+    width: 100%; height: 100%;
+    display: block;
+    color: var(--accent);
+  }
+
+  /* ═════════════════════════════════════════════════════
+     VARIANT 01 — THROW + STICK (the centerpiece)
+     Multiple shuriken fly in from off-tile, slam to a stop,
+     stick at full opacity for ~3s, then smoke-fade together.
+     Two waves cycle at different positions. 9s total cycle.
+     ═════════════════════════════════════════════════════ */
+  .tile.throw {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.18),
+      inset 0 0 26px -14px var(--accent-glow);
+    animation: throw-shake 9s ease-out infinite;
+  }
+  /* Tile-wide shake on each impact wave (very subtle, layered) */
+  @keyframes throw-shake {
+    0%, 9%   { transform: translate(0, 0); }
+    10%      { transform: translate(-1px, 1px); }
+    11%      { transform: translate(2px, -1px); }
+    12%, 19% { transform: translate(0, 0); }
+    20%      { transform: translate(-2px, 1px); }
+    21%      { transform: translate(1px, -2px); }
+    22%, 29% { transform: translate(0, 0); }
+    30%      { transform: translate(1px, 2px); }
+    31%      { transform: translate(-1px, -1px); }
+    32%, 100%{ transform: translate(0, 0); }
+  }
+  /* Ambient halo bumps on impact (reads as "something just hit") */
+  .tile.throw::after {
+    content: '';
+    position: absolute; inset: 0;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.0),
+      inset 0 0 28px -10px rgba(234,154,151,0.0);
+    animation: throw-halo 9s ease-out infinite;
+    z-index: 2;
+  }
+  @keyframes throw-halo {
+    0%, 9%   { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.0), inset 0 0 28px -10px rgba(234,154,151,0.0); }
+    11%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.55), inset 0 0 36px -6px var(--accent-glow); }
+    18%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.20), inset 0 0 28px -10px rgba(234,154,151,0.10); }
+    32%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.20), inset 0 0 28px -10px rgba(234,154,151,0.10); }
+    50%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.22), inset 0 0 28px -10px rgba(234,154,151,0.12); }
+    63%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.50), inset 0 0 36px -6px var(--accent-glow); }
+    72%      { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.20), inset 0 0 28px -10px rgba(234,154,151,0.10); }
+    100%     { box-shadow: inset 0 0 0 1px rgba(234,154,151,0.0), inset 0 0 28px -10px rgba(234,154,151,0.0); }
+  }
+  /* The shuriken stage covers the whole tile; clipping the throw
+     trajectory is intentional — the star starts off-tile. */
+  .tile.throw .stage {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 5;
+  }
+  .tile.throw .shuri {
+    position: absolute;
+    width: 26px; height: 26px;
+    color: var(--accent);
+    opacity: 0;
+    will-change: transform, opacity, filter;
+    /* Stick = settle at target, hold full opacity, then smoke-fade.
+       Each shuri runs the same 9s loop with its own starting offset
+       (tx/ty origin) and animation-delay for sequencing. */
+    animation: throw-stick 9s cubic-bezier(.16,.84,.4,1) infinite;
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+  }
+  /* Travel keyframes:
+       0%  — start off-tile at (--tx, --ty)
+       8%  — slammed home (0, 0), full opacity, peak glow
+       12% — recoil settle (-1px, +1px) for impact-bounce read
+       45% — still stuck, full opacity
+       50% — fade begin (smoke clone vanish)
+       55% — gone
+       remainder — invisible until next loop */
+  @keyframes throw-stick {
+    0%   { transform: translate(var(--tx, -120px), var(--ty, -120px)) rotate(0deg) scale(0.8);
+           opacity: 0; filter: blur(0.5px) drop-shadow(0 0 4px var(--accent-glow)); }
+    7%   { opacity: 0.95; }
+    8%   { transform: translate(0, 0) rotate(var(--rot, 540deg)) scale(1.08);
+           opacity: 1; filter: blur(0) drop-shadow(0 0 10px var(--accent-glow)); }
+    11%  { transform: translate(var(--bx, -1px), var(--by, 1px)) rotate(var(--rot, 540deg)) scale(1);
+           opacity: 1; filter: blur(0) drop-shadow(0 0 6px var(--accent-glow)); }
+    45%  { transform: translate(0, 0) rotate(var(--rot, 540deg)) scale(1);
+           opacity: 1; filter: blur(0) drop-shadow(0 0 5px var(--accent-glow)); }
+    50%  { transform: translate(0, 0) rotate(calc(var(--rot, 540deg) + 30deg)) scale(1.04);
+           opacity: 0.7; filter: blur(1px) drop-shadow(0 0 4px var(--accent-glow)); }
+    55%  { transform: translate(0, 0) rotate(calc(var(--rot, 540deg) + 60deg)) scale(0.9);
+           opacity: 0; filter: blur(3px) drop-shadow(0 0 0 transparent); }
+    100% { opacity: 0; }
+  }
+
+  /* WAVE A — first 4 shuriken, throw at ~0.0–1.5s, fade ~4.5s */
+  .tile.throw .shuri.a1 {
+    top: 22%; left: 28%;
+    --tx: -160px; --ty: -120px; --rot: 540deg; --bx: -2px; --by: 1px;
+    animation-delay: 0s;
+  }
+  .tile.throw .shuri.a2 {
+    top: 52%; left: 70%;
+    --tx: 200px; --ty: -100px; --rot: -480deg; --bx: 1px; --by: 2px;
+    animation-delay: 0.2s;
+  }
+  .tile.throw .shuri.a3 {
+    top: 64%; left: 22%;
+    --tx: -180px; --ty: 140px; --rot: 600deg; --bx: -2px; --by: -1px;
+    animation-delay: 0.4s;
+  }
+  .tile.throw .shuri.a4 {
+    top: 30%; left: 56%;
+    --tx: 220px; --ty: -160px; --rot: -540deg; --bx: 2px; --by: -1px;
+    animation-delay: 0.6s;
+  }
+  /* WAVE B — second 4, offset by 4.5s into the loop, different positions.
+     Achieved with negative animation-delay so they fire mid-cycle. */
+  .tile.throw .shuri.b1 {
+    top: 38%; left: 18%;
+    --tx: -200px; --ty: 160px; --rot: 480deg; --bx: -1px; --by: 2px;
+    animation-delay: -4.5s;
+  }
+  .tile.throw .shuri.b2 {
+    top: 26%; left: 72%;
+    --tx: 180px; --ty: 200px; --rot: -600deg; --bx: 2px; --by: -2px;
+    animation-delay: -4.3s;
+  }
+  .tile.throw .shuri.b3 {
+    top: 70%; left: 50%;
+    --tx: 0px; --ty: 220px; --rot: 720deg; --bx: 0; --by: -2px;
+    animation-delay: -4.1s;
+  }
+  .tile.throw .shuri.b4 {
+    top: 48%; left: 36%;
+    --tx: -220px; --ty: -40px; --rot: -540deg; --bx: -2px; --by: 1px;
+    animation-delay: -3.9s;
+  }
+  /* Impact flashes — small radial bursts at each landing point that
+     pulse on impact only (synchronized with the shuri's 8% mark) */
+  .tile.throw .flash {
+    position: absolute;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+    opacity: 0;
+    pointer-events: none;
+    animation: throw-flash 9s ease-out infinite;
+    mix-blend-mode: screen;
+    z-index: 4;
+  }
+  @keyframes throw-flash {
+    0%, 7%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+    8%       { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+    13%      { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+    100%     { opacity: 0; }
+  }
+  /* Position flashes to match shuriken landing centers (a-wave) */
+  .tile.throw .flash.f1 { top: 22%; left: 28%; animation-delay: 0s; }
+  .tile.throw .flash.f2 { top: 52%; left: 70%; animation-delay: 0.2s; }
+  .tile.throw .flash.f3 { top: 64%; left: 22%; animation-delay: 0.4s; }
+  .tile.throw .flash.f4 { top: 30%; left: 56%; animation-delay: 0.6s; }
+  /* b-wave flashes */
+  .tile.throw .flash.f5 { top: 38%; left: 18%; animation-delay: -4.5s; }
+  .tile.throw .flash.f6 { top: 26%; left: 72%; animation-delay: -4.3s; }
+  .tile.throw .flash.f7 { top: 70%; left: 50%; animation-delay: -4.1s; }
+  .tile.throw .flash.f8 { top: 48%; left: 36%; animation-delay: -3.9s; }
+
+  /* ═════════════════════════════════════════════════════
+     VARIANT 02 — SMOKE BOMB APPEARANCE
+     A puff of smoke billows in the center, a 「忍」 glyph
+     materializes inside, holds, then a second puff hides
+     him again. Cycle ~6s.
+     ═════════════════════════════════════════════════════ */
+  .tile.smokebomb {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.22),
+      inset 0 0 30px -14px var(--accent-glow);
+  }
+  .tile.smokebomb .smoke {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 180px; height: 180px;
+    transform: translate(-50%, -50%) scale(0.4);
+    background:
+      radial-gradient(circle at 30% 35%, rgba(234,154,151,0.55) 0%, transparent 45%),
+      radial-gradient(circle at 70% 30%, rgba(234,154,151,0.35) 0%, transparent 50%),
+      radial-gradient(circle at 50% 70%, rgba(234,154,151,0.40) 0%, transparent 55%),
+      radial-gradient(circle at 25% 75%, rgba(234,154,151,0.30) 0%, transparent 55%),
+      radial-gradient(circle at 75% 65%, rgba(234,154,151,0.30) 0%, transparent 60%);
+    border-radius: 50%;
+    filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    animation: smoke-puff 6s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes smoke-puff {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+    6%   { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+    18%  { opacity: 0.5; transform: translate(-50%, -50%) scale(1.3); }
+    35%  { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+    65%  { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    72%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    85%  { opacity: 0.5; transform: translate(-50%, -50%) scale(1.4); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+  }
+  /* Secondary, offset smoke layer for billow density */
+  .tile.smokebomb .smoke.b {
+    width: 220px; height: 220px;
+    animation-delay: 0.15s;
+    opacity: 0;
+    filter: blur(10px);
+  }
+  /* The ninja glyph materializes inside the smoke */
+  .tile.smokebomb .glyph {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    font-family: var(--jp);
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: 0 0 18px var(--accent-glow), 0 0 6px var(--accent-glow);
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: glyph-reveal 6s ease-in-out infinite;
+    letter-spacing: -0.02em;
+  }
+  @keyframes glyph-reveal {
+    0%, 8%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    14%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    55%      { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    66%      { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+    100%     { opacity: 0; transform: translate(-50%, -50%) scale(1.1); }
+  }
+
+  /* ═════════════════════════════════════════════════════
+     VARIANT 03 — FLASH STEP / SHUNPO
+     Three afterimage 「影」 (shadow) glyphs flash diagonally
+     across the tile, leaving brief motion-blur trails.
+     ═════════════════════════════════════════════════════ */
+  .tile.shunpo {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.20),
+      inset 0 0 30px -14px var(--accent-glow);
+  }
+  .tile.shunpo .afterimage {
+    position: absolute;
+    top: 50%; left: 0;
+    transform: translate(0, -50%);
+    font-family: var(--jp);
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    will-change: transform, opacity, filter;
+    text-shadow:
+      -8px 0 0 rgba(234,154,151,0.3),
+      -16px 0 0 rgba(234,154,151,0.15),
+      0 0 14px var(--accent-glow);
+    animation: shunpo-dash 4.5s ease-out infinite;
+  }
+  @keyframes shunpo-dash {
+    0%   { left: -12%; top: 78%; opacity: 0; transform: translate(0, -50%) skewX(-22deg) scale(0.85); filter: blur(2px); }
+    4%   { opacity: 0.95; }
+    8%   { left: 110%; top: 18%;  opacity: 0; transform: translate(0, -50%) skewX(-22deg) scale(0.85); filter: blur(3px); }
+    18%  { opacity: 0; }
+    22%  { left: 110%; top: 26%;  opacity: 0; transform: translate(-100%, -50%) skewX(22deg) scale(0.9); filter: blur(2px); }
+    24%  { opacity: 0.9; }
+    32%  { left: -12%;  top: 70%; opacity: 0; transform: translate(-100%, -50%) skewX(22deg) scale(0.9); filter: blur(3px); }
+    44%  { opacity: 0; }
+    48%  { left: -12%; top: 30%;  opacity: 0; transform: translate(0, -50%) skewX(-18deg) scale(0.95); filter: blur(2px); }
+    50%  { opacity: 1; }
+    58%  { left: 110%; top: 80%;  opacity: 0; transform: translate(0, -50%) skewX(-18deg) scale(0.95); filter: blur(3px); }
+    100% { opacity: 0; }
+  }
+  /* Slight horizontal motion-streak smear that follows the dash */
+  .tile.shunpo .streak {
+    position: absolute;
+    top: 0; left: -20%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(234,154,151,0.0) 30%,
+      rgba(234,154,151,0.18) 55%,
+      rgba(234,154,151,0.32) 70%,
+      rgba(234,154,151,0) 100%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    mix-blend-mode: screen;
+    animation: shunpo-streak 4.5s ease-out infinite;
+  }
+  @keyframes shunpo-streak {
+    0%   { transform: translateX(0) skewX(-22deg);   opacity: 0; }
+    4%   { opacity: 0.7; }
+    8%   { transform: translateX(220%) skewX(-22deg); opacity: 0; }
+    22%  { transform: translateX(220%) skewX(22deg);  opacity: 0; }
+    24%  { opacity: 0.7; }
+    32%  { transform: translateX(-40%) skewX(22deg);  opacity: 0; }
+    48%  { transform: translateX(0) skewX(-18deg);   opacity: 0; }
+    50%  { opacity: 0.7; }
+    58%  { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    100% { opacity: 0; }
+  }
+
+  /* ═════════════════════════════════════════════════════
+     VARIANT 04 — MAKIMONO SCROLL UNFURLS
+     A small scroll appears in the upper-right corner,
+     unrolls horizontally to reveal a 「危」 (danger) kanji,
+     holds, then rolls back up. ~6s loop.
+     ═════════════════════════════════════════════════════ */
+  .tile.scroll {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.22),
+      inset 0 0 30px -14px var(--accent-glow);
+  }
+  .tile.scroll .scroll-stage {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+    height: 64px;
+    width: 220px;
+    pointer-events: none;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  /* The unrolled paper, with a width that animates from a thin sliver
+     between the two rod ends to its full extent. */
+  .tile.scroll .paper {
+    position: absolute;
+    top: 0; bottom: 0;
+    right: 16px; /* right rod center */
+    width: 0;
+    background:
+      linear-gradient(180deg,
+        rgba(234,154,151,0.04) 0%,
+        rgba(234,154,151,0.10) 50%,
+        rgba(234,154,151,0.04) 100%),
+      var(--tile-2);
+    border-top: 1px solid rgba(234,154,151,0.35);
+    border-bottom: 1px solid rgba(234,154,151,0.35);
+    overflow: hidden;
+    animation: scroll-unfurl 6s ease-in-out infinite;
+    will-change: width;
+  }
+  @keyframes scroll-unfurl {
+    0%, 6%   { width: 0; }
+    24%      { width: 180px; }
+    66%      { width: 180px; }
+    84%      { width: 0; }
+    100%     { width: 0; }
+  }
+  /* The kanji written on the paper. It fades in once the scroll is
+     fully open, then fades before the rolling-up phase. */
+  .tile.scroll .paper .kanji {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 180px;
+    text-align: center;
+    font-family: var(--jp);
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    text-shadow: 0 0 12px var(--accent-glow);
+    opacity: 0;
+    animation: scroll-kanji 6s ease-in-out infinite;
+  }
+  @keyframes scroll-kanji {
+    0%, 25%  { opacity: 0; }
+    32%      { opacity: 1; }
+    62%      { opacity: 1; }
+    70%      { opacity: 0; }
+    100%     { opacity: 0; }
+  }
+  /* Right rod (pivot — does not move) */
+  .tile.scroll .rod-right {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    right: 12px;
+    width: 8px;
+    background: linear-gradient(180deg, var(--accent) 0%, rgba(234,154,151,0.55) 50%, var(--accent) 100%);
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+  .tile.scroll .rod-right::before,
+  .tile.scroll .rod-right::after {
+    content: '';
+    position: absolute;
+    left: -2px; width: 12px; height: 5px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  .tile.scroll .rod-right::before { top: -5px; }
+  .tile.scroll .rod-right::after  { bottom: -5px; }
+  /* Left rod — travels along with the paper's edge as it unfurls */
+  .tile.scroll .rod-left {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    right: 16px; /* will animate toward right: 196px */
+    width: 8px;
+    background: linear-gradient(180deg, var(--accent) 0%, rgba(234,154,151,0.55) 50%, var(--accent) 100%);
+    border-radius: 2px;
+    box-shadow: 0 0 10px var(--accent-glow);
+    animation: scroll-rod-left 6s ease-in-out infinite;
+  }
+  .tile.scroll .rod-left::before,
+  .tile.scroll .rod-left::after {
+    content: '';
+    position: absolute;
+    left: -2px; width: 12px; height: 5px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+  .tile.scroll .rod-left::before { top: -5px; }
+  .tile.scroll .rod-left::after  { bottom: -5px; }
+  @keyframes scroll-rod-left {
+    0%, 6%   { right: 16px; }
+    24%      { right: 196px; }
+    66%      { right: 196px; }
+    84%      { right: 16px; }
+    100%     { right: 16px; }
+  }
+
+  /* ═════════════════════════════════════════════════════
+     VARIANT 05 — HIDDEN IN SHADOW
+     The body darkens, a single accent slash cuts diagonally
+     across, then darkness lifts revealing a faint silhouette
+     for an instant before everything resettles. ~5s loop.
+     ═════════════════════════════════════════════════════ */
+  .tile.shadow {
+    border-color: transparent;
+    box-shadow:
+      inset 0 0 0 1px rgba(234,154,151,0.18),
+      inset 0 0 30px -14px var(--accent-glow);
+  }
+  /* Darkening curtain — sits on top of body, fades in/out */
+  .tile.shadow .curtain {
+    position: absolute;
+    inset: 39px 0 0 0; /* below header */
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.75) 80%),
+      linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6));
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+    animation: shadow-curtain 5s ease-in-out infinite;
+    mix-blend-mode: multiply;
+  }
+  @keyframes shadow-curtain {
+    0%, 8%   { opacity: 0; }
+    28%      { opacity: 1; }
+    62%      { opacity: 1; }
+    78%      { opacity: 0; }
+    100%     { opacity: 0; }
+  }
+  /* The slash itself — a thin accent diagonal cut */
+  .tile.shadow .slash {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140%;
+    height: 2px;
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(234,154,151,0) 18%,
+      var(--accent) 38%,
+      var(--accent) 62%,
+      rgba(234,154,151,0) 82%,
+      transparent 100%);
+    transform: translate(-50%, -50%) rotate(-22deg) scaleX(0);
+    transform-origin: 50% 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+    box-shadow:
+      0 0 8px var(--accent),
+      0 0 18px var(--accent-glow),
+      0 0 36px var(--accent-glow);
+    animation: shadow-slash 5s ease-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes shadow-slash {
+    0%, 30%  { opacity: 0; transform: translate(-50%, -50%) rotate(-22deg) scaleX(0); }
+    34%      { opacity: 1; transform: translate(-50%, -50%) rotate(-22deg) scaleX(1); }
+    44%      { opacity: 1; transform: translate(-50%, -50%) rotate(-22deg) scaleX(1); }
+    52%      { opacity: 0; transform: translate(-50%, -50%) rotate(-22deg) scaleX(1); }
+    100%     { opacity: 0; }
+  }
+  /* Faint ninja silhouette (just an outline shape, suggestive) — visible
+     briefly during the lift-off frame. Built from layered shadows
+     to suggest a hooded figure without illustration. */
+  .tile.shadow .silhouette {
+    position: absolute;
+    top: 38%;
+    right: 14%;
+    width: 38px;
+    height: 56px;
+    border-radius: 50% 50% 8px 8px / 60% 60% 8px 8px;
+    background: rgba(0,0,0,0.85);
+    box-shadow:
+      -2px 0 0 rgba(234,154,151,0.25),
+      0 0 18px rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: shadow-silhouette 5s ease-out infinite;
+  }
+  /* Eye slit — a thin accent line where the eyes would be */
+  .tile.shadow .silhouette::after {
+    content: '';
+    position: absolute;
+    top: 32%;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    border-radius: 1px;
+    opacity: 0.8;
+  }
+  @keyframes shadow-silhouette {
+    0%, 38%  { opacity: 0; transform: translateY(0); }
+    44%      { opacity: 0.85; transform: translateY(0); }
+    58%      { opacity: 0.85; transform: translateY(0); }
+    72%      { opacity: 0; transform: translateY(-4px); }
+    100%     { opacity: 0; transform: translateY(-4px); }
+  }
+
+  /* ─────────────────────────────────────────────────────
+     Reduced motion fallback
+     ───────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .tile.throw, .tile.smokebomb, .tile.shunpo, .tile.scroll, .tile.shadow {
+      animation: none !important;
+      box-shadow:
+        inset 0 0 0 1px var(--accent),
+        0 0 12px -2px var(--accent-glow) !important;
+    }
+    .tile .shuri, .tile .flash,
+    .tile .smoke, .tile .glyph,
+    .tile .afterimage, .tile .streak,
+    .tile .paper, .tile .rod-left, .tile .kanji,
+    .tile .curtain, .tile .slash, .tile .silhouette,
+    .tile.throw::after {
+      animation: none !important;
+    }
+    /* Keep one quiet static "stuck" shuriken for context on the throw tile */
+    .tile.throw .shuri.a1 { opacity: 1; transform: translate(0,0) rotate(540deg); top: 30%; left: 50%; }
+    .tile.throw .shuri:not(.a1), .tile.throw .flash { display: none; }
+    /* Keep glyph visible on smokebomb */
+    .tile.smokebomb .glyph { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+    .tile.smokebomb .smoke { display: none; }
+    /* Keep one afterimage centered on shunpo */
+    .tile.shunpo .afterimage { opacity: 0.85; left: 50%; top: 50%; transform: translate(-50%, -50%); filter: none; }
+    .tile.shunpo .streak { display: none; }
+    /* Keep scroll fully open with kanji visible */
+    .tile.scroll .paper { width: 180px; }
+    .tile.scroll .rod-left { right: 196px; }
+    .tile.scroll .kanji { opacity: 1; }
+    /* Keep silhouette static on shadow */
+    .tile.shadow .curtain, .tile.shadow .slash { display: none; }
+    .tile.shadow .silhouette { opacity: 0.7; }
+  }
+
+  /* Footer */
+  .foot {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    display: flex; gap: 18px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .foot kbd {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--tile);
+    color: var(--ink-2);
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+  <header class="head">
+    <span class="title">multiclaude · <b>ninja strike — 5 variants</b></span>
+    <span class="sep">·</span>
+    <span>each tile shows a different ninja-attack treatment, all on the accent token</span>
+    <div class="switcher" role="tablist" aria-label="Theme">
+      <button data-set="kanagawa" title="Kanagawa"></button>
+      <button data-set="everforest" title="Everforest"></button>
+      <button data-set="rose-pine" title="Rose Pine"></button>
+      <button data-set="rose-pine-alt" data-active="true" title="Rose Pine Moon (alt)"></button>
+      <button data-set="original" title="Original (amber)"></button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 01 THROW + STICK (centerpiece) -->
+    <section class="tile throw">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">shuriken-rain</span>
+        <span class="meta"><span class="jp">投</span>throw</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ awaiting decision.</div>
+        <div class="line acc">→ y · n<span class="cursor"></span></div>
+      </div>
+
+      <!-- Stage holds the flying + stuck shuriken -->
+      <div class="stage" aria-hidden="true">
+        <!-- Wave A: 4 shuriken, throw 0–1.5s, fade ~4.5s -->
+        <span class="shuri a1">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri a2">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri a3">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri a4">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <!-- Wave B: 4 shuriken offset 4.5s into loop -->
+        <span class="shuri b1">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri b2">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri b3">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <span class="shuri b4">
+          <svg class="shuriken-svg" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 1 L19.5 12.5 L31 16 L19.5 19.5 L16 31 L12.5 19.5 L1 16 L12.5 12.5 Z"/>
+            <circle cx="16" cy="16" r="2.4" fill="var(--bg)"/>
+          </svg>
+        </span>
+        <!-- Impact flashes paired with each shuriken -->
+        <span class="flash f1"></span>
+        <span class="flash f2"></span>
+        <span class="flash f3"></span>
+        <span class="flash f4"></span>
+        <span class="flash f5"></span>
+        <span class="flash f6"></span>
+        <span class="flash f7"></span>
+        <span class="flash f8"></span>
+      </div>
+
+      <div class="label-pill"><b>01</b> &nbsp;·&nbsp; throw + stick · 9s cycle</div>
+    </section>
+
+    <!-- 02 SMOKE BOMB -->
+    <section class="tile smokebomb">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">kawarimi</span>
+        <span class="meta"><span class="jp">煙</span>smoke</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ standing by.</div>
+        <div class="line acc">→ acknowledge<span class="cursor"></span></div>
+      </div>
+      <span class="smoke" aria-hidden="true"></span>
+      <span class="smoke b" aria-hidden="true"></span>
+      <span class="glyph" aria-hidden="true">忍</span>
+      <div class="label-pill"><b>02</b> &nbsp;·&nbsp; smoke bomb · 6s</div>
+    </section>
+
+    <!-- 03 FLASH STEP / SHUNPO -->
+    <section class="tile shunpo">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">shunpo</span>
+        <span class="meta"><span class="jp">影</span>after-image</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ blink and you'll miss it.</div>
+        <div class="line acc">→ confirm<span class="cursor"></span></div>
+      </div>
+      <span class="streak" aria-hidden="true"></span>
+      <span class="afterimage" aria-hidden="true">影</span>
+      <div class="label-pill"><b>03</b> &nbsp;·&nbsp; flash step · 4.5s</div>
+    </section>
+
+    <!-- 04 MAKIMONO SCROLL -->
+    <section class="tile scroll">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">makimono</span>
+        <span class="meta"><span class="jp">巻</span>unfurl</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ a message arrives.</div>
+        <div class="line dim">▌ read it.</div>
+        <div class="line acc">→ open<span class="cursor"></span></div>
+      </div>
+      <div class="scroll-stage" aria-hidden="true">
+        <div class="paper">
+          <div class="kanji">危</div>
+        </div>
+        <div class="rod-left"></div>
+        <div class="rod-right"></div>
+      </div>
+      <div class="label-pill"><b>04</b> &nbsp;·&nbsp; makimono scroll · 6s</div>
+    </section>
+
+    <!-- 05 HIDDEN IN SHADOW -->
+    <section class="tile shadow">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">kage-shinobi</span>
+        <span class="meta"><span class="jp">陰</span>hidden</span>
+      </header>
+      <div class="t-body">
+        <div class="line">$ <span class="acc">claude</span></div>
+        <div class="line dim">▌ always was here.</div>
+        <div class="line dim">▌ you didn't see.</div>
+        <div class="line acc">→ acknowledge<span class="cursor"></span></div>
+      </div>
+      <span class="curtain" aria-hidden="true"></span>
+      <span class="silhouette" aria-hidden="true"></span>
+      <span class="slash" aria-hidden="true"></span>
+      <div class="label-pill"><b>05</b> &nbsp;·&nbsp; hidden in shadow · 5s</div>
+    </section>
+
+  </div>
+
+  <footer class="foot">
+    <span>cycle theme <kbd>1</kbd>–<kbd>5</kbd></span>
+    <span>·</span>
+    <span>all motion respects <kbd>prefers-reduced-motion</kbd></span>
+    <span>·</span>
+    <span>accent token drives every glow — change the picker, every variant follows</span>
+  </footer>
+
+<script>
+  const THEMES = {
+    "kanagawa":      { bg:"#1f1f28", tile:"#25252e", t2:"#2a2a37", line:"#2f3043", l2:"#3a3b53", ink:"#dcd7ba", i2:"#a6a08a", i3:"#727169", i4:"#54546d", a:"#c0a36e", g:"rgba(192,163,110,0.32)" },
+    "everforest":    { bg:"#232a2e", tile:"#2d353b", t2:"#343f44", line:"#3d484d", l2:"#4f585e", ink:"#d3c6aa", i2:"#9da9a0", i3:"#7a8478", i4:"#56635f", a:"#a7c080", g:"rgba(167,192,128,0.32)" },
+    "rose-pine":     { bg:"#1f1d2e", tile:"#232136", t2:"#2a273f", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a475e", a:"#ea9a97", g:"rgba(234,154,151,0.30)" },
+    "rose-pine-alt": { bg:"#232136", tile:"#2a273f", t2:"#312e4a", line:"#393552", l2:"#44415a", ink:"#e0def4", i2:"#908caa", i3:"#6e6a86", i4:"#4a4660", a:"#ea9a97", g:"rgba(234,154,151,0.35)" },
+    "original":      { bg:"#0a0c0e", tile:"#0e1114", t2:"#11141a", line:"#1a1f25", l2:"#232a32", ink:"#d8dde3", i2:"#9aa3ac", i3:"#5a636c", i4:"#353c44", a:"#f0a929", g:"rgba(240,169,41,0.40)" },
+  };
+  function applyTheme(name) {
+    const t = THEMES[name];
+    if (!t) return;
+    const r = document.documentElement;
+    r.dataset.theme = name;
+    r.style.setProperty("--bg", t.bg);
+    r.style.setProperty("--tile", t.tile);
+    r.style.setProperty("--tile-2", t.t2);
+    r.style.setProperty("--line", t.line);
+    r.style.setProperty("--line-2", t.l2);
+    r.style.setProperty("--ink", t.ink);
+    r.style.setProperty("--ink-2", t.i2);
+    r.style.setProperty("--ink-3", t.i3);
+    r.style.setProperty("--ink-4", t.i4);
+    r.style.setProperty("--accent", t.a);
+    r.style.setProperty("--accent-glow", t.g);
+    document.querySelectorAll(".switcher button").forEach((b) => {
+      b.dataset.active = b.dataset.set === name ? "true" : "false";
+    });
+  }
+  document.querySelectorAll(".switcher button").forEach((b) => {
+    b.addEventListener("click", () => applyTheme(b.dataset.set));
+  });
+  const order = ["kanagawa", "everforest", "rose-pine", "rose-pine-alt", "original"];
+  window.addEventListener("keydown", (e) => {
+    const i = parseInt(e.key, 10) - 1;
+    if (i >= 0 && i < order.length) applyTheme(order[i]);
+  });
+  applyTheme("rose-pine-alt");
+</script>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 09 — Apiary Frames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* anodized droid tones */
+  --bg: #1a1612;
+  --panel: #221d18;
+  --panel-2: #2a231c;
+  --rail: #3a2f24;
+  --hairline: #3d3025;
+  --ink: #e9dcc4;
+  --ink-dim: #9b8a72;
+  --ink-mute: #6a5a47;
+  /* honey amber */
+  --amber: #f0a929;
+  --amber-deep: #c47a14;
+  --amber-glow: rgba(240,169,41,0.35);
+  --wax: #d8902a;
+  --wax-light: #efb646;
+  /* status */
+  --working: #f0a929;
+  --needs: #ff5a3a;
+  --idle: #6a5a47;
+  --stale: #4a3e30;
+  --led-green: #7dc16b;
+  /* type */
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  /* faint linen / wood grain */
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 0%, #2a1f15 0%, #1a1612 70%);
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 40px 30px 1fr 260px;
+  height: 100vh;
+}
+
+/* TITLEBAR — anodized strip with phillips screws */
+.titlebar {
+  background: linear-gradient(180deg, #2c241c, #1f1813);
+  border-bottom: 1px solid #0c0907;
+  box-shadow: inset 0 -1px 0 #3a2e22, inset 0 1px 0 rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  position: relative;
+}
+.titlebar::before, .titlebar::after {
+  content: '';
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: radial-gradient(circle at 35% 35%, #5a4a38 0%, #2a2018 70%);
+  box-shadow: inset 0 0 0 1px #0c0907;
+}
+.titlebar::before { left: 6px; }
+.titlebar::after { right: 6px; }
+.t-left { display: flex; align-items: center; gap: 14px; padding-left: 14px;}
+.lights { display: flex; gap: 6px; }
+.lights span {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #1a1410;
+  box-shadow: inset 0 0 0 1px #0a0805, inset 0 -1px 1px rgba(255,255,255,0.05);
+}
+.lights span:nth-child(1) { background: radial-gradient(circle at 35% 35%, #ff6b4a, #8a2a18); }
+.lights span:nth-child(2) { background: radial-gradient(circle at 35% 35%, #f0a929, #7a4a08); }
+.lights span:nth-child(3) { background: radial-gradient(circle at 35% 35%, #7dc16b, #2e5a24); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; color: var(--ink); }
+.bee {
+  width: 14px; height: 14px;
+  background: var(--amber);
+  border-radius: 3px;
+  position: relative;
+  box-shadow: 0 0 8px var(--amber-glow);
+}
+.bee::before, .bee::after {
+  content:''; position:absolute; left:0; right:0; height:2px;
+  background: #1a1410;
+}
+.bee::before { top: 4px; }
+.bee::after { top: 8px; }
+.t-center { font-family: var(--mono); text-transform: uppercase; color: var(--ink-dim); }
+.t-center b { color: var(--ink); font-weight: 600; }
+.t-right { display:flex; justify-content: flex-end; padding-right: 14px; gap: 10px; color: var(--ink-mute); font-family: var(--mono); }
+
+/* TELEMETRY rail */
+.telemetry {
+  background: linear-gradient(180deg, #1d1812, #161210);
+  border-bottom: 1px solid #0c0907;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 22px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+.metric { display: flex; align-items: center; gap: 8px; }
+.metric b { color: var(--ink); font-weight: 600; letter-spacing: 0.05em; }
+.metric .accent { color: var(--amber); }
+.bar {
+  display: inline-block;
+  width: 60px; height: 4px;
+  background: #2a231c;
+  border: 1px solid #0c0907;
+  position: relative;
+}
+.bar > span { position:absolute; inset:0 auto 0 0; background: var(--amber); }
+.live {
+  margin-left: auto;
+  display:flex; align-items:center; gap:8px;
+  color: var(--amber);
+}
+.live::before {
+  content:''; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+  animation: blink 1.2s infinite;
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+
+/* TERMINAL — wax-paper viewport */
+.term-wrap {
+  padding: 18px 22px;
+  position: relative;
+}
+.terminal {
+  height: 100%;
+  background: #100c08;
+  border: 1px solid #0a0705;
+  box-shadow:
+    inset 0 0 0 1px #2a1f15,
+    inset 0 0 60px rgba(240,169,41,0.04),
+    0 4px 20px rgba(0,0,0,0.6);
+  padding: 18px 24px;
+  position: relative;
+  overflow: hidden;
+}
+.terminal::before {
+  content: 'CELL · 01 — MULTICLAUDE-HUB · ~/work';
+  position: absolute;
+  top: 8px; left: 18px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.terminal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 10%, rgba(240,169,41,0.06), transparent 60%);
+}
+.term-pre {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #d4c8b0;
+  white-space: pre-wrap;
+}
+.p { color: var(--amber); }
+.c { color: #efe5cf; }
+.t { color: #6dd2c5; }
+.r { color: var(--ink-mute); }
+.e { color: #d8a8ff; }
+.cur {
+  display: inline-block;
+  width: 7px; height: 13px;
+  background: var(--amber);
+  vertical-align: text-top;
+  animation: cur 1s steps(1) infinite;
+  box-shadow: 0 0 6px var(--amber-glow);
+}
+@keyframes cur { 50% { opacity: 0; } }
+
+/* APIARY — frames standing in a super box */
+.apiary {
+  background: linear-gradient(180deg, #1d1813 0%, #15110d 100%);
+  border-top: 1px solid #0c0907;
+  box-shadow: inset 0 1px 0 #3a2e22;
+  position: relative;
+  padding: 26px 22px 18px;
+}
+.apiary::before {
+  content: 'APIARY — SUPER A · 9 FRAMES SEATED · 1 SLOT OPEN';
+  position: absolute;
+  top: 8px; left: 22px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.apiary::after {
+  content: 'PULL ▲   SEAT ▼';
+  position: absolute;
+  top: 8px; right: 22px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* the wooden super interior — top rail with notches */
+.super-rail {
+  position: absolute;
+  left: 22px; right: 22px;
+  top: 22px;
+  height: 8px;
+  background: linear-gradient(180deg, #3a2e22, #2a2018);
+  border-top: 1px solid #4a3a2a;
+  border-bottom: 1px solid #0c0907;
+}
+.super-floor {
+  position: absolute;
+  left: 22px; right: 22px;
+  bottom: 18px;
+  height: 6px;
+  background: linear-gradient(180deg, #2a2018, #1a1410);
+  border-top: 1px solid #0c0907;
+}
+
+.frames {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  height: 100%;
+  align-items: stretch;
+  padding-top: 4px;
+}
+
+/* a single frame (Langstroth-style) — wooden border + amber comb pane */
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #4a3a2a 0%, #3a2c1f 6px, #2a1e15 8px, #2a1e15 calc(100% - 8px), #3a2c1f calc(100% - 6px), #4a3a2a 100%);
+  border-left: 1px solid #1a1410;
+  border-right: 1px solid #1a1410;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+  box-shadow: 0 2px 0 #0c0907;
+}
+.frame:hover { transform: translateY(-4px); }
+.frame.active { transform: translateY(-14px); box-shadow: 0 14px 24px rgba(0,0,0,0.5), 0 2px 0 #0c0907; }
+
+/* top hanger lug */
+.frame::before {
+  content:'';
+  position: absolute;
+  top: -6px; left: 8px; right: 8px;
+  height: 6px;
+  background: linear-gradient(180deg, #5a4a36, #3a2c1f);
+  border-radius: 1px;
+  box-shadow: inset 0 -1px 0 #1a1410;
+}
+/* tag pin */
+.frame-tag {
+  position: absolute;
+  top: -3px; right: 14px;
+  width: 6px; height: 12px;
+  background: var(--tag, var(--amber));
+  border-radius: 1px;
+  box-shadow: 0 0 6px var(--tag-glow, var(--amber-glow));
+  z-index: 2;
+}
+
+.frame-pane {
+  flex: 1;
+  margin: 10px 8px;
+  background: #1a120a;
+  border: 1px solid #0a0705;
+  position: relative;
+  overflow: hidden;
+  /* wax / comb texture */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(240,169,41,0.08), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(240,169,41,0.05), transparent 50%);
+}
+
+/* working: filled with golden wax + slow gradient */
+.frame.working .frame-pane {
+  background:
+    linear-gradient(180deg, rgba(240,169,41,0.08), rgba(240,169,41,0.18) 40%, rgba(240,169,41,0.10) 70%, rgba(196,122,20,0.06)),
+    #2a1d0c;
+  box-shadow: inset 0 0 24px rgba(240,169,41,0.18);
+}
+.frame.needs .frame-pane {
+  background:
+    linear-gradient(180deg, rgba(255,90,58,0.18), rgba(255,90,58,0.08)),
+    #2a120c;
+  box-shadow: inset 0 0 18px rgba(255,90,58,0.25);
+}
+.frame.idle .frame-pane {
+  background: #16110b;
+  opacity: 0.85;
+}
+.frame.stale .frame-pane {
+  background: #14110d;
+  opacity: 0.55;
+}
+
+/* fill bar — how much "honey" is in the frame (=context fill or activity) */
+.fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: var(--fill, 30%);
+  background: linear-gradient(180deg, var(--wax-light), var(--wax) 50%, var(--amber-deep));
+  opacity: 0.85;
+}
+.frame.idle .fill { opacity: 0.25; background: linear-gradient(180deg, #6a5a47, #4a3e30); }
+.frame.stale .fill { opacity: 0.15; background: #3a3024; }
+.frame.needs .fill { background: linear-gradient(180deg, #ff7a5a, #c43a1a); }
+
+/* wax cap line */
+.fill::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,220,160,0.4);
+}
+
+/* slow bee-shimmer for working */
+.frame.working .fill {
+  animation: honey-flow 3.5s ease-in-out infinite;
+}
+@keyframes honey-flow {
+  0%,100% { filter: brightness(0.95); }
+  50% { filter: brightness(1.15); }
+}
+
+/* status LED on the top lug */
+.led {
+  position: absolute;
+  top: -1px; left: 14px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--idle);
+  z-index: 2;
+}
+.frame.working .led { background: var(--working); box-shadow: 0 0 6px var(--working), 0 0 12px var(--amber-glow); animation: pulse 1.6s infinite; }
+.frame.needs .led { background: var(--needs); box-shadow: 0 0 6px var(--needs); animation: pulse 0.8s infinite; }
+.frame.stale .led { background: var(--stale); }
+@keyframes pulse {
+  0%,100% { opacity: 0.55; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* label plate at the bottom (engraved brass) */
+.plate {
+  margin: 0 8px 10px;
+  padding: 6px 8px 7px;
+  background: linear-gradient(180deg, #5a4a36, #3e3324);
+  border: 1px solid #1a1410;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: #1a1410;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.25;
+  position: relative;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.3);
+}
+.plate b { display: block; font-weight: 700; color: #1a1410; font-size: 10.5px; }
+.plate .sub { color: #4a3a26; font-size: 8.5px; letter-spacing: 0.1em; margin-top: 2px; }
+.frame.stale .plate, .frame.idle .plate { filter: saturate(0.6) brightness(0.85); }
+
+/* numerical index above the plate */
+.frame-num {
+  position: absolute;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+/* empty slot (for "new session") */
+.frame.empty {
+  background: linear-gradient(180deg, #2a2018, #1a1410);
+  cursor: pointer;
+}
+.frame.empty::before { background: linear-gradient(180deg, #2a2018, #1a1410); box-shadow: none; }
+.frame.empty .frame-pane {
+  background: transparent;
+  border: 1px dashed #3a2e22;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+  font-size: 18px;
+}
+.frame.empty .plate {
+  background: transparent;
+  border: 1px dashed #3a2e22;
+  color: var(--ink-mute);
+}
+.frame.empty:hover .frame-pane { border-color: var(--amber); color: var(--amber); }
+
+/* tiny activity sparkline overlaid on working pane */
+.shimmer {
+  position: absolute;
+  top: 8px; left: 8px; right: 8px;
+  height: 14px;
+  display: flex; align-items: flex-end; gap: 2px;
+  opacity: 0.5;
+}
+.shimmer span {
+  flex: 1;
+  background: var(--amber);
+  height: var(--h, 40%);
+  animation: spark 1.6s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+.frame:not(.working) .shimmer { display: none; }
+@keyframes spark {
+  0%,100% { transform: scaleY(0.3); opacity: 0.4; }
+  50% { transform: scaleY(1); opacity: 0.85; }
+}
+
+.caption {
+  position: fixed;
+  bottom: 6px; left: 22px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.back {
+  position: fixed; top: 10px; right: 14px; z-index: 20;
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--ink-mute); text-decoration: none;
+  background: #1a1410;
+  border: 1px solid #3a2e22;
+  padding: 4px 9px;
+}
+.back:hover { color: var(--amber); border-color: var(--amber); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="t-left">
+      <div class="lights"><span></span><span></span><span></span></div>
+      <div class="brand"><span class="bee"></span>MULTICLAUDE</div>
+    </div>
+    <div class="t-center">~/work / <b>multiclaude-hub</b> · super A</div>
+    <div class="t-right">10 FRAMES · ⌘N PULL FRAME</div>
+  </div>
+
+  <div class="telemetry">
+    <span class="metric">MODEL <b>OPUS 4.7</b></span>
+    <span class="metric">EFFORT <b class="accent">MAX</b></span>
+    <span class="metric">CTX <span class="bar"><span style="width:47%"></span></span> <b>47%</b></span>
+    <span class="metric">YIELD <b>14 MSG</b></span>
+    <span class="metric">QUEEN <b>HUB-01</b></span>
+    <span class="live">FORAGING — BASH(NPM RUN DEV)</span>
+  </div>
+
+  <div class="term-wrap">
+    <div class="terminal">
+<pre class="term-pre"><span class="p">&gt;</span> <span class="c">claude</span>
+
+<span class="c">⏺ Welcome back. What are we working on today?</span>
+
+<span class="p">&gt;</span> Wire the apiary frames into the live status feed
+
+<span class="c">⏺ Reading the registry layer to see how status flows in.</span>
+
+<span class="t">⏺ Bash(rg "SessionStatus" src/ -n)</span>
+  <span class="r">⎿  src/state/registry.ts:18:  type SessionStatus = 'WORKING' | 'IDLE' | 'NEEDS' | 'STALE'
+     src/components/Apiary.tsx:42:  status: SessionStatus
+     src/hooks/useSessions.ts:9:  return store.subscribe(...)</span>
+
+<span class="c">⏺ Got it. The frames already accept a status prop, they're just not
+  subscribing to the live store. I'll wire that up and map status →
+  fill height: WORKING fills slowly, NEEDS pulses red wax, STALE drains.</span>
+
+<span class="e">⏺ Edit(src/components/Apiary.tsx)</span>
+  <span class="r">⎿  Subscribed to useSessions(); mapped status → --fill var
+     Added pulse animation for NEEDS frames
+     Slowed STALE shimmer to 4s</span>
+
+<span class="c">⏺ Done. Each frame now reads honey level off the live store.
+  Hover a frame to peek scrollback; click to seat it as the active cell.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+    </div>
+  </div>
+
+  <!-- APIARY -->
+  <div class="apiary">
+    <div class="super-rail"></div>
+    <div class="super-floor"></div>
+    <div class="frames">
+
+      <!-- 1 ACTIVE WORKING -->
+      <div class="frame working active" style="--fill: 78%; --tag: #f0a929;">
+        <span class="led"></span>
+        <span class="frame-tag"></span>
+        <div class="frame-pane">
+          <div class="shimmer">
+            <span style="--h:40%; --d:0s"></span><span style="--h:70%; --d:0.1s"></span>
+            <span style="--h:55%; --d:0.2s"></span><span style="--h:85%; --d:0.3s"></span>
+            <span style="--h:60%; --d:0.4s"></span><span style="--h:75%; --d:0.5s"></span>
+          </div>
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·01</div>
+        <div class="plate"><b>MULTICLAUDE</b><div class="sub">~/WORK · NOW</div></div>
+      </div>
+
+      <!-- 2 WORKING -->
+      <div class="frame working" style="--fill: 62%; --tag: #6dd2c5;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#6dd2c5; box-shadow:0 0 6px #6dd2c5;"></span>
+        <div class="frame-pane">
+          <div class="shimmer">
+            <span style="--h:55%; --d:0s"></span><span style="--h:75%; --d:0.15s"></span>
+            <span style="--h:45%; --d:0.3s"></span><span style="--h:80%; --d:0.45s"></span>
+            <span style="--h:60%; --d:0.6s"></span><span style="--h:70%; --d:0.75s"></span>
+          </div>
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·02</div>
+        <div class="plate"><b>EXPMT-A</b><div class="sub">~/SCRATCH · 12s</div></div>
+      </div>
+
+      <!-- 3 NEEDS -->
+      <div class="frame needs" style="--fill: 90%; --tag: #ff5a3a;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#ff5a3a; box-shadow:0 0 8px #ff5a3a;"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·03</div>
+        <div class="plate"><b>SDO-AUDIT</b><div class="sub">PERMIT? · 30s</div></div>
+      </div>
+
+      <!-- 4 IDLE -->
+      <div class="frame idle" style="--fill: 35%; --tag: #7a3aff;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#7a3aff; box-shadow:0 0 6px rgba(122,58,255,0.4);"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·04</div>
+        <div class="plate"><b>DEMO-PREP</b><div class="sub">~/SDO · 4m</div></div>
+      </div>
+
+      <!-- 5 IDLE -->
+      <div class="frame idle" style="--fill: 28%; --tag: #ff2d92;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#ff2d92; box-shadow:0 0 6px rgba(255,45,146,0.4);"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·05</div>
+        <div class="plate"><b>CLAUDE-CLI</b><div class="sub">~/OSS · 8m</div></div>
+      </div>
+
+      <!-- 6 WORKING -->
+      <div class="frame working" style="--fill: 45%; --tag: #3a7afe;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#3a7afe; box-shadow:0 0 6px #3a7afe;"></span>
+        <div class="frame-pane">
+          <div class="shimmer">
+            <span style="--h:30%; --d:0s"></span><span style="--h:60%; --d:0.2s"></span>
+            <span style="--h:40%; --d:0.4s"></span><span style="--h:70%; --d:0.6s"></span>
+            <span style="--h:50%; --d:0.8s"></span><span style="--h:65%; --d:1s"></span>
+          </div>
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·06</div>
+        <div class="plate"><b>API-PROBES</b><div class="sub">~/PLATFORM · 3s</div></div>
+      </div>
+
+      <!-- 7 IDLE -->
+      <div class="frame idle" style="--fill: 22%; --tag: #cc1f3d;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#cc1f3d; box-shadow:0 0 6px rgba(204,31,61,0.3);"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·07</div>
+        <div class="plate"><b>PROD-MIGRATE</b><div class="sub">~/INFRA · 18m</div></div>
+      </div>
+
+      <!-- 8 STALE -->
+      <div class="frame stale" style="--fill: 18%; --tag: #6a5a47;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#6a5a47;"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·08</div>
+        <div class="plate"><b>STAG-DEPLOY</b><div class="sub">2H AGO</div></div>
+      </div>
+
+      <!-- 9 STALE -->
+      <div class="frame stale" style="--fill: 14%; --tag: #6a5a47;">
+        <span class="led"></span>
+        <span class="frame-tag" style="background:#6a5a47;"></span>
+        <div class="frame-pane">
+          <div class="fill"></div>
+        </div>
+        <div class="frame-num">F·09</div>
+        <div class="plate"><b>EXPMT-B</b><div class="sub">5H AGO</div></div>
+      </div>
+
+      <!-- 10 EMPTY -->
+      <div class="frame empty">
+        <span class="led"></span>
+        <div class="frame-pane">+</div>
+        <div class="frame-num">F·10</div>
+        <div class="plate"><b>SEAT FRAME</b><div class="sub">⌘N</div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="caption">09 / APIARY FRAMES — sessions seated as Langstroth frames; honey level reads activity, wax cap reads status.</div>
+<a class="back" href="index.html">─ INDEX</a>
+</body>
+</html>

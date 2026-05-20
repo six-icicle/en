@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MULTICLAUDE / 08 — Departures Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Major+Mono+Display&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --hall: #0a0907;
+  --board-frame: #1c1810;
+  --board-frame-2: #2a2418;
+  --board-bg: #050403;
+  --flap-bg: #0e0c08;
+  --flap-edge: #1a160e;
+  --flap-mid: #000;
+  --flap-text: #f6e3a8;
+  --flap-text-dim: #9c8d62;
+
+  --amber: #f5a524;
+  --amber-deep: #d68a14;
+  --amber-glow: #ffc15c;
+  --bee-yellow: #f0c419;
+  --led-green: #6dc83a;
+  --led-red: #e05038;
+
+  --text-frame: #c9b88e;
+  --text-faint: #6a5d44;
+
+  --term-bg: #050403;
+  --term-text: #e6dcc0;
+
+  --display: 'Major Mono Display', monospace;
+  --board-font: 'JetBrains Mono', ui-monospace, monospace;
+  --mono: 'DM Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--mono);
+  background: var(--hall);
+  color: var(--text-frame);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, #1c1810 0%, #0a0907 60%, #050403 100%);
+}
+
+.hall {
+  display: grid;
+  grid-template-rows: 36px auto 1fr 26px;
+  height: 100vh;
+}
+
+/* TITLEBAR */
+.titlebar {
+  background: linear-gradient(180deg, #14110b, #0a0805);
+  border-bottom: 1px solid #1c1810;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-frame);
+  position: relative;
+}
+.titlebar::after {
+  content:''; position:absolute; left:0; right:0; bottom:0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber) 30%, var(--amber) 70%, transparent);
+  opacity: 0.4;
+}
+.tb-l { display:flex; align-items:center; gap: 14px; }
+.lights { display:flex; gap: 5px; }
+.lt { width: 9px; height: 9px; border-radius: 50%; background: #1c1810; box-shadow: inset 0 0 2px rgba(0,0,0,0.6); }
+.lt.on { background: radial-gradient(circle at 35% 30%, var(--amber-glow), var(--amber) 60%, #5e3a08); box-shadow: 0 0 5px rgba(245,165,36,0.5); }
+.brand {
+  display:flex; align-items:center; gap: 10px;
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 0.16em;
+  color: var(--amber);
+}
+.brand-mark { width: 18px; height: 18px; }
+.tb-m { color: var(--text-faint); font-size: 10px; }
+.tb-m b { color: var(--bee-yellow); font-weight:500; }
+.tb-r { display:flex; justify-content:flex-end; align-items:center; gap: 10px; color: var(--text-faint); }
+.pill {
+  font-size: 9px; letter-spacing: 0.14em;
+  padding: 3px 9px;
+  border: 1px solid #3a2c14;
+  background: #14110b;
+  color: var(--text-frame);
+}
+.pill.live { color: var(--led-green); border-color: #2c4a1c; }
+.pill.live::before { content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background: var(--led-green); margin-right: 6px; box-shadow: 0 0 5px var(--led-green); animation: blink 1.4s ease-in-out infinite; }
+
+@keyframes blink { 50% { opacity: 0.4; } }
+
+/* BIG BOARD */
+.board-wrap {
+  background:
+    linear-gradient(180deg, #1c1810 0%, #14110b 100%);
+  border-bottom: 4px solid #2a2418;
+  padding: 14px 16px 18px;
+  position: relative;
+}
+.board-wrap::before {
+  /* top valance with screws */
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #2a2418 0 60px, #1c1810 60px 64px);
+}
+
+.board {
+  background: var(--board-bg);
+  border: 2px solid #2a2418;
+  border-top-color: #3a2f20;
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 4px 18px rgba(0,0,0,0.9),
+    0 8px 24px rgba(0,0,0,0.6);
+  position: relative;
+}
+
+.board-header {
+  display: grid;
+  grid-template-columns: 60px 90px 1.4fr 80px 1.6fr 90px 90px 90px;
+  gap: 0;
+  padding: 8px 14px 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #6a5530;
+  text-transform: uppercase;
+  border-bottom: 1px solid #1c1810;
+  background: linear-gradient(180deg, #0c0a06, #050403);
+}
+.board-header > span { padding-right: 6px; }
+
+.rows {
+  padding: 4px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 60px 90px 1.4fr 80px 1.6fr 90px 90px 90px;
+  gap: 0;
+  align-items: center;
+  height: 38px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+.row:hover { background: rgba(245,165,36,0.04); }
+.row.active {
+  background: linear-gradient(90deg, rgba(245,165,36,0.16) 0%, rgba(245,165,36,0.04) 80%, transparent 100%);
+  box-shadow: inset 4px 0 0 var(--amber);
+}
+.row.active::after {
+  content: '▶';
+  position: absolute;
+  left: 8px; top: 50%; transform: translateY(-50%);
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 11px;
+  text-shadow: 0 0 6px rgba(245,165,36,0.7);
+}
+
+/* split-flap "cell" — each cell looks like a flip-character box */
+.cell {
+  background: var(--flap-bg);
+  border: 1px solid var(--flap-edge);
+  border-top: 1px solid #1f1a10;
+  border-bottom: 1px solid #000;
+  height: 30px;
+  margin-right: 4px;
+  display: flex; align-items: center;
+  padding: 0 9px;
+  font-family: var(--board-font);
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--flap-text);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 14px rgba(0,0,0,0.7);
+}
+/* horizontal "flap split" line */
+.cell::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--flap-mid);
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+/* subtle light gradient on top half */
+.cell::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
+  pointer-events: none;
+}
+
+.cell.no-flap::before, .cell.no-flap::after { display:none; }
+
+.cell.dim { color: var(--flap-text-dim); }
+
+/* status flap colors */
+.cell.status { letter-spacing: 0.18em; font-weight: 700; padding: 0 10px; }
+.cell.status.working { color: var(--led-green); text-shadow: 0 0 6px rgba(109,200,58,0.4); }
+.cell.status.working::before { background: rgba(0,0,0,0.9); }
+.cell.status.needs {
+  color: #fff;
+  background: linear-gradient(180deg, #b62a18 0%, #7a1c10 100%);
+  border-color: #2a0c06;
+  text-shadow: 0 0 8px rgba(255,200,180,0.5);
+  animation: needs-blink 1.2s ease-in-out infinite;
+}
+@keyframes needs-blink {
+  0%, 100% { box-shadow: inset 0 0 14px rgba(0,0,0,0.7); }
+  50% { box-shadow: inset 0 0 14px rgba(0,0,0,0.7), 0 0 12px rgba(224,80,56,0.6); }
+}
+.cell.status.idle { color: var(--flap-text-dim); }
+.cell.status.stale { color: #5a4f38; }
+
+/* track stripe (color tag) */
+.cell.track {
+  padding: 0 6px;
+  font-size: 11px;
+  color: var(--flap-bg);
+  font-weight: 700;
+  background: var(--tag, #6a5530);
+  border-color: rgba(0,0,0,0.5);
+  position: relative;
+}
+.cell.track::before { background: rgba(0,0,0,0.35); }
+
+/* activity sparkline */
+.cell.act {
+  padding: 0 6px;
+  display: flex; align-items: center; gap: 2px;
+}
+.cell.act::before, .cell.act::after { display:none; }
+.cell.act .bar {
+  width: 3px;
+  height: var(--h, 30%);
+  background: var(--led-green);
+  box-shadow: 0 0 3px rgba(109,200,58,0.5);
+}
+.row.idle .cell.act .bar { background: #4a4135; box-shadow: none; opacity: 0.5; }
+.row.needs .cell.act .bar { background: var(--led-red); box-shadow: 0 0 3px rgba(224,80,56,0.6); }
+.row.stale .cell.act .bar { background: #3a342a; box-shadow: none; opacity: 0.4; }
+.row.working .cell.act .bar { animation: bar-pulse 1.4s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes bar-pulse {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; transform-origin: bottom; }
+  50% { transform: scaleY(1); opacity: 1; transform-origin: bottom; }
+}
+
+/* row dim states */
+.row.idle .cell:not(.status):not(.track) { color: var(--flap-text-dim); }
+.row.stale .cell:not(.status):not(.track) { color: #5a4f38; }
+
+/* lock dial / corner ornaments */
+.board::before {
+  content: '';
+  position: absolute;
+  top: -10px; left: -10px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c9a060, #6a5530 60%, #2a1f0e 100%);
+  box-shadow: inset 0 0 1px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.4);
+}
+.board::after {
+  content: '';
+  position: absolute;
+  top: -10px; right: -10px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c9a060, #6a5530 60%, #2a1f0e 100%);
+  box-shadow: inset 0 0 1px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* board valance / station signage */
+.valance {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, #2a2418, #1c1810);
+  border-top: 1px solid #3a2f20;
+  border-bottom: 1px solid #050403;
+  font-family: var(--display);
+  letter-spacing: 0.32em;
+  color: var(--amber);
+  font-size: 13px;
+}
+.valance .right {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+}
+.valance .right b { color: var(--bee-yellow); font-weight:500; }
+.valance .platform-num {
+  display: inline-block;
+  background: var(--bee-yellow);
+  color: #1a140e;
+  padding: 2px 8px;
+  font-family: var(--board-font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-right: 12px;
+}
+
+/* clock cell */
+.clock-cell {
+  background: var(--flap-bg);
+  border: 1px solid var(--flap-edge);
+  padding: 4px 10px;
+  font-family: var(--board-font);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.16em;
+  position: relative;
+  text-shadow: 0 0 8px rgba(245,165,36,0.4);
+}
+.clock-cell::before {
+  content: ''; position: absolute;
+  left: 0; right: 0; top: 50%; height: 1px;
+  background: rgba(0,0,0,0.85);
+}
+
+/* TERMINAL PANE below */
+.main {
+  background: #050403;
+  position: relative;
+  display: grid;
+  grid-template-rows: 30px 1fr;
+  border-top: 1px solid #1c1810;
+}
+.telemetry {
+  background: linear-gradient(180deg, #14110b, #0a0805);
+  border-bottom: 1px solid #1c1810;
+  display: flex; align-items: center; gap: 18px;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  overflow: hidden;
+}
+.tm { display:flex; align-items:center; gap: 7px; white-space: nowrap; }
+.tm b { color: var(--text-frame); font-weight:500; }
+.tm .em { color: var(--bee-yellow); }
+.bar2 { display:inline-block; width: 56px; height: 5px; background: #1c1810; position: relative; }
+.bar2 > i { position:absolute; inset: 0; right: auto; background: linear-gradient(90deg, var(--amber-deep), var(--bee-yellow)); }
+.tm.act { margin-left:auto; color: var(--led-green); }
+.tm.act::before { content:''; width:6px; height:6px; border-radius:50%; background: var(--led-green); box-shadow: 0 0 6px var(--led-green); animation: blink 1.2s ease-in-out infinite; }
+
+.term-frame { padding: 12px 16px 16px; position: relative; min-height: 0; }
+.term {
+  background: var(--term-bg);
+  border: 1px solid #1a160e;
+  border-top: 1px solid #2a2418;
+  height: 100%;
+  padding: 16px 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.7);
+}
+.term::before {
+  content: 'TRACK 03 · NOW BOARDING';
+  position: absolute;
+  top: 6px; right: 12px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #5b4f3a;
+  letter-spacing: 0.2em;
+}
+.term::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0) 0 2px, rgba(255,255,255,0.012) 2px 3px);
+  pointer-events: none;
+}
+pre.console {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--term-text);
+  white-space: pre;
+  margin: 0;
+}
+.c-prompt { color: var(--amber); font-weight: 500; }
+.c-claude { color: #ede4c8; }
+.c-tool { color: #8ad0e5; }
+.c-result { color: #7a7060; }
+.c-edit { color: #f0c074; }
+.c-cursor { display:inline-block; width:9px; height:15px; background: var(--amber); vertical-align: text-top; animation: blink 1s step-end infinite; box-shadow: 0 0 6px rgba(245,165,36,0.5); }
+
+.caption {
+  position: absolute;
+  left: 22px; bottom: 22px;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #5b4f3a;
+  pointer-events: none;
+}
+.caption b { color: var(--amber); }
+
+/* footer */
+.foot {
+  background: linear-gradient(180deg, #0c0a06, #050403);
+  border-top: 1px solid #1c1810;
+  display: flex; align-items: center; gap: 14px;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+.foot .right { margin-left: auto; }
+
+.back {
+  position: fixed;
+  top: 7px; right: 14px;
+  z-index: 100;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-frame);
+  background: #14110b;
+  border: 1px solid #3a2c14;
+  padding: 3px 9px;
+  text-decoration: none;
+}
+.back:hover { color: var(--amber); border-color: var(--amber); }
+
+/* small flap "settling" animation on first load — subtle */
+.row .cell { animation: settle 0.4s ease-out backwards; }
+.row:nth-child(1) .cell { animation-delay: 0.05s; }
+.row:nth-child(2) .cell { animation-delay: 0.1s; }
+.row:nth-child(3) .cell { animation-delay: 0.15s; }
+.row:nth-child(4) .cell { animation-delay: 0.2s; }
+.row:nth-child(5) .cell { animation-delay: 0.25s; }
+.row:nth-child(6) .cell { animation-delay: 0.3s; }
+.row:nth-child(7) .cell { animation-delay: 0.35s; }
+.row:nth-child(8) .cell { animation-delay: 0.4s; }
+.row:nth-child(9) .cell { animation-delay: 0.45s; }
+.row:nth-child(10) .cell { animation-delay: 0.5s; }
+@keyframes settle {
+  from { transform: translateY(-3px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="hall">
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="tb-l">
+      <div class="lights"><span class="lt"></span><span class="lt"></span><span class="lt on"></span></div>
+      <div class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 6 L12 2 L21 6 L21 18 L12 22 L3 18 Z" stroke="#f5a524" stroke-width="1.4" fill="#0a0907"/>
+            <circle cx="12" cy="12" r="3" fill="#f5a524"/>
+          </svg>
+        </span>
+        MULTICLAUDE
+      </div>
+    </div>
+    <div class="tb-m">SIGNAL HALL · TRACK <b>03</b> · ~/work/multiclaude-hub</div>
+    <div class="tb-r">
+      <span class="pill">HALL-A</span>
+      <span class="pill live">9 SCHEDULED</span>
+    </div>
+  </div>
+
+  <!-- BIG BOARD -->
+  <section class="board-wrap">
+    <div class="valance">
+      <div><span class="platform-num">PLAT 03</span> SESSION DEPARTURES</div>
+      <div class="right">SVC <b>BEE-DROID</b> · LIVE · <span class="clock-cell" style="display:inline-block; padding: 2px 8px; font-size: 12px;">14:32:08</span></div>
+    </div>
+
+    <div class="board">
+      <div class="board-header">
+        <span>TRACK</span>
+        <span>DEP</span>
+        <span>SESSION</span>
+        <span>SVC</span>
+        <span>DESTINATION (PROJECT)</span>
+        <span>ACTIVITY</span>
+        <span>ETA</span>
+        <span>STATUS</span>
+      </div>
+
+      <div class="rows">
+
+        <!-- ROW 1: working -->
+        <div class="row working">
+          <div class="cell">01</div>
+          <div class="cell">14:18</div>
+          <div class="cell">CLAUDE-CLI</div>
+          <div class="cell track" style="--tag:#3a7afe; color:#fff;">DEV</div>
+          <div class="cell">~/OSS/CLAUDE-CODE</div>
+          <div class="cell act">
+            <span class="bar" style="--h:60%; --d:0s"></span>
+            <span class="bar" style="--h:80%; --d:0.1s"></span>
+            <span class="bar" style="--h:50%; --d:0.2s"></span>
+            <span class="bar" style="--h:90%; --d:0.3s"></span>
+            <span class="bar" style="--h:70%; --d:0.4s"></span>
+            <span class="bar" style="--h:65%; --d:0.5s"></span>
+            <span class="bar" style="--h:75%; --d:0.6s"></span>
+          </div>
+          <div class="cell">00:14</div>
+          <div class="cell status working">WORKING</div>
+        </div>
+
+        <!-- ROW 2: idle -->
+        <div class="row idle">
+          <div class="cell">02</div>
+          <div class="cell">14:09</div>
+          <div class="cell">DEMO-PREP</div>
+          <div class="cell track" style="--tag:#7a3aff; color:#fff;">DEMO</div>
+          <div class="cell">~/SDO/SPRING-DEMO</div>
+          <div class="cell act">
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:22%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+          </div>
+          <div class="cell">04:21</div>
+          <div class="cell status idle">IDLE</div>
+        </div>
+
+        <!-- ROW 3: ACTIVE / working -->
+        <div class="row working active">
+          <div class="cell">03</div>
+          <div class="cell">14:31</div>
+          <div class="cell">MULTICLAUDE</div>
+          <div class="cell track" style="--tag:#f5a524; color:#1a140e;">HUB</div>
+          <div class="cell">~/WORK/MULTICLAUDE-HUB</div>
+          <div class="cell act">
+            <span class="bar" style="--h:80%; --d:0s"></span>
+            <span class="bar" style="--h:65%; --d:0.08s"></span>
+            <span class="bar" style="--h:90%; --d:0.16s"></span>
+            <span class="bar" style="--h:75%; --d:0.24s"></span>
+            <span class="bar" style="--h:85%; --d:0.32s"></span>
+            <span class="bar" style="--h:70%; --d:0.4s"></span>
+            <span class="bar" style="--h:95%; --d:0.48s"></span>
+          </div>
+          <div class="cell">00:02</div>
+          <div class="cell status working">▶ NOW</div>
+        </div>
+
+        <!-- ROW 4: NEEDS YOU -->
+        <div class="row needs">
+          <div class="cell">04</div>
+          <div class="cell">14:28</div>
+          <div class="cell">SDO-AUDIT</div>
+          <div class="cell track" style="--tag:#e05038; color:#fff;">SF</div>
+          <div class="cell">~/SF/AUDIT-RUNNER</div>
+          <div class="cell act">
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+            <span class="bar" style="--h:95%"></span>
+          </div>
+          <div class="cell">00:46</div>
+          <div class="cell status needs">NEEDS YOU</div>
+        </div>
+
+        <!-- ROW 5: working -->
+        <div class="row working">
+          <div class="cell">05</div>
+          <div class="cell">14:24</div>
+          <div class="cell">EXPMT-TAURI</div>
+          <div class="cell track" style="--tag:#00b3a6; color:#fff;">SPK</div>
+          <div class="cell">~/SCRATCH/TAURI-SPIKE</div>
+          <div class="cell act">
+            <span class="bar" style="--h:55%; --d:0s"></span>
+            <span class="bar" style="--h:70%; --d:0.12s"></span>
+            <span class="bar" style="--h:45%; --d:0.24s"></span>
+            <span class="bar" style="--h:65%; --d:0.36s"></span>
+            <span class="bar" style="--h:50%; --d:0.48s"></span>
+            <span class="bar" style="--h:60%; --d:0.6s"></span>
+            <span class="bar" style="--h:55%; --d:0.72s"></span>
+          </div>
+          <div class="cell">00:08</div>
+          <div class="cell status working">WORKING</div>
+        </div>
+
+        <!-- ROW 6: idle -->
+        <div class="row idle">
+          <div class="cell">06</div>
+          <div class="cell">13:56</div>
+          <div class="cell">PROD-MIGRATE</div>
+          <div class="cell track" style="--tag:#cc1f3d; color:#fff;">OPS</div>
+          <div class="cell">~/INFRA/MIGRATION-2026</div>
+          <div class="cell act">
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:22%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+          </div>
+          <div class="cell">12:03</div>
+          <div class="cell status idle">IDLE</div>
+        </div>
+
+        <!-- ROW 7: stale -->
+        <div class="row stale">
+          <div class="cell">07</div>
+          <div class="cell">12:18</div>
+          <div class="cell">STAG-DEPLOY</div>
+          <div class="cell track" style="--tag:#8a6a1a; color:#1a140e;">OPS</div>
+          <div class="cell">~/OPS/STAG</div>
+          <div class="cell act">
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+            <span class="bar" style="--h:14%"></span>
+          </div>
+          <div class="cell">2:14H</div>
+          <div class="cell status stale">STALE</div>
+        </div>
+
+        <!-- ROW 8: working -->
+        <div class="row working">
+          <div class="cell">08</div>
+          <div class="cell">14:01</div>
+          <div class="cell">PAPER-WIRE</div>
+          <div class="cell track" style="--tag:#f0c419; color:#1a140e;">DOC</div>
+          <div class="cell">~/DECKS/RELEASE-26</div>
+          <div class="cell act">
+            <span class="bar" style="--h:65%; --d:0s"></span>
+            <span class="bar" style="--h:75%; --d:0.14s"></span>
+            <span class="bar" style="--h:55%; --d:0.28s"></span>
+            <span class="bar" style="--h:80%; --d:0.42s"></span>
+            <span class="bar" style="--h:60%; --d:0.56s"></span>
+            <span class="bar" style="--h:70%; --d:0.7s"></span>
+            <span class="bar" style="--h:65%; --d:0.84s"></span>
+          </div>
+          <div class="cell">00:31</div>
+          <div class="cell status working">WORKING</div>
+        </div>
+
+        <!-- ROW 9: idle -->
+        <div class="row idle">
+          <div class="cell">09</div>
+          <div class="cell">13:42</div>
+          <div class="cell">SCRATCH-B</div>
+          <div class="cell track" style="--tag:#ff2d92; color:#fff;">SPK</div>
+          <div class="cell">~/SCRATCH/B</div>
+          <div class="cell act">
+            <span class="bar" style="--h:16%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:16%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:16%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:16%"></span>
+          </div>
+          <div class="cell">28:00</div>
+          <div class="cell status idle">IDLE</div>
+        </div>
+
+        <!-- ROW 10: idle -->
+        <div class="row idle">
+          <div class="cell">10</div>
+          <div class="cell">13:12</div>
+          <div class="cell">DOCS-INDEX</div>
+          <div class="cell track" style="--tag:#6a5530; color:#f6e3a8;">DOC</div>
+          <div class="cell">~/WORK/DOCS-SITE</div>
+          <div class="cell act">
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:22%"></span>
+            <span class="bar" style="--h:18%"></span>
+            <span class="bar" style="--h:20%"></span>
+            <span class="bar" style="--h:18%"></span>
+          </div>
+          <div class="cell">58:14</div>
+          <div class="cell status idle">IDLE</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- TERMINAL PANE -->
+  <main class="main">
+    <div class="telemetry">
+      <span class="tm"><span>TRK</span><b>03</b></span>
+      <span class="tm"><span>MODEL</span><b>OPUS 4.7</b></span>
+      <span class="tm"><span>EFFORT</span><b class="em">MAX</b></span>
+      <span class="tm"><span>CTX</span><span class="bar2"><i style="width:47%"></i></span><b>47%</b></span>
+      <span class="tm"><span>MSG</span><b>14</b></span>
+      <span class="tm"><span>UPTIME</span><b>00:42:18</b></span>
+      <span class="tm act"><b>BASH(NPM RUN DEV)</b></span>
+    </div>
+
+    <div class="term-frame">
+      <div class="term">
+<pre class="console"><span class="c-prompt">&gt;</span> <span class="c-claude">claude</span>
+
+<span class="c-claude">⏺ Departing track 03. What are we shipping today?</span>
+
+<span class="c-prompt">&gt;</span> Make the departures-board flap when a session changes status
+
+<span class="c-claude">⏺ Reading the board cell renderer + status reducer...</span>
+
+<span class="c-tool">⏺ Bash(rg "status =&gt;" src/board/)</span>
+  <span class="c-result">⎿  src/board/Row.tsx:42:    on(session.status =&gt; setStatus(s))
+     src/board/flap.css:8:    @keyframes flap-flip { ... }</span>
+
+<span class="c-claude">⏺ I'll trigger the flap-flip animation only on the cells whose value
+  actually changed — TRACK and ETA stay still, STATUS / ACT flip.
+  Each flap settles with a 40ms stagger so the row reads left-to-right
+  like a real Solari board.</span>
+
+<span class="c-edit">⏺ Edit(src/board/Row.tsx)</span>
+  <span class="c-result">⎿  Diffed prev/next row, mapped to changed-cell set
+     Triggered animation on changed cells only
+     Added 40ms stagger via animation-delay</span>
+
+<span class="c-claude">⏺ Done. Watch the board now: when sdo-audit flips from WORKING to
+  NEEDS YOU, you'll hear (well — see) the row clatter.
+  The eye catches the motion before the red.</span>
+
+<span class="c-prompt">&gt;</span> <span class="c-cursor"></span></pre>
+      </div>
+      <div class="caption"><b>08 ·</b> DEPARTURES BOARD — sessions as scheduled trains; scan the hall, the flapping rows are the ones you owe attention</div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <div class="foot">
+    <span>HALL-A</span>
+    <span>10 SCHEDULED</span>
+    <span>·</span>
+    <span style="color:#aef07e;">DEPARTING 4</span>
+    <span style="color:#ff8a78;">HOLD 1</span>
+    <span style="color:#c9b88e;">STANDBY 4</span>
+    <span style="color:#6a5d44;">CANCELLED 1</span>
+    <span class="right">▣ NEXT FLIP IN 12s · BOARD REV 2026.05.19</span>
+  </div>
+</div>
+
+<a class="back" href="index.html">─ INDEX</a>
+
+</body>
+</html>

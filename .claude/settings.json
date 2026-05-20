@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sf data query *)",
+      "Bash(sf org list *)",
+      "Bash(sf org display *)",
+      "Bash(sf sobject list *)"
+    ]
+  }
+}

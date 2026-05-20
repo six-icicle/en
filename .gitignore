@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Vite / build
+dist/
+*.tsbuildinfo
+
+# Rust / Cargo
+target/
+**/target/
+Cargo.lock.bak
+
+# Tauri
+src-tauri/gen/
+src-tauri/target/
+
+# Local scratch
+pass-code.md
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Project-local Claude settings (user-specific, not project state)
+.claude/settings.local.json
