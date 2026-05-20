@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EN / 42 — Brand fonts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600;700&family=Fraunces:wght@400;500;600;700&family=Instrument+Serif:wght@400&family=DM+Serif+Display:wght@400&family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Crimson+Pro:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Spectral:wght@400;500;600;700&family=Marcellus&family=Cinzel:wght@400;500;600;700&family=Major+Mono+Display&family=VT323&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+:root {
+  --bg:        #232136;
+  --tile:      #2a273f;
+  --tile-2:    #312e4a;
+  --line:      #393552;
+  --line-2:    #44415a;
+  --ink:       #e0def4;
+  --ink-2:     #908caa;
+  --ink-3:     #6e6a86;
+  --ink-4:     #4a4660;
+  --accent:    #ea9a97;
+  --accent-glow: rgba(234,154,151,0.35);
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  min-height: 100%;
+  padding: 28px 28px 60px;
+}
+
+/* seigaiha texture (lifted from 36-textures.html) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.7'%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3Ccircle cx='60' cy='20' r='18'/%3E%3Ccircle cx='60' cy='20' r='12'/%3E%3Ccircle cx='60' cy='20' r='6'/%3E%3Ccircle cx='0' cy='40' r='18'/%3E%3Ccircle cx='40' cy='40' r='18'/%3E%3Ccircle cx='80' cy='40' r='18'/%3E%3Ccircle cx='0' cy='0' r='18'/%3E%3Ccircle cx='40' cy='0' r='18'/%3E%3Ccircle cx='80' cy='0' r='18'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 40px;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 60%,
+      rgba(0,0,0,0.16) 100%);
+  z-index: 9998;
+}
+
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+header.intro {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  padding: 22px 26px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+header.intro h1 {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+header.intro p {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  padding: 28px 30px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+  transition: border-color 0.15s ease;
+}
+.card:hover {
+  border-color: var(--line-2);
+}
+.card .wordmark {
+  font-size: 88px;
+  line-height: 0.95;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+.card .meta {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 220px;
+}
+.card .meta .name {
+  color: var(--ink);
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 12.5px;
+}
+.card .meta .vibe {
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 11.5px;
+  font-style: italic;
+  font-family: var(--sans);
+  text-align: right;
+  line-height: 1.4;
+  max-width: 220px;
+}
+.card .meta .num {
+  font-size: 9.5px;
+  color: var(--ink-4);
+}
+
+/* — Each font gets a class. Lowercase 'en' shown at large size. — */
+
+.f-inter      { font-family: 'Inter', sans-serif; font-weight: 600; }
+.f-jbm        { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+.f-space      { font-family: 'Space Grotesk', sans-serif; font-weight: 500; }
+.f-geist      { font-family: 'Geist Mono', monospace; font-weight: 500; }
+.f-plex-serif { font-family: 'IBM Plex Serif', serif; font-weight: 500; }
+.f-plex-mono  { font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+.f-eb         { font-family: 'EB Garamond', serif; font-weight: 500; font-style: italic; }
+.f-fraunces   { font-family: 'Fraunces', serif; font-weight: 500; }
+.f-instrument { font-family: 'Instrument Serif', serif; font-weight: 400; font-style: italic; }
+.f-dm         { font-family: 'DM Serif Display', serif; font-weight: 400; }
+.f-playfair   { font-family: 'Playfair Display', serif; font-weight: 500; }
+.f-cormorant  { font-family: 'Cormorant Garamond', serif; font-weight: 500; font-style: italic; }
+.f-crimson    { font-family: 'Crimson Pro', serif; font-weight: 500; }
+.f-outfit     { font-family: 'Outfit', sans-serif; font-weight: 600; }
+.f-manrope    { font-family: 'Manrope', sans-serif; font-weight: 600; }
+.f-spectral   { font-family: 'Spectral', serif; font-weight: 500; font-style: italic; }
+.f-marcellus  { font-family: 'Marcellus', serif; font-weight: 400; }
+.f-cinzel     { font-family: 'Cinzel', serif; font-weight: 500; text-transform: lowercase; }
+.f-major      { font-family: 'Major Mono Display', monospace; font-weight: 400; }
+.f-vt         { font-family: 'VT323', monospace; font-weight: 400; }
+
+.section-label {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 18px 4px 6px;
+  border-bottom: 1px solid var(--line);
+  margin-top: 8px;
+}
+
+/* The current pick gets an accent ring */
+.card.current::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px var(--accent), 0 0 24px var(--accent-glow);
+  z-index: -1;
+}
+.card.current .badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 3px 7px;
+  margin-bottom: 6px;
+  border-radius: 1px;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="intro">
+  <h1>EN — wordmark / font sampling</h1>
+  <p>theme: rose-pine-alt · texture: seigaiha · sample: lowercase 'en'</p>
+</header>
+
+<div class="grid">
+
+  <div class="section-label">Current — sans-serif</div>
+
+  <div class="card current">
+    <div class="wordmark f-inter">en</div>
+    <div class="meta">
+      <span class="badge">current</span>
+      <span class="name">Inter</span>
+      <span class="num">01</span>
+      <span class="vibe">Modern, neutral, blends. The default.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-jbm">en</div>
+    <div class="meta">
+      <span class="name">JetBrains Mono</span>
+      <span class="num">02</span>
+      <span class="vibe">Same font as the rest of the UI. Tool-built-by-engineers identity.</span>
+    </div>
+  </div>
+
+  <div class="section-label">Geometric / modern sans</div>
+
+  <div class="card">
+    <div class="wordmark f-space">en</div>
+    <div class="meta">
+      <span class="name">Space Grotesk</span>
+      <span class="num">03</span>
+      <span class="vibe">Quirky lowercase, slight humanist warmth. Confident.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-outfit">en</div>
+    <div class="meta">
+      <span class="name">Outfit</span>
+      <span class="num">04</span>
+      <span class="vibe">Clean Apple-like geometric. Friendly.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-manrope">en</div>
+    <div class="meta">
+      <span class="name">Manrope</span>
+      <span class="num">05</span>
+      <span class="vibe">Open, soft terminals. Minimal but human.</span>
+    </div>
+  </div>
+
+  <div class="section-label">Mono — devtool feel</div>
+
+  <div class="card">
+    <div class="wordmark f-geist">en</div>
+    <div class="meta">
+      <span class="name">Geist Mono</span>
+      <span class="num">06</span>
+      <span class="vibe">Vercel's signature mono. Crisp, modern, confident.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-plex-mono">en</div>
+    <div class="meta">
+      <span class="name">IBM Plex Mono</span>
+      <span class="num">07</span>
+      <span class="vibe">Industrial precision. Serious but approachable.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-major">en</div>
+    <div class="meta">
+      <span class="name">Major Mono Display</span>
+      <span class="num">08</span>
+      <span class="vibe">All-caps display mono. Cyberpunk header. Loud.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-vt">en</div>
+    <div class="meta">
+      <span class="name">VT323</span>
+      <span class="num">09</span>
+      <span class="vibe">CRT terminal nostalgia. Goes hard with scanlines texture.</span>
+    </div>
+  </div>
+
+  <div class="section-label">Editorial / serif — adds character</div>
+
+  <div class="card">
+    <div class="wordmark f-instrument">en</div>
+    <div class="meta">
+      <span class="name">Instrument Serif (italic)</span>
+      <span class="num">10</span>
+      <span class="vibe">Editorial italic. Looks like a fashion magazine masthead.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-eb">en</div>
+    <div class="meta">
+      <span class="name">EB Garamond (italic)</span>
+      <span class="num">11</span>
+      <span class="vibe">Quiet, classical italic. The literate choice.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-cormorant">en</div>
+    <div class="meta">
+      <span class="name">Cormorant Garamond (italic)</span>
+      <span class="num">12</span>
+      <span class="vibe">Display Garamond, sharp. Like Hermès not Penguin.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-fraunces">en</div>
+    <div class="meta">
+      <span class="name">Fraunces</span>
+      <span class="num">13</span>
+      <span class="vibe">Wonky variable serif. Friendly literary.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-spectral">en</div>
+    <div class="meta">
+      <span class="name">Spectral (italic)</span>
+      <span class="num">14</span>
+      <span class="vibe">Reading-screen serif. Calm, patient, trustworthy.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-playfair">en</div>
+    <div class="meta">
+      <span class="name">Playfair Display</span>
+      <span class="num">15</span>
+      <span class="vibe">High-contrast Didone. Editorial, luxurious.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-dm">en</div>
+    <div class="meta">
+      <span class="name">DM Serif Display</span>
+      <span class="num">16</span>
+      <span class="vibe">Bold display Didone. Loud declaration.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-plex-serif">en</div>
+    <div class="meta">
+      <span class="name">IBM Plex Serif</span>
+      <span class="num">17</span>
+      <span class="vibe">Pairs perfectly if you also adopt Plex Mono. Coherent system.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-marcellus">en</div>
+    <div class="meta">
+      <span class="name">Marcellus</span>
+      <span class="num">18</span>
+      <span class="vibe">Roman inscriptional serif. Quiet authority. Enduring.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-cinzel">en</div>
+    <div class="meta">
+      <span class="name">Cinzel (lowercased)</span>
+      <span class="num">19</span>
+      <span class="vibe">Capital-only carved serif, forced to lowercase. Stark.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wordmark f-crimson">en</div>
+    <div class="meta">
+      <span class="name">Crimson Pro</span>
+      <span class="num">20</span>
+      <span class="vibe">Old-style book serif. Library-quiet.</span>
+    </div>
+  </div>
+
+</div>
+</div>
+</body>
+</html>

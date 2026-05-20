@@ -8,9 +8,9 @@ User runs many `claude` sessions per day across different projects and wants one
 
 ## Stack
 - Frontend: React 19 + TypeScript + shadcn/ui + Vite + xterm.js (WebGL addon)
-- Backend: Tauri 2 + Rust + portable-pty
+- Backend: Tauri 2 + Rust + portable-pty + tiny_http (status-detection HTTP receiver)
 - Storage: SQLite via rusqlite (planned — metadata only; sessions are ephemeral, die on hub quit)
-- Aesthetic: hyper-modern minimal terminal grid. Inter + JetBrains Mono. **Default theme: rose-pine-alt + seigaiha texture** (changed from kanagawa/grain). 5 themes + 6 textures + accent/bg pickers + texture-amount and font-size scales.
+- Aesthetic: hyper-modern minimal terminal grid. **Brand wordmark: Outfit 600/18px**, body sans Inter, mono JetBrains Mono. **Default theme: rose-pine-alt + seigaiha texture** (changed from kanagawa/grain). 5 themes + 6 textures + accent/bg pickers + texture-amount and font-size scales.
 
 ## What's done
 - Architecture: Tauri 2 + React/TS + portable-pty
@@ -35,12 +35,16 @@ User runs many `claude` sessions per day across different projects and wants one
   - All honor `prefers-reduced-motion`. Default = Andon.
   - Status detection isn't wired yet — `tile.status === "needs"` never fires from runtime today; preview via `pass-code.md` devtools snippet.
 - **Window-drag artifact fixed**: switched `body::before` (texture) and `body::after` (vignette) from `position: fixed` → `position: absolute` so they don't get put on a separate compositor layer that lagged behind the window during drag on macOS WebView.
+- **Project rename + git init** (2026-05-20): folder `multiclaude/`→`en/`, brand `multi·claude`→lowercase `en`, bundle `dev.sixicicle.en`, Cargo crate `en`/`en_lib`, refit event `multiclaude:refit`→`en:refit`. Memory dir moved to `~/.claude/projects/-Users-austin-pozodesportes-Documents-claude-projects-en/memory/`. Repo: `https://github.com/six-icicle/en` (HTTPS via gh token; SSH not authorized for this account). Initial commit pushed to `main`.
+- **Status detection shipped on `feat/status-detection`** (2026-05-20, NOT YET MERGED OR PUSHED). New `app/src-tauri/src/hooks.rs` runs a `tiny_http` receiver bound to 127.0.0.1:0 (dynamic port), listens for `POST /hook` with `{session_id, event}`, emits `tile-status:<id>` Tauri events. State machine: SessionStart→idle, UserPromptSubmit→working, Stop|Notification→needs, SubagentStop ignored. `pty.rs` injects `EN_HUB_SESSION_ID` and `EN_HUB_HOOK_URL` into every spawn. On startup the app idempotently merges a hook block into `~/.claude/settings.json` (with one-time `settings.json.en-backup-<ts>` backup). Hook commands are guarded by `[ -n "$EN_HUB_SESSION_ID" ]` so claude run outside en is a no-op. Frontend `sessions.tsx` listens per-session and writes to `Session.status`; `App.tsx` `tilesWithStatus` mapping passes `working`/`needs`/`idle` through to existing CSS. Smoke-tested live: tiles flip working↔needs on real claude prompts.
+- **Brand font set to Outfit** (2026-05-20): `.brand` is Outfit 600 @ 18px / 0.01em letter-spacing. Loaded alongside Inter + JetBrains Mono in `index.html`.
 
 ## What's next
-1. **Status detection** — primary roadmap item. Plan: env-scoped Claude hooks (`UserPromptSubmit`, `Notification`, `Stop`, `SessionStart`, `SubagentStop`) `curl POST` to a local HTTP receiver in Rust, broadcast via Tauri events to the frontend. PTY-output-rate fallback as safety net. Once wired, the existing `.tile.needs` class + alert-style DOM will start firing on their own — no new UI work.
+1. **Push `feat/status-detection` and merge to main.** Open PR or fast-forward — branch contains 2 commits (status-detection feature + Outfit brand font). Worktree at `.claude/worktrees/status-detection/`.
 2. **Phase B persistence** — tile slots (cwd + name) restored on relaunch, manual click-to-spawn, missing-cwd shows a disabled state. Optional Phase C later: auto-respawn with `claude --resume <uuid>` from `~/.claude/projects/.../*.jsonl`.
-3. Polish: find-in-scrollback (⌘F), drag-reorder tiles, SQLite metadata for titles/colors/recent cwds
-4. Consider Tauri `Channel<Vec<u8>>` instead of base64 events if streaming overhead shows up
+3. **Layer 3 — distribution / enterprise readiness.** Apple Developer ID ($99/yr), code signing + notarization in `tauri.conf.json`, `tauri-plugin-updater` with minisign keypair, GitHub Actions to build signed `.dmg` on tag push. Set up *before* first teammate distribution because the updater public key is baked at build time. Real app icons (replace placeholder Tauri ones).
+4. Polish: find-in-scrollback (⌘F), drag-reorder tiles, SQLite metadata for titles/colors/recent cwds.
+5. Consider Tauri `Channel<Vec<u8>>` instead of base64 events if streaming overhead shows up.
 
 ## Open decisions
 - Categorical color palette for per-session tags (deferred until grid feels crowded)
@@ -49,8 +53,11 @@ User runs many `claude` sessions per day across different projects and wants one
 - Minimum tile width enforcement vs accepting narrow-tile clipping
 
 ## Key references
+- **Always work from `/Users/austin.pozodesportes/Documents/claude-projects/en/`** — older sessions launched in the `…multiclaude/` cwd resolve memory to a stale path. Future Claude Code sessions should `cd en/` before starting.
 - Memory directory: `~/.claude/projects/-Users-austin-pozodesportes-Documents-claude-projects-en/memory/`
 - TauriForge persona + 5-section output protocol with `<thought>` tags: see memory `feedback-tauriforge-protocol.md`
 - pass-code.md workflow: runnable code blocks go to `./pass-code.md`, prose stays in chat
-- Mockups: `./mockups/` (locked design = `36-textures.html`)
+- Mockups: `./mockups/` (locked design = `36-textures.html`; brand-font sampler = `42-brand-fonts.html`)
 - Project settings: `./.claude/settings.json` (allowlist), `./.claude/settings.local.json` (user-local, untouched)
+- Worktree for in-flight work: `./.claude/worktrees/status-detection/` on branch `feat/status-detection`. To re-enter: `cd .claude/worktrees/status-detection`. To re-run dev build: `cd .claude/worktrees/status-detection/app && npm run tauri dev`. Worktree shares `node_modules` with main tree via symlink.
+- `~/.claude/settings.json` was modified by en's auto-merge (status-detection install). Backup at `~/.claude/settings.json.en-backup-<ts>`. The `# en-managed` marker in hook commands is what makes the merge idempotent.
