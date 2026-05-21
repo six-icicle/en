@@ -28,3 +28,6 @@ pass-code.md
 
 # Project-local Claude settings (user-specific, not project state)
 .claude/settings.local.json
+
+# Local Claude worktrees (in-flight branch checkouts)
+.claude/worktrees/

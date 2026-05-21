@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>en — UI font sampler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Manrope:wght@300..700&family=Plus+Jakarta+Sans:wght@300..700&family=Outfit:wght@300..700&family=Sora:wght@300..700&family=DM+Sans:wght@300..700&family=Space+Grotesk:wght@300..700&family=Public+Sans:wght@300..700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Work+Sans:wght@300..700&family=Hanken+Grotesk:wght@300..700&family=Albert+Sans:wght@300..700&family=Nunito+Sans:wght@300..700&family=Figtree:wght@300..700&family=JetBrains+Mono:wght@400;500&family=Geist:wght@300..700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #232136;
+    --tile: #2a273f;
+    --tile-2: #322d49;
+    --line: #3e3a5e;
+    --line-2: #56527a;
+    --ink: #e0def4;
+    --ink-2: #908caa;
+    --ink-3: #6e6a86;
+    --ink-4: #4a475e;
+    --accent: #ea9a97;
+    --accent-glow: rgba(234, 154, 151, 0.25);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 28px 32px 60px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  h1 span { color: var(--accent); }
+  .lede {
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--tile-2);
+  }
+  .font-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .font-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── App-shape mock ───
+     Each .demo replicates en's chrome at real sizes:
+     a 44px titlebar with frosted-glass pills, an empty-state with
+     "no sessions / kindle one" CTA, and a tile-head row. */
+  .demo { padding: 0; }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--line-2);
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    gap: 8px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Outfit', sans-serif; /* logo stays Outfit */
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+  }
+  .brand svg { color: var(--accent); }
+  .brand span { color: var(--accent); }
+
+  .pill {
+    flex: none;
+    height: 26px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top-color: rgba(255, 255, 255, 0.14);
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 100%);
+    color: var(--ink);
+    cursor: default;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 1px 2px rgba(0,0,0,0.20);
+  }
+  .pill .label {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .pill .val {
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .pill .swatch {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+  .pill.icon { width: 30px; padding: 0; justify-content: center; color: var(--accent); }
+  .pill.icon svg { width: 14px; height: 14px; }
+
+  .titlebar .right {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ink-2);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--ink-4);
+  }
+  .dot.ok { background: #87a987; box-shadow: 0 0 6px #87a987; }
+
+  .body-area {
+    height: 220px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+  .empty-line {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--line-2);
+    background: transparent;
+    color: var(--ink-2);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .empty-cta kbd {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 2px 5px;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    opacity: 0.6;
+  }
+
+  /* Tile head row at bottom of body-area */
+  .tile-head-strip {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px;
+    height: 36px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .tile-head-strip .name { color: var(--ink); letter-spacing: 0.02em; }
+  .tile-head-strip .path { color: var(--ink-2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile-head-strip .meta { color: var(--ink-3); font-size: 13px; letter-spacing: 0.04em; font-family: var(--mono); }
+
+  /* Per-card font binding: applies to every non-mono element inside .demo
+     EXCEPT .brand (logo always Outfit) and .font-meta / kbd / mono spans. */
+  .demo[data-font="inter"]        { font-family: 'Inter', sans-serif; }
+  .demo[data-font="manrope"]      { font-family: 'Manrope', sans-serif; }
+  .demo[data-font="jakarta"]      { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .demo[data-font="geist"]        { font-family: 'Geist', sans-serif; }
+  .demo[data-font="outfit"]       { font-family: 'Outfit', sans-serif; }
+  .demo[data-font="sora"]         { font-family: 'Sora', sans-serif; }
+  .demo[data-font="dmsans"]       { font-family: 'DM Sans', sans-serif; }
+  .demo[data-font="spacegrotesk"] { font-family: 'Space Grotesk', sans-serif; }
+  .demo[data-font="publicsans"]   { font-family: 'Public Sans', sans-serif; }
+  .demo[data-font="ibmplex"]      { font-family: 'IBM Plex Sans', sans-serif; }
+  .demo[data-font="worksans"]     { font-family: 'Work Sans', sans-serif; }
+  .demo[data-font="hanken"]       { font-family: 'Hanken Grotesk', sans-serif; }
+  .demo[data-font="albert"]       { font-family: 'Albert Sans', sans-serif; }
+  .demo[data-font="nunito"]       { font-family: 'Nunito Sans', sans-serif; }
+  .demo[data-font="figtree"]      { font-family: 'Figtree', sans-serif; }
+
+  /* Toolbar */
+  .toolbar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--tile);
+    border: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .toolbar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-right: 6px;
+  }
+  .wbtn {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line-2);
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color 120ms, color 120ms, background 120ms;
+  }
+  .wbtn:hover { color: var(--ink); border-color: var(--ink-3); }
+  .wbtn.is-active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  /* Body weight knob: every text inside .demo (except the locked
+     wordmark and mono spans) follows this. JS swaps it. */
+  .demo { --body-wt: 450; }
+  .demo .titlebar .pill .label,
+  .demo .titlebar .pill .val,
+  .demo .titlebar .right,
+  .demo .empty-line,
+  .demo .empty-cta,
+  .demo .tile-head-strip .name,
+  .demo .tile-head-strip .path,
+  .demo .tile-head-strip .meta {
+    font-weight: var(--body-wt);
+  }
+  /* Logo wordmark is always 600 — locked. */
+  .demo .brand { font-weight: 600; }
+
+  .footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  .footer b { color: var(--ink-2); font-weight: 500; }
+</style>
+</head>
+<body>
+  <h1>en — UI font sampler <span>·</span></h1>
+  <div class="lede">15 candidates · current = Inter (top-left) · titlebar + empty-state + tile-head shown at real sizes</div>
+
+  <div class="toolbar">
+    <span class="toolbar-label">body weight</span>
+    <button class="wbtn" data-w="400">400 regular</button>
+    <button class="wbtn is-active" data-w="450">450</button>
+    <button class="wbtn" data-w="500">500 medium</button>
+    <button class="wbtn" data-w="550">550</button>
+    <button class="wbtn" data-w="600">600 semibold</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">
+    Logo wordmark stays <b>Outfit 600</b> in every card. Mono spans (kbd, meta) stay <b>JetBrains Mono</b>. The sans face under test is everything else: brand "en", pill labels & values, empty state, tile-head text. <br />
+    Try DevTools → bump body weight 400 → 500 if "thin" is your only complaint.
+  </div>
+
+  <script>
+    // Build all 15 demo cards from one template so the markup stays clean.
+    const FONTS = [
+      { id: "inter",        name: "Inter",            note: "current" },
+      { id: "manrope",      name: "Manrope",          note: "geometric, heavier at 400" },
+      { id: "jakarta",      name: "Plus Jakarta Sans",note: "friendly, slightly rounder" },
+      { id: "geist",        name: "Geist",            note: "vercel, mechanical" },
+      { id: "outfit",       name: "Outfit",           note: "matches the wordmark" },
+      { id: "sora",         name: "Sora",             note: "geometric, futuristic" },
+      { id: "dmsans",       name: "DM Sans",          note: "low-contrast, warm" },
+      { id: "spacegrotesk", name: "Space Grotesk",    note: "distinctive, slightly quirky" },
+      { id: "publicsans",   name: "Public Sans",      note: "USWDS, neutral, sturdy" },
+      { id: "ibmplex",      name: "IBM Plex Sans",    note: "corporate, slab-edged" },
+      { id: "worksans",     name: "Work Sans",        note: "balanced, slightly tall" },
+      { id: "hanken",       name: "Hanken Grotesk",   note: "sturdy at small sizes" },
+      { id: "albert",       name: "Albert Sans",      note: "geometric, slightly condensed" },
+      { id: "nunito",       name: "Nunito Sans",      note: "soft, rounded terminals" },
+      { id: "figtree",      name: "Figtree",          note: "friendly, heavier than Inter" },
+    ];
+    const torii = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6 L21 6"/><path d="M2 4 L22 4"/><path d="M6 6 L6 20"/><path d="M18 6 L18 20"/><path d="M6 10 L18 10"/></svg>`;
+    const plus  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+    const refresh = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`;
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = FONTS.map(f => `
+      <div class="card">
+        <div class="card-head">
+          <span class="font-name">${f.name}</span>
+          <span class="font-meta">${f.note}</span>
+        </div>
+        <div class="demo" data-font="${f.id}">
+          <div class="titlebar">
+            <div class="brand">${torii}<span>en</span></div>
+            <button class="pill icon" title="kindle">${plus}</button>
+            <button class="pill icon" title="reset sizes">${refresh}</button>
+            <span class="pill"><span class="label">theme</span><span class="val">rose-pine-alt</span></span>
+            <span class="pill"><span class="label">layout</span><span class="val">grid</span></span>
+            <span class="pill"><span class="swatch"></span><span class="label">alert</span><span class="val">andon</span></span>
+            <span class="right"><span class="dot ok"></span>3 live · 0 needs</span>
+          </div>
+          <div class="body-area">
+            <span class="empty-line">no sessions</span>
+            <button class="empty-cta">kindle one <kbd>⌘N</kbd></button>
+            <div class="tile-head-strip">
+              <span class="name">api-server</span>
+              <span class="path">~/Documents/work/repo/services/api-server</span>
+              <span class="meta">working…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+
+    // Weight toggle — sets --body-wt on every .demo
+    document.querySelectorAll(".wbtn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const w = btn.dataset.w;
+        document.querySelectorAll(".wbtn").forEach(b => b.classList.toggle("is-active", b === btn));
+        document.querySelectorAll(".demo").forEach(d => d.style.setProperty("--body-wt", w));
+      });
+    });
+  </script>
+</body>
+</html>
+</content>
+</invoke>

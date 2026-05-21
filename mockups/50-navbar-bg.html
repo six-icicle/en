@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>en — navbar background variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@600&display=swap" rel="stylesheet" />
+<style>
+  /* Rose-pine-soft canvas (the canonical default) */
+  :root {
+    --bg:        #2a273f;
+    --tile:      #312e4a;
+    --tile-2:    #383454;
+    --line:      #44415a;
+    --line-2:    #524d70;
+    --ink:       #e0def4;
+    --ink-2:     #908caa;
+    --ink-3:     #6e6a86;
+    --ink-4:     #4a4660;
+    --accent:    #ea9a97;
+    --accent-glow: rgba(234,154,151,0.35);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --display: 'Outfit', 'Space Grotesk', sans-serif;
+    --fz: 1;
+    --dur-fast: 120ms;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  /* Subtle texture so we feel the canvas, like the app */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 0 50%, transparent 18px, rgba(255,255,255,0.012) 18px, rgba(255,255,255,0.012) 19px, transparent 19px);
+    background-size: 28px 56px;
+    opacity: 0.6;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 24px 120px;
+  }
+  header.head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 44px;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span { color: var(--accent); }
+  .lede {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 48px;
+  }
+
+  /* Each variant block */
+  .variant {
+    margin-bottom: 44px;
+  }
+  .variant-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 0 4px 10px;
+  }
+  .variant-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    flex: none;
+  }
+  .variant-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .variant-recipe {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+  .variant-note {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: var(--ink-2);
+    padding: 10px 4px 0;
+    max-width: 78ch;
+  }
+  .variant-note b { color: var(--ink); font-weight: 500; }
+
+  /* Frame around the navbar so we can see how it sits against the canvas */
+  .frame {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  /* The navbar itself — shared structure, only the .titlebar bg changes per variant */
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    padding: 0 calc(20px * var(--fz));
+    height: calc(50px * var(--fz));
+    border-bottom: 1px solid var(--line-2);
+    /* default — overridden per variant */
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: calc(16px * var(--fz));
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .brand-mark {
+    width: calc(14px * var(--fz));
+    height: calc(14px * var(--fz));
+    color: var(--accent);
+    flex: none;
+  }
+
+  .status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    flex-wrap: nowrap;
+  }
+
+  /* Frosted-glass nav buttons (same recipe as App.css) */
+  .nbtn {
+    flex: none;
+    position: relative;
+    width: calc(30px * var(--fz));
+    height: calc(30px * var(--fz));
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top-color: rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: var(--accent);
+    font-family: var(--mono);
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 1px 2px rgba(0,0,0,0.20),
+      0 4px 12px -4px rgba(0,0,0,0.40);
+  }
+  .nbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nbtn-aa {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .theme-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* Canvas-look strip below the navbar so we see contrast against the actual app bg */
+  .canvas-preview {
+    height: 76px;
+    background: var(--bg);
+    background-image:
+      linear-gradient(transparent 0, transparent calc(50% - 1px), rgba(255,255,255,0.018) calc(50% - 1px), rgba(255,255,255,0.018) 50%, transparent 50%);
+    background-size: 100% 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+  }
+
+  /* ─── Per-variant titlebar bg recipes ─── */
+
+  /* 1. Current */
+  .v-current .titlebar {
+    background: color-mix(in oklch, var(--bg), black 35%);
+  }
+
+  /* 2. Lifted (bg pulled UP, mirrors lifted-bg theme recipe) */
+  .v-lifted .titlebar {
+    background: color-mix(in oklch, var(--bg), white 6%);
+  }
+
+  /* 3. Tile-flush */
+  .v-tile .titlebar {
+    background: var(--tile);
+  }
+
+  /* 4. Frosted glass over canvas */
+  .v-frosted .titlebar {
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 100%),
+      var(--bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  /* 5. Subtle gradient (bg at top, slight darken at bottom) */
+  .v-gradient .titlebar {
+    background: linear-gradient(180deg,
+      var(--bg) 0%,
+      color-mix(in oklch, var(--bg), black 8%) 100%);
+  }
+
+  /* 6. Hairline only (fully canvas-flush) */
+  .v-hairline .titlebar {
+    background: transparent;
+    border-bottom-color: var(--line-2);
+  }
+
+  /* 7. Foot-bar twin */
+  .v-foot .titlebar {
+    background: linear-gradient(180deg, var(--bg) 0%, var(--tile-2) 100%);
+  }
+
+  /* ─── Skill-collaboration variants (08–13) ─── */
+  /* Outer shadow on .v-engawa needs the titlebar above its sibling preview */
+  .v-engawa .titlebar,
+  .v-fold .titlebar {
+    position: relative;
+    z-index: 2;
+  }
+
+  .skill-tag {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid var(--line-2);
+    color: var(--ink-3);
+    background: color-mix(in oklch, var(--bg), white 4%);
+    margin-left: 8px;
+  }
+  .skill-tag.fd { color: #c4b5fd; border-color: rgba(196,181,253,0.32); }
+  .skill-tag.imp { color: #a5d6a7; border-color: rgba(165,214,167,0.32); }
+  .skill-tag.ux { color: #ffcc80; border-color: rgba(255,204,128,0.32); }
+
+  .section-divider {
+    margin: 64px 4px 36px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .section-divider .label {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .section-divider .sub {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-left: auto;
+  }
+
+  /* 8. Tea-stain wash — frontend-design */
+  .v-tea .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--accent) 4%) 0%,
+      var(--bg) 100%);
+    border-bottom: 1px solid var(--line-2);
+    box-shadow: inset 0 -1px 0 var(--accent-glow);
+  }
+
+  /* 9. Engawa beam — frontend-design */
+  .v-engawa .titlebar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 10px 28px -10px rgba(0,0,0,0.38);
+  }
+
+  /* 10. Sumi ink wash — impeccable */
+  .v-sumi .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 22%) 0%,
+      var(--bg) 100%);
+    border-bottom: 1px solid var(--line-2);
+  }
+
+  /* 11. Folded-paper seam — impeccable */
+  .v-fold .titlebar {
+    background: var(--bg);
+    border-bottom: 3px double var(--line-2);
+  }
+
+  /* 12. Bento beam — ui-ux-pro-max */
+  .v-bento .titlebar {
+    background: var(--tile-2);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* 13. Embossed channel — ui-ux-pro-max */
+  .v-embossed .titlebar {
+    background: var(--bg);
+    box-shadow:
+      inset 0 1px 2px rgba(0,0,0,0.25),
+      inset 0 -1px 0 rgba(255,255,255,0.04);
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Recommendation banner */
+  .reco {
+    margin-top: 56px;
+    padding: 24px 28px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: color-mix(in oklch, var(--bg), white 4%);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+  .reco h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .reco b { color: var(--ink); font-weight: 500; }
+  .reco ul { margin: 8px 0 0 22px; }
+  .reco li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="wordmark">e<span>n</span></div>
+  </header>
+  <div class="lede">navbar — 7 background recipes — rose-pine-soft canvas</div>
+
+  <!-- Reusable navbar markup as a template — duplicated per variant -->
+  <!-- 1 -->
+  <div class="variant v-current">
+    <div class="variant-head">
+      <div class="variant-num">01</div>
+      <div class="variant-title">Current — color-mix bg, black 35%</div>
+      <div class="variant-recipe">color-mix(in oklch, var(--bg), black 35%)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Heavy.</b> Bar reads ~35% darker than canvas, sinking <i>below</i> the floor while tiles sit <i>above</i>. Inverts the lifted-bg recipe the rest of the app follows. The "too dark" instinct is right.
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="variant v-lifted">
+    <div class="variant-head">
+      <div class="variant-num">02</div>
+      <div class="variant-title">Lifted — chrome floats above canvas</div>
+      <div class="variant-recipe">color-mix(in oklch, var(--bg), white 6%)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Mirrors the lifted-bg theme recipe.</b> Chrome sits 6% lighter than canvas, the same direction tiles move. Reads as "the bar is part of the lifted layer." Soft separation, no weight. <b>Strong default candidate.</b>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="variant v-tile">
+    <div class="variant-head">
+      <div class="variant-num">03</div>
+      <div class="variant-title">Tile-flush — chrome IS a tile</div>
+      <div class="variant-recipe">var(--tile)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      Reuses the existing tile token. The bar reads like a wide tile pinned at the top. Quiet, but loses the "this is chrome" cue — feels almost too unified.
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="variant v-frosted">
+    <div class="variant-head">
+      <div class="variant-num">04</div>
+      <div class="variant-title">Frosted glass — same recipe as the buttons</div>
+      <div class="variant-recipe">linear-gradient(white 5% → 2%) over var(--bg) + blur(20px)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Bar uses the same gradient as the buttons themselves.</b> Side-effect: buttons disappear into the bar — they share a substrate. Either visually elegant ("one frosted slab") or too unified (no chrome/control distinction). Better when there's content scrolling underneath.
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="variant v-gradient">
+    <div class="variant-head">
+      <div class="variant-num">05</div>
+      <div class="variant-title">Subtle gradient — atmospheric depth</div>
+      <div class="variant-recipe">linear-gradient(var(--bg) → var(--bg)+8% black)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      Starts at canvas, ends 8% darker. Reads as "lit from above" without committing to a hard color shift. Brand-coherent (you already use 180° gradients in the buttons). Compromise candidate.
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="variant v-hairline">
+    <div class="variant-head">
+      <div class="variant-num">06</div>
+      <div class="variant-title">Hairline only — canvas-flush, no fill</div>
+      <div class="variant-recipe">background: transparent; border-bottom: 1px var(--line-2)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Maximum quiet.</b> Bar dissolves into the canvas; only the buttons + hairline mark its territory. Tea-ceremony minimalism in its purest form. Risk: when textures get heavy (sakura rain, scanlines) the bar can feel like "where do I click?"
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="variant v-foot">
+    <div class="variant-head">
+      <div class="variant-num">07</div>
+      <div class="variant-title">Foot-bar twin — top + bottom symmetry</div>
+      <div class="variant-recipe">linear-gradient(var(--bg) → var(--tile-2))</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Mirror of the foot bar's recipe — your explicit ask.</b> Top and bottom bookend the canvas with the same gradient, except the foot reads bg→tile-2 (lighter at bottom) and this reads the same direction (canvas dark above, tile-2 toward the seam). Visually frames the workspace. Risk: gradient direction is the same as foot, so they don't <i>oppose</i>; they both feel like they're "leading into" the canvas. Could flip the navbar gradient (tile-2 → bg) for a true mirror.
+    </div>
+  </div>
+
+  <!-- ───── Skill-collaboration section ───── -->
+  <div class="section-divider">
+    <div class="label">skill collaborations</div>
+    <div class="sub">2 recipes per skill — 6 additional variants</div>
+  </div>
+
+  <!-- 8 — frontend-design -->
+  <div class="variant v-tea">
+    <div class="variant-head">
+      <div class="variant-num">08</div>
+      <div class="variant-title">Tea-stain wash<span class="skill-tag fd">frontend-design</span></div>
+      <div class="variant-recipe">linear-gradient(bg+accent 4% → bg) + accent-glow inset hairline</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Accent infused into chrome.</b> 4% accent wash at the top fades to canvas; an accent-glow inset hairline sits along the bottom seam. Chrome that's <i>touched</i> by the theme color the way tea stains paper. Reads dramatically different across themes (rose-pine: warm coral, hinoki: amber, kanagawa: indigo).
+    </div>
+  </div>
+
+  <!-- 9 — frontend-design -->
+  <div class="variant v-engawa">
+    <div class="variant-head">
+      <div class="variant-num">09</div>
+      <div class="variant-title">Engawa beam — floating shelf<span class="skill-tag fd">frontend-design</span></div>
+      <div class="variant-recipe">var(--bg) + drop-shadow + 1px top highlight</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Same color as canvas, but a soft drop-shadow falls onto the tiles below + a 1px highlight catches light along the top edge.</b> Reads as a lintel beam over an engawa porch — the bar isn't a different color, it's the <i>same wood</i> held above the workspace. Pure architectural light, no tint shift.
+    </div>
+  </div>
+
+  <!-- 10 — impeccable -->
+  <div class="variant v-sumi">
+    <div class="variant-head">
+      <div class="variant-num">10</div>
+      <div class="variant-title">Sumi ink wash<span class="skill-tag imp">impeccable</span></div>
+      <div class="variant-recipe">linear-gradient(bg+ink-4 22% → bg)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Weight settles at the top edge and dissolves into canvas — ink fading on washi.</b> Hierarchy expressed by gradient direction alone; uses <code>--ink-4</code> as the wash so it retints theme-by-theme without ever introducing chroma. Restrained, on-strategy, no decorative chrome.
+    </div>
+  </div>
+
+  <!-- 11 — impeccable -->
+  <div class="variant v-fold">
+    <div class="variant-head">
+      <div class="variant-num">11</div>
+      <div class="variant-title">Folded-paper seam<span class="skill-tag imp">impeccable</span></div>
+      <div class="variant-recipe">var(--bg) + 3px double border-bottom var(--line-2)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Color-flush with canvas; CSS <code>double</code> border paints two parallel hairlines with a 1px gap.</b> Pure architecture, zero color shift. The bar is announced by <i>structure</i>, not tone — like a folded edge in cardstock. Closest cousin of the hairline variant but with more presence.
+    </div>
+  </div>
+
+  <!-- 12 — ui-ux-pro-max -->
+  <div class="variant v-bento">
+    <div class="variant-head">
+      <div class="variant-num">12</div>
+      <div class="variant-title">Bento beam — tile-2 surface<span class="skill-tag ux">ui-ux-pro-max</span></div>
+      <div class="variant-recipe">var(--tile-2) + 1px var(--line) bottom</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Uses the warmest tile token (the hover-state surface) so the bar reads as "always slightly active."</b> Bento aesthetic — navbar is the structural beam between cells, treated as its own surface, not a void above the canvas. Brighter cousin of variant 03; more decisive.
+    </div>
+  </div>
+
+  <!-- 13 — ui-ux-pro-max -->
+  <div class="variant v-embossed">
+    <div class="variant-head">
+      <div class="variant-num">13</div>
+      <div class="variant-title">Embossed channel — soft neumorphism<span class="skill-tag ux">ui-ux-pro-max</span></div>
+      <div class="variant-recipe">var(--bg) + inset top shadow + inset bottom highlight</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12 Q22 8 39 12" /><line x1="11" y1="18" x2="33" y2="18" /><line x1="14" y1="12" x2="14" y2="36" /><line x1="30" y1="12" x2="30" y2="36" /></g></svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="8" stroke-opacity="0.5"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+    </div>
+    <div class="variant-note">
+      <b>Color-flush; top inset shadow creates a recessed channel, bottom highlight catches the lip.</b> Soft neumorphism — buttons sit inside an embossed groove, like keys in a cast-aluminum bar. Quietest depth cue of the 13 variants; reads as <i>physically</i> recessed without changing color.
+    </div>
+  </div>
+
+  <div class="reco">
+    <h3>recommendation — 13 variants</h3>
+    <p><b>Top three for an A/B/C eyeball:</b></p>
+    <ul>
+      <li><b>02 Lifted</b> — strict obedience to the lifted-bg design law. One token, retints across 8 themes, smallest possible change.</li>
+      <li><b>09 Engawa beam</b> [frontend-design] — same color as canvas + drop shadow + top highlight. The bar is held <i>above</i> the workspace by light, not tone. Most architecturally interesting.</li>
+      <li><b>10 Sumi ink wash</b> [impeccable] — gradient from <code>bg+ink-4 22%</code> to <code>bg</code>. Ink fading on washi. The most poetic option, still strictly on-strategy.</li>
+    </ul>
+    <p style="margin-top:14px"><b>Honorable mentions:</b></p>
+    <ul>
+      <li><b>08 Tea-stain</b> [frontend-design] — accent infused into chrome. Most theme-expressive; if you want themes to feel <i>more</i> different from each other, this is the lever.</li>
+      <li><b>13 Embossed channel</b> [ui-ux-pro-max] — soft neumorphism, recessed groove. Adds depth without color shift; closest to "premium hardware" feel.</li>
+      <li><b>11 Folded-paper seam</b> [impeccable] — double-line border, zero color shift. Pure architecture. Quieter cousin of 06.</li>
+    </ul>
+    <p style="margin-top:14px"><b>Probably skip:</b></p>
+    <ul>
+      <li><b>01 Current</b> — the reason we're doing this exercise.</li>
+      <li><b>04 Frosted</b> — buttons share the bar's substrate, dissolve into it.</li>
+      <li><b>06 Hairline</b> — too quiet under heavy textures.</li>
+      <li><b>07 Foot twin</b> — top + bottom symmetry doubles chrome weight; foot is a footnote, not a beam.</li>
+      <li><b>12 Bento beam</b> — tile-2 reads like a hover state stuck on; brand-loud.</li>
+    </ul>
+    <p style="margin-top:14px"><b>If you want one decisive call:</b> <b>10 Sumi ink wash</b> is the most refined of the 13 and obeys both the lifted-bg recipe (top edge sits up from canvas via the ink-4 wash, not down via black-mix) and the chroma-restraint rule. <b>09 Engawa</b> is the runner-up if you'd rather the bar read as architectural rather than tonal. <b>02 Lifted</b> remains the smallest-diff, lowest-risk option.</p>
+  </div>
+</div>
+</body>
+</html>

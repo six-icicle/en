@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EN / 45 — Texture preview: asanoha vs bamboo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+:root {
+  --bg:          #232136;
+  --tile:        #2a273f;
+  --tile-2:      #312e4a;
+  --line:        #393552;
+  --line-2:      #44415a;
+  --ink:         #e0def4;
+  --ink-2:       #908caa;
+  --ink-3:       #6e6a86;
+  --ink-4:       #4a4660;
+  --accent:      #ea9a97;
+  --accent-glow: rgba(234,154,151,0.35);
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+  --brand: 'Outfit', var(--sans);
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  padding: 28px 28px 60px;
+}
+.page { max-width: 1320px; margin: 0 auto; }
+
+header.intro {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  padding: 22px 26px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+header.intro h1 {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+header.intro p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* two side-by-side full-app mocks */
+.compare {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.mock {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Texture layers float ABOVE chrome, like the real app
+   (body::before with mix-blend-mode: screen at z-index 9999). */
+.mock.asanoha::after,
+.mock.bamboo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: screen;
+}
+.mock.asanoha::after {
+  opacity: 0.18;
+  /* Pointy-top hex tile: radius 30, width 52, height 90.
+     Hex A center (26,15); Hex B center (0,60) [half on left edge];
+     Hex C center (52,60) [half on right edge]. Vertices share at
+     tile boundaries so tessellation is seamless. */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='90' viewBox='0 0 52 90'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.7'%3E%3Cpolygon points='26,-15 52,0 52,30 26,45 0,30 0,0'/%3E%3Cpolygon points='0,30 26,45 26,75 0,90 -26,75 -26,45'/%3E%3Cpolygon points='52,30 78,45 78,75 52,90 26,75 26,45'/%3E%3Cline x1='26' y1='15' x2='26' y2='-15'/%3E%3Cline x1='26' y1='15' x2='52' y2='0'/%3E%3Cline x1='26' y1='15' x2='52' y2='30'/%3E%3Cline x1='26' y1='15' x2='26' y2='45'/%3E%3Cline x1='26' y1='15' x2='0' y2='30'/%3E%3Cline x1='26' y1='15' x2='0' y2='0'/%3E%3Cline x1='0' y1='60' x2='0' y2='30'/%3E%3Cline x1='0' y1='60' x2='26' y2='45'/%3E%3Cline x1='0' y1='60' x2='26' y2='75'/%3E%3Cline x1='0' y1='60' x2='0' y2='90'/%3E%3Cline x1='52' y1='60' x2='52' y2='30'/%3E%3Cline x1='52' y1='60' x2='26' y2='45'/%3E%3Cline x1='52' y1='60' x2='26' y2='75'/%3E%3Cline x1='52' y1='60' x2='52' y2='90'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 52px 90px;
+}
+.mock.bamboo::after {
+  opacity: 0.14;
+  background-image:
+    repeating-linear-gradient(0deg,
+      transparent 0 70px,
+      rgba(255,255,255,0.55) 70px 71px,
+      transparent 71px 72px,
+      rgba(255,255,255,0.25) 72px 73px,
+      transparent 73px 140px),
+    repeating-linear-gradient(90deg,
+      transparent 0 30px,
+      rgba(255,255,255,0.50) 30px 31px,
+      transparent 31px 60px);
+  background-size: 100% 140px, 60px 100%;
+}
+
+/* simulated app chrome */
+.titlebar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 44px;
+  background: color-mix(in oklch, var(--bg), black 35%);
+  border-bottom: 1px solid var(--line-2);
+  gap: 8px;
+}
+.brand-en {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-en svg { color: var(--accent); }
+.right { margin-left: auto; display: flex; gap: 8px; }
+.spawn-btn {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  color: var(--ink-2);
+  background: transparent;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 16px; font-weight: 300; line-height: 1;
+}
+.pill {
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 0 10px;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.pill .swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+/* simulated tile grid */
+.tile-grid {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  padding: 1px;
+}
+.tile {
+  background: var(--tile);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.tile.active {
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}
+.tile .head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.tile .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ok, var(--ink-3));
+}
+.tile .name {
+  color: var(--ink);
+  font-size: 12px;
+}
+.tile .body {
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.label-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.label-row .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.label-row .desc {
+  font-size: 12px;
+  color: var(--ink-2);
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="intro">
+    <h1>EN / 45 — Texture preview</h1>
+    <p>Option 1 (asanoha) vs Option 4 (bamboo grid) — both static, low opacity</p>
+  </header>
+
+  <div class="compare">
+
+    <div>
+      <div class="mock asanoha">
+        <div class="titlebar">
+          <span class="brand-en">
+            <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+              <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <path d="M5 12 Q22 8 39 12"/>
+                <line x1="11" y1="18" x2="33" y2="18"/>
+                <line x1="14" y1="12" x2="14" y2="36"/>
+                <line x1="30" y1="12" x2="30" y2="36"/>
+              </g>
+            </svg>
+            en
+          </span>
+          <button class="spawn-btn">+</button>
+          <div class="right">
+            <span class="pill">aA ▾</span>
+            <span class="pill">⚠ Andon ▾</span>
+            <span class="pill">▦ Quad ▾</span>
+            <span class="pill"><span class="swatch"></span> Rose Pine ▾</span>
+          </div>
+        </div>
+        <div class="tile-grid">
+          <div class="tile active">
+            <div class="head"><span class="dot"></span><span class="name">claude-bridge</span></div>
+            <div class="body">$ ls<br>messages.log<br>config.toml<br>$ tail -f messages.log<br>2026-05-20T18:04 ▌</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">en</span></div>
+            <div class="body">$ npm run tauri dev<br>VITE v7.3.3 ready in 116ms<br>Compiling… 412/507 ▌</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">infra</span></div>
+            <div class="body">$ kubectl get pods<br>NAME           READY  STATUS<br>api-server-7   1/1    Running</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">notes</span></div>
+            <div class="body">- ship status detection<br>- texture: asanoha<br>- 9th cell filled ▌</div>
+          </div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label">01 · Asanoha (hemp leaf)</span>
+        <span class="desc">interlocking hexagonal stars · static · 0.10 opacity</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="mock bamboo">
+        <div class="titlebar">
+          <span class="brand-en">
+            <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+              <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                <path d="M5 12 Q22 8 39 12"/>
+                <line x1="11" y1="18" x2="33" y2="18"/>
+                <line x1="14" y1="12" x2="14" y2="36"/>
+                <line x1="30" y1="12" x2="30" y2="36"/>
+              </g>
+            </svg>
+            en
+          </span>
+          <button class="spawn-btn">+</button>
+          <div class="right">
+            <span class="pill">aA ▾</span>
+            <span class="pill">⚠ Andon ▾</span>
+            <span class="pill">▦ Quad ▾</span>
+            <span class="pill"><span class="swatch"></span> Rose Pine ▾</span>
+          </div>
+        </div>
+        <div class="tile-grid">
+          <div class="tile active">
+            <div class="head"><span class="dot"></span><span class="name">claude-bridge</span></div>
+            <div class="body">$ ls<br>messages.log<br>config.toml<br>$ tail -f messages.log<br>2026-05-20T18:04 ▌</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">en</span></div>
+            <div class="body">$ npm run tauri dev<br>VITE v7.3.3 ready in 116ms<br>Compiling… 412/507 ▌</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">infra</span></div>
+            <div class="body">$ kubectl get pods<br>NAME           READY  STATUS<br>api-server-7   1/1    Running</div>
+          </div>
+          <div class="tile">
+            <div class="head"><span class="dot"></span><span class="name">notes</span></div>
+            <div class="body">- ship status detection<br>- texture: bamboo<br>- 9th cell filled ▌</div>
+          </div>
+        </div>
+      </div>
+      <div class="label-row">
+        <span class="label">04 · Bamboo grid</span>
+        <span class="desc">vertical culms + horizontal nodes · static · 0.07 opacity</span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

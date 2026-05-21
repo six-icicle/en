@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
-  Activity,
   Bug,
   Columns3,
-  Flower2,
   Grid3x3,
   HeartPulse,
   LayoutGrid,
   LayoutPanelLeft,
   MoveVertical,
-  Sparkles,
-  Star,
   Sword,
   Wind,
 } from "lucide-react";
@@ -38,26 +35,35 @@ type TileDecl = SessionDecl & {
 
 const THEMES: { id: Theme; title: string }[] = [
   { id: "kanagawa", title: "Kanagawa Sumi" },
+  { id: "kanagawa-soft", title: "Kanagawa Sumi (soft)" },
   { id: "everforest", title: "Everforest Dusk" },
+  { id: "everforest-soft", title: "Everforest Dusk (soft)" },
   { id: "rose-pine", title: "Rose Pine Moon" },
-  { id: "rose-pine-alt", title: "Rose Pine Moon (alt)" },
-  { id: "original", title: "Original (dark amber)" },
+  { id: "rose-pine-soft", title: "Rose Pine Moon (soft)" },
+  { id: "hinoki", title: "Hinoki" },
+  { id: "hinoki-soft", title: "Hinoki (soft)" },
 ];
 
 const THEME_ACCENTS: Record<Theme, string> = {
-  kanagawa: "#c0a36e",
-  everforest: "#a7c080",
-  "rose-pine": "#ea9a97",
-  "rose-pine-alt": "#ea9a97",
-  original: "#f0a929",
+  kanagawa: "#d4b274",
+  "kanagawa-soft": "#c0a36e",
+  everforest: "#b8d290",
+  "everforest-soft": "#a7c080",
+  "rose-pine": "#f4a8a5",
+  "rose-pine-soft": "#ea9a97",
+  hinoki: "#d49a3a",
+  "hinoki-soft": "#c89656",
 };
 
 const THEME_BGS: Record<Theme, string> = {
-  kanagawa: "#25252e",
-  everforest: "#2d353b",
-  "rose-pine": "#232136",
-  "rose-pine-alt": "#2a273f",
-  original: "#0e1114",
+  kanagawa: "#1a1a23",
+  "kanagawa-soft": "#2f2f3d",
+  everforest: "#222a30",
+  "everforest-soft": "#3a464c",
+  "rose-pine": "#211f33",
+  "rose-pine-soft": "#312e4a",
+  hinoki: "#1b1d20",
+  "hinoki-soft": "#312d26",
 };
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -90,6 +96,14 @@ const TEXTURES: { id: Texture; title: string }[] = [
   { id: "dots", title: "Dot grid" },
   { id: "sakura", title: "Sakura" },
   { id: "seigaiha", title: "Seigaiha (waves)" },
+  { id: "topography", title: "Topography" },
+  { id: "pluses", title: "Plus signs" },
+  { id: "yagasuri", title: "Yagasuri" },
+  { id: "brush", title: "Brush strokes" },
+  { id: "bokeh", title: "Bokeh" },
+  { id: "bamboo", title: "Bamboo forest" },
+  { id: "petals-fall", title: "Sakura rain" },
+  { id: "shuriken-fall", title: "Shuriken rain" },
 ];
 
 const LAYOUTS: { id: Layout; title: string; desc: string }[] = [
@@ -107,7 +121,7 @@ const ALERT_STYLES: { id: AlertStyle; title: string; desc: string }[] = [
   { id: "samurai",   title: "Samurai",       desc: "katana sheen" },
   { id: "triple",    title: "Sandangiri",    desc: "three cuts" },
   { id: "vertical",  title: "Tatewari",      desc: "falling cut" },
-  { id: "sakura",    title: "Sakura",        desc: "petals fall" },
+  { id: "sakura",    title: "Sakura rain",   desc: "petals fall" },
   { id: "ninja",     title: "Ninja",         desc: "corner strike" },
   { id: "shuriken",  title: "Shuriken",      desc: "throw + stick" },
 ];
@@ -156,6 +170,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(APPEARANCE_DEFAULTS.theme);
   const [texture, setTexture] = useState<Texture>(APPEARANCE_DEFAULTS.texture);
   const [fz, setFz] = useState(APPEARANCE_DEFAULTS.fz);
+  const [tfz, setTfz] = useState(APPEARANCE_DEFAULTS.tfz);
   const [texAmt, setTexAmt] = useState(APPEARANCE_DEFAULTS.texAmt);
   const [accent, setAccent] = useState<string | null>(APPEARANCE_DEFAULTS.accent);
   const [bg, setBg] = useState<string | null>(APPEARANCE_DEFAULTS.bg);
@@ -174,6 +189,11 @@ export default function App() {
   const [appearanceLoaded, setAppearanceLoaded] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [pendingClose, setPendingClose] = useState<string | null>(null);
+  const [resetMenuOpen, setResetMenuOpen] = useState(false);
+  const [fzMenuOpen, setFzMenuOpen] = useState(false);
+  const fzMenuRef = useRef<HTMLDivElement | null>(null);
+  const [tfzMenuOpen, setTfzMenuOpen] = useState(false);
+  const tfzMenuRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const { kill, list } = useSessions();
 
@@ -236,6 +256,7 @@ export default function App() {
       setTexture(a.texture);
       setLayout(a.layout);
       setFz(a.fz);
+      setTfz(a.tfz);
       setTexAmt(a.texAmt);
       setAccent(a.accent);
       setBg(a.bg);
@@ -254,6 +275,7 @@ export default function App() {
       texture,
       layout,
       fz,
+      tfz,
       texAmt,
       accent,
       bg,
@@ -266,6 +288,7 @@ export default function App() {
     texture,
     layout,
     fz,
+    tfz,
     texAmt,
     accent,
     bg,
@@ -332,6 +355,40 @@ export default function App() {
       window.removeEventListener("keydown", onKey);
     };
   }, [themeMenuOpen]);
+
+  useEffect(() => {
+    if (!fzMenuOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!fzMenuRef.current) return;
+      if (!fzMenuRef.current.contains(e.target as Node)) setFzMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFzMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [fzMenuOpen]);
+
+  useEffect(() => {
+    if (!tfzMenuOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!tfzMenuRef.current) return;
+      if (!tfzMenuRef.current.contains(e.target as Node)) setTfzMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTfzMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [tfzMenuOpen]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -505,6 +562,8 @@ export default function App() {
 
   const bumpFz = (delta: number) =>
     setFz((v) => Math.max(0.7, Math.min(1.6, +(v + delta).toFixed(2))));
+  const bumpTfz = (delta: number) =>
+    setTfz((v) => Math.max(0.7, Math.min(1.6, +(v + delta).toFixed(2))));
   const bumpTexAmt = (delta: number) =>
     setTexAmt((v) => Math.max(0.2, Math.min(2.0, +(v + delta).toFixed(2))));
 
@@ -515,7 +574,7 @@ export default function App() {
     let meta = t.meta;
     if (s === "spawning") {
       status = "idle";
-      meta = "spawning…";
+      meta = "kindling…";
     } else if (s === "exited") {
       status = "stale";
       meta = "exited";
@@ -528,50 +587,85 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="titlebar">
+      {(texture === "petals-fall" || texture === "shuriken-fall") && (
+        <FallingTexture kind={texture === "petals-fall" ? "petals" : "shuriken"} />
+      )}
+      <div className="titlebar" data-tauri-drag-region>
+        <WindowControls />
         <div className="brand">
+          <svg
+            className="brand-mark"
+            viewBox="0 0 44 44"
+            fill="none"
+            aria-hidden="true"
+          >
+            <g stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
           en
         </div>
         <div className="status">
           <button
             className="spawn-btn"
             onClick={spawn}
-            title="Spawn a new session"
-            aria-label="Spawn new session"
+            title="Kindle a new session (⌘N)"
+            aria-label="Kindle new session"
           >
-            <span className="spawn-btn-plus">+</span>
-            <span className="spawn-btn-label">new session</span>
-            <kbd className="spawn-btn-kbd">⌘N</kbd>
+            <svg
+              className="spawn-btn-plus"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
           </button>
           <button
             className="reset-sizes-btn"
-            onClick={() => {
-              setColFrs(defaults.cols);
-              setRowFrs(defaults.rows);
-              window.dispatchEvent(new Event("en:refit"));
-            }}
-            title="Reset all terminal sizes to default"
-            aria-label="Reset terminal sizes"
+            onClick={() => setResetMenuOpen(true)}
+            title="Reset…"
+            aria-label="Open reset menu"
           >
-            reset sizes
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+            </svg>
           </button>
         </div>
         <div className="alert-style-wrap" ref={themeMenuRef}>
-          <span className="label">theme</span>
           <button
-            className="alert-style-trigger"
+            className="alert-style-trigger icon-only"
             aria-expanded={themeMenuOpen}
             aria-haspopup="menu"
             onClick={() => setThemeMenuOpen((v) => !v)}
-            title="Theme + accent + background + texture"
+            title={`Theme: ${THEMES.find((t) => t.id === theme)?.title ?? "Theme"}`}
+            aria-label="Theme"
           >
             <span
-              className="theme-trigger-swatch"
+              className="theme-trigger-dot"
               aria-hidden="true"
-              style={{ background: accent ?? THEME_ACCENTS[theme] }}
+              style={{
+                background: `linear-gradient(135deg, ${bg ?? THEME_BGS[theme]} 50%, ${accent ?? THEME_ACCENTS[theme]} 50%)`,
+              }}
             />
-            <span>{THEMES.find((t) => t.id === theme)?.title ?? "Theme"}</span>
-            <span className="caret">▾</span>
           </button>
           {themeMenuOpen && (
             <div className="alert-style-popover theme-popover" role="menu">
@@ -638,7 +732,7 @@ export default function App() {
               <div className="theme-section">
                 <div className="theme-section-label">Texture</div>
                 <div className="textures inline-textures">
-                  {TEXTURES.map((t) => (
+                  {TEXTURES.filter((t) => !t.id.endsWith("-fall")).map((t) => (
                     <button
                       key={t.id}
                       className="texture-chip"
@@ -649,6 +743,34 @@ export default function App() {
                     >
                       <span className="texture-chip-label">
                         {t.id === "none" ? "off" : t.id}
+                      </span>
+                    </button>
+                  ))}
+                  {(() => {
+                    const normal = TEXTURES.filter(
+                      (t) => !t.id.endsWith("-fall"),
+                    ).length;
+                    return Array.from({ length: (3 - (normal % 3)) % 3 }).map(
+                      (_, i) => (
+                        <div
+                          key={`fill-${i}`}
+                          className="texture-chip texture-chip-filler"
+                          aria-hidden="true"
+                        />
+                      ),
+                    );
+                  })()}
+                  {TEXTURES.filter((t) => t.id.endsWith("-fall")).map((t) => (
+                    <button
+                      key={t.id}
+                      className="texture-chip texture-chip-rain"
+                      data-tex={t.id}
+                      data-active={texture === t.id ? "true" : undefined}
+                      title={t.title}
+                      onClick={() => setTexture(t.id)}
+                    >
+                      <span className="texture-chip-label">
+                        {t.id === "petals-fall" ? "sakura rain" : "shuriken rain"}
                       </span>
                     </button>
                   ))}
@@ -664,19 +786,17 @@ export default function App() {
           )}
         </div>
         <div className="alert-style-wrap" ref={layoutMenuRef}>
-          <span className="label">layout</span>
           <button
-            className="alert-style-trigger"
+            className="alert-style-trigger icon-only"
             aria-expanded={layoutMenuOpen}
             aria-haspopup="menu"
             onClick={() => setLayoutMenuOpen((v) => !v)}
-            title="Tile layout"
+            title={`Layout: ${LAYOUTS.find((l) => l.id === layout)?.title ?? "Row"}`}
+            aria-label="Layout"
           >
             <span className="trigger-glyph" aria-hidden="true">
               <LayoutGlyph id={layout} />
             </span>
-            <span>{LAYOUTS.find((l) => l.id === layout)?.title ?? "Row"}</span>
-            <span className="caret">▾</span>
           </button>
           {layoutMenuOpen && (
             <div className="alert-style-popover" role="menu">
@@ -703,17 +823,17 @@ export default function App() {
           )}
         </div>
         <div className="alert-style-wrap" ref={alertMenuRef}>
-          <span className="label">alert</span>
           <button
-            className="alert-style-trigger"
+            className="alert-style-trigger icon-only"
             aria-expanded={alertMenuOpen}
             aria-haspopup="menu"
             onClick={() => setAlertMenuOpen((v) => !v)}
-            title="Alert style — visual treatment when a session needs you"
+            title={`Alert: ${ALERT_STYLES.find((s) => s.id === alertStyle)?.title ?? "Andon"}`}
+            aria-label="Alert style"
           >
-            <span className="swatch" />
-            <span>{ALERT_STYLES.find((s) => s.id === alertStyle)?.title ?? "Andon"}</span>
-            <span className="caret">▾</span>
+            <span className="trigger-glyph" aria-hidden="true">
+              <AlertGlyph id={alertStyle} />
+            </span>
           </button>
           {alertMenuOpen && (
             <div className="alert-style-popover" role="menu">
@@ -739,11 +859,62 @@ export default function App() {
             </div>
           )}
         </div>
-        <div className="fz">
-          <span className="label">font size</span>
-          <button onClick={() => bumpFz(-0.05)} title="Decrease font size">−</button>
-          <span className="val">{Math.round(fz * 100)}%</span>
-          <button onClick={() => bumpFz(0.05)} title="Increase font size">+</button>
+        <div className="alert-style-wrap" ref={fzMenuRef}>
+          <button
+            className="alert-style-trigger icon-only fz-trigger"
+            aria-expanded={fzMenuOpen}
+            aria-haspopup="menu"
+            onClick={() => setFzMenuOpen((v) => !v)}
+            title={`App font size: ${Math.round(fz * 100)}%`}
+            aria-label="App font size"
+          >
+            <span className="fz-trigger-aa" aria-hidden="true">Aa</span>
+          </button>
+          {fzMenuOpen && (
+            <div className="alert-style-popover fz-popover" role="menu">
+              <div className="fz-popover-row">
+                <span className="fz-popover-label">app font size</span>
+                <button onClick={() => bumpFz(-0.05)} title="Decrease">−</button>
+                <span className="val">{Math.round(fz * 100)}%</span>
+                <button onClick={() => bumpFz(0.05)} title="Increase">+</button>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="alert-style-wrap" ref={tfzMenuRef}>
+          <button
+            className="alert-style-trigger icon-only fz-trigger"
+            aria-expanded={tfzMenuOpen}
+            aria-haspopup="menu"
+            onClick={() => setTfzMenuOpen((v) => !v)}
+            title={`Terminal font size: ${Math.round(tfz * 100)}%`}
+            aria-label="Terminal font size"
+          >
+            <span className="fz-trigger-glyph" aria-hidden="true">
+              <svg
+                viewBox="0 0 16 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="1" y="1" width="14" height="10" rx="1.5" />
+                <path d="M4 5l2 2-2 2" />
+                <line x1="7.5" y1="9" x2="11" y2="9" />
+              </svg>
+            </span>
+          </button>
+          {tfzMenuOpen && (
+            <div className="alert-style-popover fz-popover" role="menu">
+              <div className="fz-popover-row">
+                <span className="fz-popover-label">terminal font size</span>
+                <button onClick={() => bumpTfz(-0.05)} title="Decrease">−</button>
+                <span className="val">{Math.round(tfz * 100)}%</span>
+                <button onClick={() => bumpTfz(0.05)} title="Increase">+</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -761,7 +932,7 @@ export default function App() {
           <div className="empty-state">
             <span className="empty-line">no sessions</span>
             <button className="empty-cta" onClick={spawn}>
-              spawn one <kbd>⌘N</kbd>
+              kindle one <kbd>⌘ N</kbd>
             </button>
           </div>
         )}
@@ -828,7 +999,7 @@ export default function App() {
                   cmd: s.cmd,
                 }}
                 theme={theme}
-                fontScale={fz}
+                fontScale={tfz}
                 accent={accent ?? undefined}
                 bg={bg ?? undefined}
                 active={activeId === s.key}
@@ -874,6 +1045,35 @@ export default function App() {
           }}
         />
       )}
+      {resetMenuOpen && (
+        <ResetMenuModal
+          onClose={() => setResetMenuOpen(false)}
+          actions={{
+            terminalSizes: () => {
+              setColFrs(defaults.cols);
+              setRowFrs(defaults.rows);
+              window.dispatchEvent(new Event("en:refit"));
+            },
+            appFontSize: () => setFz(APPEARANCE_DEFAULTS.fz),
+            termFontSize: () => setTfz(APPEARANCE_DEFAULTS.tfz),
+            themeColors: () => {
+              setAccent(null);
+              setBg(null);
+            },
+            allAppearance: () => {
+              setTheme(APPEARANCE_DEFAULTS.theme);
+              setTexture(APPEARANCE_DEFAULTS.texture);
+              setLayout(APPEARANCE_DEFAULTS.layout);
+              setFz(APPEARANCE_DEFAULTS.fz);
+              setTfz(APPEARANCE_DEFAULTS.tfz);
+              setTexAmt(APPEARANCE_DEFAULTS.texAmt);
+              setAccent(APPEARANCE_DEFAULTS.accent);
+              setBg(APPEARANCE_DEFAULTS.bg);
+              setAlertStyle(APPEARANCE_DEFAULTS.alertStyle);
+            },
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -914,14 +1114,26 @@ function AlertExtras({ style }: { style: AlertStyle }) {
   if (style === "sakura") {
     const drift = Array.from({ length: 6 });
     const pile = Array.from({ length: 36 });
+    const Petal = () => (
+      <svg viewBox="-5 -8 10 14" width="11" height="15">
+        <path
+          d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
     return (
       <div className="alert-extras" aria-hidden="true">
         <div className="petals">
           {drift.map((_, i) => (
-            <span key={`d${i}`} className="petal drift" />
+            <span key={`d${i}`} className="petal drift">
+              <Petal />
+            </span>
           ))}
           {pile.map((_, i) => (
-            <span key={`p${i}`} className="petal pile" />
+            <span key={`p${i}`} className="petal pile">
+              <Petal />
+            </span>
           ))}
         </div>
       </div>
@@ -1016,7 +1228,11 @@ function LayoutGlyph({ id }: { id: Layout }) {
 function AlertGlyph({ id }: { id: AlertStyle }) {
   const props = { size: 14, strokeWidth: 1.75 } as const;
   switch (id) {
-    case "pulse":     return <Activity {...props} />;
+    case "pulse":     return (
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <ellipse cx="8" cy="8" rx="6.2" ry="2.6" stroke="currentColor" strokeWidth="1.4" />
+      </svg>
+    );
     case "heartbeat": return <HeartPulse {...props} />;
     case "breath":    return <Wind {...props} />;
     case "hotaru":    return <Bug {...props} />;
@@ -1030,10 +1246,69 @@ function AlertGlyph({ id }: { id: AlertStyle }) {
         </span>
       );
     case "vertical":  return <MoveVertical {...props} />;
-    case "sakura":    return <Flower2 {...props} />;
-    case "ninja":     return <Sparkles {...props} />;
-    case "shuriken":  return <Star {...props} />;
+    case "sakura":    return (
+      <svg width="14" height="14" viewBox="0 0 16 16">
+        <defs>
+          <path id="ag-p" d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z" fill="currentColor" />
+        </defs>
+        <use href="#ag-p" transform="translate(4 3.5) rotate(-30) scale(0.42)" />
+        <use href="#ag-p" transform="translate(10.5 7.5) rotate(40) scale(0.52)" />
+        <use href="#ag-p" transform="translate(5.5 12) rotate(80) scale(0.38)" />
+      </svg>
+    );
+    case "ninja":     return (
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2.5 8 Q2.5 2.5 8 2.5 Q13.5 2.5 13.5 8 L13.5 13.5 Q13.5 14 13 14 L3 14 Q2.5 14 2.5 13.5 Z" />
+        <line x1="4.5" y1="8" x2="6.5" y2="8" />
+        <line x1="9.5" y1="8" x2="11.5" y2="8" />
+      </svg>
+    );
+    case "shuriken":  return (
+      <svg width="14" height="14" viewBox="-8 -8 16 16">
+        <path
+          d="M0,-7 L1.6,-1.6 L7,0 L1.6,1.6 L0,7 L-1.6,1.6 L-7,0 L-1.6,-1.6 Z"
+          fill="currentColor"
+        />
+        <circle r="1.1" fill="var(--bg)" />
+      </svg>
+    );
   }
+}
+
+function WindowControls() {
+  const handleClose = useCallback(() => {
+    void getCurrentWindow().close();
+  }, []);
+  const handleMinimize = useCallback(() => {
+    void getCurrentWindow().minimize();
+  }, []);
+  const handleFullscreen = useCallback(async () => {
+    const w = getCurrentWindow();
+    const isFs = await w.isFullscreen();
+    void w.setFullscreen(!isFs);
+  }, []);
+  return (
+    <div className="window-controls">
+      <button
+        className="wc wc-close"
+        onClick={handleClose}
+        title="Close window (⌘Q)"
+        aria-label="Close window"
+      />
+      <button
+        className="wc wc-min"
+        onClick={handleMinimize}
+        title="Minimize window (⌘M)"
+        aria-label="Minimize window"
+      />
+      <button
+        className="wc wc-full"
+        onClick={handleFullscreen}
+        title="Toggle fullscreen (⌃⌘F)"
+        aria-label="Toggle fullscreen"
+      />
+    </div>
+  );
 }
 
 function ConfirmCloseModal({
@@ -1086,6 +1361,118 @@ function ConfirmCloseModal({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ResetMenuModal({
+  onClose,
+  actions,
+}: {
+  onClose: () => void;
+  actions: {
+    terminalSizes: () => void;
+    appFontSize: () => void;
+    termFontSize: () => void;
+    themeColors: () => void;
+    allAppearance: () => void;
+  };
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", onKey, { capture: true });
+  }, [onClose]);
+  const items: { label: string; desc: string; run: () => void }[] = [
+    {
+      label: "terminal sizes",
+      desc: "snap grid tracks back to layout default",
+      run: actions.terminalSizes,
+    },
+    {
+      label: "app font size",
+      desc: "reset app chrome scale to 100%",
+      run: actions.appFontSize,
+    },
+    {
+      label: "terminal font size",
+      desc: "reset xterm scale to 100%",
+      run: actions.termFontSize,
+    },
+    {
+      label: "theme colors",
+      desc: "drop custom accent + background overrides",
+      run: actions.themeColors,
+    },
+    {
+      label: "all appearance",
+      desc: "theme · accent · bg · texture · sizes · alert",
+      run: actions.allAppearance,
+    },
+  ];
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="modal reset-modal"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-title">Reset…</div>
+        <div className="reset-list">
+          {items.map((it) => (
+            <button
+              key={it.label}
+              className="reset-item"
+              onClick={() => {
+                it.run();
+                onClose();
+              }}
+            >
+              <span className="reset-item-label">{it.label}</span>
+              <span className="reset-item-desc">{it.desc}</span>
+            </button>
+          ))}
+        </div>
+        <div className="modal-actions">
+          <button className="modal-cancel" onClick={onClose}>
+            cancel <kbd>esc</kbd>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FallingTexture({ kind }: { kind: "petals" | "shuriken" }) {
+  const count = kind === "petals" ? 18 : 12;
+  return (
+    <div className={`tex-fall-layer tex-fall-${kind}`} aria-hidden="true">
+      {Array.from({ length: count }).map((_, i) => (
+        <span key={i} className="tex-fall-particle">
+          {kind === "petals" ? (
+            <svg viewBox="-5 -8 10 14" width="11" height="15">
+              <path
+                d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z"
+                fill="currentColor"
+              />
+            </svg>
+          ) : (
+            <svg viewBox="-8 -8 16 16" width="18" height="18">
+              <g fill="currentColor">
+                <path d="M0,-7 L1.6,-1.6 L7,0 L1.6,1.6 L0,7 L-1.6,1.6 L-7,0 L-1.6,-1.6 Z" />
+              </g>
+              <circle r="1.2" fill="rgba(0,0,0,0.55)" />
+            </svg>
+          )}
+        </span>
+      ))}
     </div>
   );
 }

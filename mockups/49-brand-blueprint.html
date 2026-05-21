@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>en — brand & aesthetic blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@600&display=swap" rel="stylesheet" />
+<style>
+  /* Page renders in rose-pine-soft (the canonical default) */
+  :root {
+    --bg:        #2a273f;
+    --tile:      #312e4a;
+    --tile-2:    #383454;
+    --line:      #44415a;
+    --line-2:    #524d70;
+    --ink:       #e0def4;
+    --ink-2:     #908caa;
+    --ink-3:     #6e6a86;
+    --ink-4:     #4a4660;
+    --accent:    #ea9a97;
+    --accent-glow: rgba(234,154,151,0.35);
+    --ok:        #9ccfd8;
+    --warn:      #eb6f92;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --display: 'Outfit', 'Space Grotesk', sans-serif;
+    --dur-fast: 120ms;
+    --dur-slow: 250ms;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  /* Faint seigaiha-like grid backdrop, like the app */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 0 50%, transparent 18px, rgba(255,255,255,0.012) 18px, rgba(255,255,255,0.012) 19px, transparent 19px);
+    background-size: 28px 56px;
+    opacity: 0.6;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.18) 100%);
+    z-index: 0;
+  }
+
+  /* Layout */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 64px 32px 120px;
+  }
+  header.brand-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 56px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .wordmark span { color: var(--accent); }
+  .lede {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 56px;
+  }
+
+  /* Section frame */
+  section {
+    margin-bottom: 72px;
+  }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+  }
+  .sec-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .sec-sub {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    margin: 24px 0 8px;
+    text-transform: uppercase;
+  }
+  h3:first-child { margin-top: 0; }
+  p {
+    color: var(--ink-2);
+    max-width: 72ch;
+    margin-bottom: 12px;
+  }
+  p b, p strong { color: var(--ink); font-weight: 600; }
+  ul {
+    list-style: none;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+  }
+  ul li { padding: 4px 0 4px 18px; position: relative; }
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 14px;
+    width: 5px;
+    height: 1px;
+    background: var(--accent);
+  }
+  ul li b { color: var(--ink); font-weight: 600; }
+
+  /* Code/JSON copy block */
+  .code-block {
+    position: relative;
+    background: var(--tile);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    margin: 16px 0 24px;
+    overflow: hidden;
+  }
+  .code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: var(--tile-2);
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
+  }
+  .copy-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+  .copy-btn.copied {
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.65;
+    color: var(--ink);
+    padding: 16px 18px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  pre .k { color: var(--accent); }      /* key */
+  pre .s { color: var(--ok); }          /* string */
+  pre .n { color: #c4a7e7; }            /* number */
+  pre .c { color: var(--ink-3); font-style: italic; }  /* comment */
+
+  /* Theme palette grid */
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(440px, 1fr));
+    gap: 16px;
+    margin: 16px 0 24px;
+  }
+  .theme-card {
+    background: var(--tile);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .theme-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .theme-card-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .theme-card-id {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+  .theme-preview {
+    height: 130px;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .theme-preview-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    position: relative;
+  }
+  .theme-preview-aa {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+  }
+  .theme-preview-cap {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .theme-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    height: 16px;
+  }
+  .theme-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    border-top: 1px solid var(--line);
+  }
+  .theme-card-meta b {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+  .pill {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    color: var(--ink-2);
+  }
+  .pill.hc { color: var(--accent); border-color: var(--accent); }
+
+  /* Token chips */
+  .token-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin: 12px 0 20px;
+  }
+  .token-chip {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .token-name {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .token-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink);
+  }
+  .token-desc {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .swatch-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .swatch-row .sw {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    border: 1px solid var(--line-2);
+  }
+
+  /* Component example: nav pill */
+  .nav-demo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: color-mix(in oklch, var(--bg), black 35%);
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    margin: 12px 0 24px;
+  }
+  .demo-pill {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-top-color: rgba(255,255,255,0.14);
+    background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 1px 2px rgba(0,0,0,0.20);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* Mega spec block */
+  .mega-spec {
+    background: var(--tile);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    margin-top: 16px;
+    box-shadow:
+      0 0 0 1px var(--accent-glow),
+      0 16px 48px -12px rgba(0,0,0,0.55);
+  }
+  .mega-spec .code-head { background: color-mix(in oklch, var(--accent), var(--tile-2) 70%); }
+  .mega-spec .code-head span { color: var(--accent); }
+  .mega-spec pre { max-height: 800px; overflow: auto; }
+
+  footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ────────────────────────── HEADER ────────────────────────── -->
+<header class="brand-head">
+  <span class="wordmark">en<span>·</span></span>
+</header>
+<div class="lede">brand & aesthetic blueprint · v1 · 2026-05-21</div>
+
+
+<!-- ────────────────────────── 0. ESSENCE ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">00</span>
+    <span class="sec-title">Essence</span>
+    <span class="sec-sub">what en is, in one breath</span>
+  </div>
+
+  <p><b>en</b> (縁 — connection, fate, the central point that links) is a tea-ceremony aesthetic for software: quiet surfaces, restrained color, deliberate motion, and a deep respect for the user's attention. The default is calm. Loudness is reserved for moments that <em>earn</em> it — an alert, an active state, a freshly-summoned action.</p>
+
+  <p>The aesthetic borrows from Japanese visual language: muted earth pigments rather than saturated screen colors, hairline strokes rather than heavy borders, lifted backgrounds that feel "lit from within" rather than "ink on void." Names lean toward Japanese terms (<em>kanagawa</em>, <em>hinoki</em>, <em>kindle</em>, <em>kodou</em>) when they fit naturally — never as costume.</p>
+
+  <p>The brand is for tools that respect the operator. Where most app design fights for attention, en is what's <em>left over</em> when you stop fighting.</p>
+
+  <h3>Three principles</h3>
+  <ul>
+    <li><b>Quiet by default.</b> Every surface starts subdued. Loudness is rationed and meaningful.</li>
+    <li><b>Match the family.</b> If a pattern exists, the next variant copies its full contract — tokens, defaults, motion, edge cases. Drift is the enemy.</li>
+    <li><b>Restraint is the design.</b> A removed element, a desaturated accent, a smaller number — these <em>are</em> the choices, not omissions.</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.essence — JSON</span>
+      <button class="copy-btn" data-copy="essence">copy</button>
+    </div>
+<pre id="essence">{
+  "brand": "en",
+  "kanji": "縁",
+  "meaning": "connection · fate · the central point that links",
+  "voice": {
+    "tone": "tea-ceremony minimalism — quiet surfaces, deliberate motion",
+    "register": "considered, unhurried, technical-poetic",
+    "do": ["use Japanese terms only when they fit naturally", "favor lowercase", "let restraint do the talking"],
+    "avoid": ["exclamation marks", "marketing superlatives", "emoji unless the user explicitly requests"]
+  },
+  "principles": [
+    "Quiet by default. Loudness is rationed and meaningful.",
+    "Match the family. New variants copy the full contract of their siblings.",
+    "Restraint IS the design — a removed element is a choice, not an omission."
+  ],
+  "what_it_is_not": [
+    "not corporate-tech blue/grey neutral",
+    "not maximalist gradients or glassmorphism-as-spectacle",
+    "not ironic or playful — sincere quietude",
+    "not Japanese-themed costume; Japanese visual values authentically applied"
+  ]
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 1. TYPOGRAPHY ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Typography</span>
+    <span class="sec-sub">three faces, locked roles</span>
+  </div>
+
+  <p>Three typefaces, no substitutions. Each role is locked.</p>
+
+  <h3>display — Outfit 600</h3>
+  <p>Wordmarks, primary nameplates only. Geometric, slightly humanist, reads as quiet authority. Used at 16–56px depending on context. Never used for body text — at body sizes Outfit's open apertures feel airy in a way that fights the body face.</p>
+
+  <h3>sans — Space Grotesk 500</h3>
+  <p>All UI body text — buttons, labels, paragraphs, descriptions. Body weight is <b>500</b>, not 400; en's body text is sturdier than typical sans default. The slightly distinctive terminals (the <em>a</em>, <em>g</em>, <em>t</em>) give the UI character without needing decorative chrome.</p>
+
+  <h3>mono — JetBrains Mono 400/500</h3>
+  <p>Used in two registers: <b>terminal output</b> (xterm, code) at 400, and <b>UI metadata</b> (status text, kbd legends, timestamps, percentages, section labels) at 400-500. Mono in chrome should always feel like a label, not a paragraph — uppercase + 0.10–0.18em letter-spacing for label use.</p>
+
+  <h3>scale</h3>
+  <p>Body 16px nominal, scaled by <code>--fz</code> (0.7–1.6). Chrome labels 10–11px. Buttons 11–13px. The scale is intentionally narrow — en doesn't have h1/h2/h3 hierarchies because it's an app shell, not a document.</p>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.typography — JSON</span>
+      <button class="copy-btn" data-copy="typography">copy</button>
+    </div>
+<pre id="typography">{
+  "typography": {
+    "faces": {
+      "display": {
+        "family": "Outfit",
+        "weights": [600],
+        "use_for": ["wordmarks", "primary nameplates"],
+        "never_for": ["body text", "labels", "paragraphs"]
+      },
+      "sans": {
+        "family": "Space Grotesk",
+        "fallback": "system-ui, sans-serif",
+        "weights": [400, 500, 600, 700],
+        "body_default_weight": 500,
+        "use_for": ["all UI body text", "buttons", "labels", "paragraphs", "descriptions"]
+      },
+      "mono": {
+        "family": "JetBrains Mono",
+        "fallback": "ui-monospace, monospace",
+        "weights": [400, 500],
+        "use_for": ["terminal output (xterm, code blocks)", "UI metadata (status, kbd, timestamps, percentages, caps labels)"]
+      }
+    },
+    "rules": {
+      "body_weight": "500 (NOT 400 — body text must read sturdy)",
+      "label_treatment": "mono, 10-11px, 0.10–0.18em letter-spacing, uppercase",
+      "scale_range": "0.7 – 1.6 via --fz CSS custom property",
+      "no_heading_hierarchy": "no h1/h2/h3 — en is an app shell, not a document"
+    }
+  }
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 2. COLOR & THEMES ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Color &amp; Themes</span>
+    <span class="sec-sub">eight palettes, four pairs</span>
+  </div>
+
+  <p>en has <b>four theme families</b>, each with two variants:</p>
+  <ul>
+    <li><b>default (high-contrast)</b> — deeper bg, brighter ink, more saturated accent. The "crisp" reading.</li>
+    <li><b>-soft (lifted)</b> — bg pulled <em>up</em> not down, ink tonally related to bg, accent restrained. Feels "lit from within" rather than "crisp on void."</li>
+  </ul>
+
+  <p><b>The lifted recipe is the soul of en.</b> When in doubt, lean lifted. The default rose-pine-soft palette is the canonical reference — every other theme is tuned to that target feel.</p>
+
+  <div class="theme-grid" id="theme-grid"><!-- JS-rendered --></div>
+
+  <h3>Color tokens (per theme)</h3>
+  <div class="token-grid">
+    <div class="token-chip">
+      <span class="token-name">--bg</span>
+      <span class="token-val">page background</span>
+      <span class="token-desc">the deepest surface; vignette + texture render against this</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--tile</span>
+      <span class="token-val">primary surface</span>
+      <span class="token-desc">cards, popovers, modals; one step above bg</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--tile-2</span>
+      <span class="token-val">elevated surface</span>
+      <span class="token-desc">hover states, internal headers; one step above tile</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--line</span>
+      <span class="token-val">hairline divider</span>
+      <span class="token-desc">subtle internal separators</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--line-2</span>
+      <span class="token-val">visible border</span>
+      <span class="token-desc">button outlines, popover edges</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--ink</span>
+      <span class="token-val">primary text</span>
+      <span class="token-desc">titles, prominent values</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--ink-2</span>
+      <span class="token-val">body text</span>
+      <span class="token-desc">paragraphs, secondary values, button labels</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--ink-3</span>
+      <span class="token-val">label text</span>
+      <span class="token-desc">caps section labels, captions, descriptions</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--ink-4</span>
+      <span class="token-val">disabled / placeholder</span>
+      <span class="token-desc">inactive elements, empty status dots</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--accent</span>
+      <span class="token-val">brand color</span>
+      <span class="token-desc">interactive icons, focus rings, key glyphs</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--accent-glow</span>
+      <span class="token-val">accent at low alpha</span>
+      <span class="token-desc">hover backgrounds, soft halos</span>
+    </div>
+    <div class="token-chip">
+      <span class="token-name">--ok / --warn</span>
+      <span class="token-val">status colors</span>
+      <span class="token-desc">live (ok), needs / error (warn); per theme, never hardcoded</span>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.themes — JSON (all 8 palettes)</span>
+      <button class="copy-btn" data-copy="themes">copy</button>
+    </div>
+<pre id="themes">{
+  "themes": {
+    "model": "4 families × 2 variants = 8 themes",
+    "variants": {
+      "default": "high-contrast: deeper bg, brighter ink, more saturated accent",
+      "-soft": "lifted: bg pulled UP, ink tonally related, accent restrained — 'lit from within'"
+    },
+    "canonical_reference": "rose-pine-soft (the lifted recipe target)",
+    "default_theme": "rose-pine-soft",
+    "tokens_per_theme": [
+      "--bg", "--tile", "--tile-2", "--line", "--line-2",
+      "--ink", "--ink-2", "--ink-3", "--ink-4",
+      "--accent", "--accent-glow", "--ok", "--warn",
+      "--grain-opacity", "--grain-blend", "--vignette", "--sheen"
+    ],
+    "palettes": {
+      "kanagawa": {
+        "title": "Kanagawa Sumi",
+        "feel": "high-contrast: deep sumi-ink bg, cream washi ink, tea-stained gold accent",
+        "bg": "#14141c", "tile": "#1a1a23", "tile-2": "#20202c",
+        "line": "#2a2c40", "line-2": "#383a55",
+        "ink": "#ece6c4", "ink-2": "#b8b094", "ink-3": "#82806f", "ink-4": "#5a5a72",
+        "accent": "#d4b274", "accent-glow": "rgba(212,178,116,0.42)",
+        "ok": "#87a87b", "warn": "#d44848"
+      },
+      "kanagawa-soft": {
+        "title": "Kanagawa Sumi (soft)",
+        "feel": "lifted charcoal-with-warmth, cream ink, gold accent restrained",
+        "bg": "#2a2a37", "tile": "#2f2f3d", "tile-2": "#353544",
+        "line": "#3a3b53", "line-2": "#45465e",
+        "ink": "#dcd7ba", "ink-2": "#a6a08a", "ink-3": "#727169", "ink-4": "#54546d",
+        "accent": "#c0a36e", "accent-glow": "rgba(192,163,110,0.32)",
+        "ok": "#76946a", "warn": "#c34043"
+      },
+      "everforest": {
+        "title": "Everforest Dusk",
+        "feel": "high-contrast: forest-green twilight, warm cream ink, sage accent",
+        "bg": "#181f23", "tile": "#222a30", "tile-2": "#2a343a",
+        "line": "#344047", "line-2": "#475158",
+        "ink": "#e1d6b5", "ink-2": "#aab9ad", "ink-3": "#8c948a", "ink-4": "#606b66",
+        "accent": "#b8d290", "accent-glow": "rgba(184,210,144,0.42)",
+        "ok": "#92d3a3", "warn": "#f08e90"
+      },
+      "everforest-soft": {
+        "title": "Everforest Dusk (soft)",
+        "feel": "lifted forest-grey, warm ink, sage accent dialed back",
+        "bg": "#343f44", "tile": "#3a464c", "tile-2": "#404d54",
+        "line": "#4f585e", "line-2": "#5a6469",
+        "ink": "#d3c6aa", "ink-2": "#9da9a0", "ink-3": "#7a8478", "ink-4": "#56635f",
+        "accent": "#a7c080", "accent-glow": "rgba(167,192,128,0.32)",
+        "ok": "#83c092", "warn": "#e67e80"
+      },
+      "rose-pine": {
+        "title": "Rose Pine Moon",
+        "feel": "high-contrast: dark plum, lavender ink, coral accent fully present",
+        "bg": "#1a1828", "tile": "#211f33", "tile-2": "#29263e",
+        "line": "#322e4d", "line-2": "#3f3a5a",
+        "ink": "#ecebff", "ink-2": "#a39ec4", "ink-3": "#7e7a98", "ink-4": "#555274",
+        "accent": "#f4a8a5", "accent-glow": "rgba(244,168,165,0.42)",
+        "ok": "#aadce4", "warn": "#f47fa1"
+      },
+      "rose-pine-soft": {
+        "title": "Rose Pine Moon (soft) — DEFAULT",
+        "feel": "the canonical lifted recipe — purple-grey bg lifted to glow, lavender ink resonates with bg's purple undertone, coral accent restrained so ink stays the protagonist",
+        "bg": "#2a273f", "tile": "#312e4a", "tile-2": "#383454",
+        "line": "#44415a", "line-2": "#524d70",
+        "ink": "#e0def4", "ink-2": "#908caa", "ink-3": "#6e6a86", "ink-4": "#4a4660",
+        "accent": "#ea9a97", "accent-glow": "rgba(234,154,151,0.35)",
+        "ok": "#9ccfd8", "warn": "#eb6f92"
+      },
+      "hinoki": {
+        "title": "Hinoki",
+        "feel": "high-contrast: warm charcoal cypress, cream ink, desaturated tea-amber accent (NOT neon)",
+        "bg": "#15171a", "tile": "#1b1d20", "tile-2": "#21232a",
+        "line": "#292d35", "line-2": "#353a44",
+        "ink": "#e3dccb", "ink-2": "#aaa294", "ink-3": "#6e6a5e", "ink-4": "#423f38",
+        "accent": "#d49a3a", "accent-glow": "rgba(212,154,58,0.38)",
+        "ok": "#88c99c", "warn": "#e07050"
+      },
+      "hinoki-soft": {
+        "title": "Hinoki (soft)",
+        "feel": "lifted wood-grain warm-grey, ink stays warm, accent further toasted",
+        "bg": "#2a2620", "tile": "#312d26", "tile-2": "#38332b",
+        "line": "#403a32", "line-2": "#4a443b",
+        "ink": "#d6d0bf", "ink-2": "#9a9282", "ink-3": "#6a6458", "ink-4": "#4a4438",
+        "accent": "#c89656", "accent-glow": "rgba(200,150,86,0.32)",
+        "ok": "#88c99c", "warn": "#d97050"
+      }
+    }
+  }
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 3. SPACING & MOTION ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Spacing, Motion, Elevation</span>
+    <span class="sec-sub">disciplined tokens, two durations</span>
+  </div>
+
+  <h3>spacing</h3>
+  <p>Body padding/gap/margin in interactive chrome scales with <code>--fz</code> via <code>calc(Npx * var(--fz))</code>. <b>Borders, hairlines, blur radii, fixed widths/heights, breakpoints, and border-radius do NOT scale.</b> The rule: if the text inside scales, the chrome around it should breathe; visual constants stay constant.</p>
+
+  <h3>motion</h3>
+  <p>Two durations, period.</p>
+  <ul>
+    <li><code>--dur-fast: 120ms</code> — every micro-interaction (hover, focus, active, popover open, modal fade).</li>
+    <li><code>--dur-slow: 250ms</code> — page-level transitions only (theme switch body fade).</li>
+  </ul>
+  <p>Animations (alert pulses, ambient drift, decorative) are tuned per-effect (0.9s–28s). They are not durations — they are choreography. Each must have a <code>prefers-reduced-motion: reduce</code> opt-out.</p>
+
+  <h3>elevation</h3>
+  <p>en uses <em>frosted glass</em>, not drop shadows. The vocabulary is:</p>
+  <ul>
+    <li><b>Inset 1px highlight</b> on top edge (<code>rgba(255,255,255,0.08)</code>) — gives the surface a "lit-from-above" quality.</li>
+    <li><b>Backdrop-filter blur(20px) saturate(180%)</b> on translucent surfaces.</li>
+    <li><b>Hairline 1px border</b> with top edge slightly brighter than sides.</li>
+    <li><b>Soft outer shadow</b> only for popovers and modals — never for inline buttons.</li>
+  </ul>
+
+  <h3>z-index</h3>
+  <p>Three documented tiers:</p>
+  <ul>
+    <li><b>9997–9999</b> — global decorative overlays (texture, vignette, particles).</li>
+    <li><b>50–100</b> — chrome (popovers 50, modals 100).</li>
+    <li><b>1–6</b> — tile-internal effects (xterm, alert overlays).</li>
+  </ul>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.tokens.motion-and-elevation — JSON</span>
+      <button class="copy-btn" data-copy="motion">copy</button>
+    </div>
+<pre id="motion">{
+  "spacing": {
+    "rule": "padding/gap/margin in interactive chrome uses calc(Npx * var(--fz)); borders/radius/shadows/breakpoints stay fixed",
+    "common_steps_px": [2, 4, 6, 8, 10, 12, 14, 18, 20, 22],
+    "fz_range": [0.7, 1.6]
+  },
+  "motion": {
+    "durations": {
+      "--dur-fast": "120ms — every micro-interaction (hover, focus, active, popover open)",
+      "--dur-slow": "250ms — page-level only (theme switch body fade)"
+    },
+    "press_feedback": "transform scale(0.97) on :active, 80ms ease (faster than ambient hover)",
+    "animations_are_choreography_not_durations": "decorative animations tuned per effect (0.9s–28s); each MUST have prefers-reduced-motion: reduce opt-out"
+  },
+  "elevation": {
+    "vocabulary": "frosted glass, not drop shadows",
+    "frosted_pill_recipe": {
+      "border": "1px solid rgba(255,255,255,0.07); top-edge rgba(255,255,255,0.14)",
+      "background": "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+      "backdrop_filter": "blur(20px) saturate(180%)",
+      "inset_highlight": "inset 0 1px 0 rgba(255,255,255,0.08)",
+      "subtle_shadow": "0 1px 2px rgba(0,0,0,0.20), 0 4px 12px -4px rgba(0,0,0,0.40)"
+    },
+    "popover_modal_only": "soft outer shadow reserved for popovers and modals; inline buttons never get drop shadows"
+  },
+  "z_index": {
+    "9999_decorative_top": "body::before — grain/static texture",
+    "9998_decorative_mid": "body::after — vignette",
+    "9997_decorative_low": ".tex-fall-layer — falling particles",
+    "100_modal_backdrop": ".modal-overlay",
+    "50_popover_panel": ".alert-style-popover",
+    "1_to_6_tile_internal": "alert effects > xterm > scanlines"
+  }
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 4. COMPONENTS ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Component patterns</span>
+    <span class="sec-sub">how building blocks behave</span>
+  </div>
+
+  <h3>nav frosted pill</h3>
+  <p>The signature en chrome element. 30×30 square with 9px radius. Frosted-glass surface (see elevation recipe). Inner glyph in <code>var(--accent)</code>, sized 14×14 max. On hover: top-edge highlight brightens, accent ring forms. On press: scale(0.97), inset shadow flips to suggest pressed-in. Use for any nav action that opens a popover or fires a single command.</p>
+  <div class="nav-demo">
+    <span class="demo-pill">+</span>
+    <span class="demo-pill">↻</span>
+    <span class="demo-pill">●</span>
+    <span class="demo-pill">▦</span>
+    <span class="demo-pill">Aa</span>
+  </div>
+
+  <h3>popover</h3>
+  <p>Opens below trigger with 8px gap. Uses <code>var(--tile)</code> bg + 1px <code>var(--line-2)</code> border + inset 1px <code>var(--accent)</code> ring + 32px soft shadow. Open animation: fade + 4px translateY, 120ms. Click-outside dismisses. Escape dismisses.</p>
+
+  <h3>modal</h3>
+  <p>Center-of-screen on a <code>rgba(0,0,0,0.55)</code> backdrop with backdrop-blur(2px). Frame matches popover (tile bg, accent ring, deep shadow). Escape cancels; Enter confirms (when there's a primary action). Focus is trapped on the primary button on open.</p>
+
+  <h3>alert state (tile.needs)</h3>
+  <p>When a session needs the user, the tile escalates via one of 10 alert styles (kodou, kokyu, hotaru, samurai, sandangiri, tatewari, sakura-rain, ninja, shuriken, andon). Every style is driven by <code>var(--accent)</code> so it auto-themes. Each style honors <code>prefers-reduced-motion</code> — falling back to a soft static halo.</p>
+
+  <h3>texture overlays</h3>
+  <p>en supports 14 texture layers — 12 static (grain, scanlines, dots, sakura, seigaiha, topography, pluses, yagasuri, brush, bokeh, bamboo) and 2 animated rains (sakura-rain, shuriken-rain). All driven by <code>--tex-amt</code> (0.2–2.0) for global intensity. Textures are decorative atmosphere, never functional state.</p>
+
+  <h3>brand mark</h3>
+  <p>Torii gate SVG (4 strokes, currentColor) + "en" wordmark in Outfit 600. The torii sits before the wordmark, sized to match cap-height. Color is always <code>var(--accent)</code> — retints with theme automatically.</p>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.components — JSON</span>
+      <button class="copy-btn" data-copy="components">copy</button>
+    </div>
+<pre id="components">{
+  "components": {
+    "nav_frosted_pill": {
+      "size": "30 × 30 px (scales with --fz)",
+      "radius": "9px",
+      "surface": "frosted_pill_recipe (see elevation)",
+      "inner_glyph": "color: var(--accent), max 14×14",
+      "hover": "top-edge highlight + accent ring + accent-glow shadow",
+      "active": "transform scale(0.97), inset shadow flip",
+      "use_for": "any nav action that opens a popover or fires a single command"
+    },
+    "popover": {
+      "anchor": "below trigger, 8px gap",
+      "bg": "var(--tile)",
+      "border": "1px var(--line-2) + inset 1px var(--accent) ring",
+      "shadow": "0 12px 32px -8px rgba(0,0,0,0.55)",
+      "open_animation": "fade + 4px translateY, 120ms",
+      "dismiss": ["click-outside", "Escape"]
+    },
+    "modal": {
+      "backdrop": "rgba(0,0,0,0.55) + backdrop-filter blur(2px)",
+      "frame": "matches popover (tile bg, accent ring, deep shadow)",
+      "size": "min-width 380px, max-width 480px (chat-style); reset modal min-width 420px",
+      "keys": { "Escape": "cancel", "Enter": "confirm primary action" },
+      "focus": "trapped on primary button on open"
+    },
+    "tile_alert": {
+      "trigger": "session.status = 'needs'",
+      "styles_count": 10,
+      "ids": ["andon", "kodou", "kokyu", "hotaru", "samurai", "sandangiri", "tatewari", "sakura-rain", "ninja", "shuriken"],
+      "color": "always driven by var(--accent) — auto-themes",
+      "reduced_motion": "MUST honor prefers-reduced-motion — fallback to soft static halo"
+    },
+    "texture_overlay": {
+      "static_count": 12,
+      "static_ids": ["grain", "scanlines", "dots", "sakura", "seigaiha", "topography", "pluses", "yagasuri", "brush", "bokeh", "bamboo", "none"],
+      "animated_count": 2,
+      "animated_ids": ["petals-fall (sakura rain)", "shuriken-fall (shuriken rain)"],
+      "intensity_var": "--tex-amt (0.2–2.0)",
+      "rule": "decorative atmosphere only, never functional state"
+    },
+    "brand_mark": {
+      "shape": "torii gate (4 strokes, SVG, currentColor) + 'en' wordmark in Outfit 600",
+      "color": "var(--accent) — retints with theme",
+      "torii_first_then_wordmark": true,
+      "letter_spacing_wordmark": "0.04em"
+    }
+  }
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 5. VOICE & COPY ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Voice &amp; Copy</span>
+    <span class="sec-sub">how en sounds</span>
+  </div>
+
+  <p>Lowercase by default. Restrained verbs. Japanese terms only when the meaning fits naturally — never as decoration. Ration exclamation marks (zero is the default). Status text reads as observation, not announcement.</p>
+
+  <h3>verb choices</h3>
+  <p>en's verbs lean ceremonial-quiet. Where a typical app says <em>create</em>, <em>open</em>, <em>start</em>, en often picks something with weight: <em>kindle</em>, <em>summon</em>, <em>begin</em>. Not always — if the natural English word is correct, use it. The rule: pick the verb that respects the user's attention and the act being named.</p>
+
+  <h3>examples</h3>
+  <ul>
+    <li><b>kindle one</b> — start a new session (lighting a lantern; ties to the andon/torii motifs)</li>
+    <li><b>kindling…</b> — session spawning (transition state)</li>
+    <li><b>no sessions</b> — empty state (observation, not "Get started!" cheerfulness)</li>
+    <li><b>focus</b> — current selection (used as a noun in foot bar)</li>
+  </ul>
+
+  <h3>kbd legends</h3>
+  <p>Mono caps. <code>⌘ N</code> with a space (the keys are visually distinct units). <code>esc</code> and <code>↵</code> in lowercase mono.</p>
+
+  <div class="code-block">
+    <div class="code-head">
+      <span>brand.voice — JSON</span>
+      <button class="copy-btn" data-copy="voice">copy</button>
+    </div>
+<pre id="voice">{
+  "voice": {
+    "casing": "lowercase by default",
+    "verbs": {
+      "principle": "pick the verb that respects the user's attention and the act being named",
+      "ceremonial_when_fitting": ["kindle", "summon", "begin", "ignite"],
+      "plain_when_correct": ["open", "close", "save", "load"]
+    },
+    "tone": {
+      "do": ["observation, not announcement", "let restraint do the talking", "Japanese terms when they fit naturally"],
+      "avoid": ["exclamation marks (default = zero)", "marketing superlatives (\"awesome!\", \"effortlessly\")", "second-person hype (\"You'll love it!\")", "Japanese as costume"]
+    },
+    "examples": {
+      "primary_cta": "kindle one",
+      "transition": "kindling…",
+      "empty_state": "no sessions",
+      "current_selection_label": "focus",
+      "kbd_chord": "⌘ N (space between modifier and key)",
+      "esc_legend": "esc",
+      "enter_legend": "↵"
+    }
+  }
+}</pre>
+  </div>
+</section>
+
+
+<!-- ────────────────────────── 6. MEGA SPEC ────────────────────────── -->
+<section>
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <span class="sec-title">Full blueprint — single payload</span>
+    <span class="sec-sub">paste into AI to mimic en 1:1</span>
+  </div>
+
+  <p>Everything above, in one JSON object. Paste this into any AI assistant (Claude, GPT, Cursor, Aider) along with the instruction <em>"design a UI in this aesthetic"</em>, and you'll get en-faithful output without further explanation. Includes brand essence, typography, all 8 themes, motion/elevation/spacing tokens, component recipes, and voice rules.</p>
+
+  <div class="code-block mega-spec">
+    <div class="code-head">
+      <span>en.brand.full — JSON</span>
+      <button class="copy-btn" data-copy="full">copy full spec</button>
+    </div>
+<pre id="full">{
+  "$schema": "en-brand-blueprint/v1",
+  "name": "en",
+  "kanji": "縁",
+  "meaning": "connection · fate · the central point that links",
+  "version": "1.0",
+  "updated": "2026-05-21",
+
+  "essence": {
+    "voice": {
+      "tone": "tea-ceremony minimalism — quiet surfaces, deliberate motion",
+      "register": "considered, unhurried, technical-poetic",
+      "do": ["use Japanese terms only when they fit naturally", "favor lowercase", "let restraint do the talking"],
+      "avoid": ["exclamation marks", "marketing superlatives", "emoji unless the user explicitly requests"]
+    },
+    "principles": [
+      "Quiet by default. Loudness is rationed and meaningful.",
+      "Match the family. New variants copy the full contract of their siblings.",
+      "Restraint IS the design — a removed element is a choice, not an omission."
+    ],
+    "what_it_is_not": [
+      "not corporate-tech blue/grey neutral",
+      "not maximalist gradients or glassmorphism-as-spectacle",
+      "not ironic or playful — sincere quietude",
+      "not Japanese-themed costume; Japanese visual values authentically applied"
+    ]
+  },
+
+  "typography": {
+    "faces": {
+      "display": { "family": "Outfit", "weights": [600], "use_for": ["wordmarks", "primary nameplates"], "never_for": ["body text", "labels"] },
+      "sans":    { "family": "Space Grotesk", "fallback": "system-ui, sans-serif", "weights": [400, 500, 600, 700], "body_default_weight": 500, "use_for": ["all UI body text", "buttons", "labels", "paragraphs"] },
+      "mono":    { "family": "JetBrains Mono", "fallback": "ui-monospace, monospace", "weights": [400, 500], "use_for": ["terminal output", "UI metadata (status, kbd, caps labels)"] }
+    },
+    "rules": {
+      "body_weight": "500 (NOT 400 — body text must read sturdy)",
+      "label_treatment": "mono, 10-11px, 0.10–0.18em letter-spacing, uppercase",
+      "scale_range": "0.7 – 1.6 via --fz",
+      "no_heading_hierarchy": "no h1/h2/h3 — en is an app shell"
+    }
+  },
+
+  "themes": {
+    "model": "4 families × 2 variants = 8 themes",
+    "variants": {
+      "default": "high-contrast: deeper bg, brighter ink, more saturated accent",
+      "-soft": "lifted: bg pulled UP, ink tonally related, accent restrained — 'lit from within'"
+    },
+    "canonical_reference": "rose-pine-soft",
+    "default_theme": "rose-pine-soft",
+    "tokens_per_theme": ["--bg", "--tile", "--tile-2", "--line", "--line-2", "--ink", "--ink-2", "--ink-3", "--ink-4", "--accent", "--accent-glow", "--ok", "--warn", "--grain-opacity", "--grain-blend", "--vignette", "--sheen"],
+    "palettes": {
+      "kanagawa":         { "title": "Kanagawa Sumi",            "feel": "high-contrast: deep sumi-ink bg, cream washi ink, tea-stained gold accent",                  "bg": "#14141c", "tile": "#1a1a23", "tile-2": "#20202c", "line": "#2a2c40", "line-2": "#383a55", "ink": "#ece6c4", "ink-2": "#b8b094", "ink-3": "#82806f", "ink-4": "#5a5a72", "accent": "#d4b274", "accent-glow": "rgba(212,178,116,0.42)", "ok": "#87a87b", "warn": "#d44848" },
+      "kanagawa-soft":    { "title": "Kanagawa Sumi (soft)",     "feel": "lifted charcoal-with-warmth, cream ink, gold accent restrained",                            "bg": "#2a2a37", "tile": "#2f2f3d", "tile-2": "#353544", "line": "#3a3b53", "line-2": "#45465e", "ink": "#dcd7ba", "ink-2": "#a6a08a", "ink-3": "#727169", "ink-4": "#54546d", "accent": "#c0a36e", "accent-glow": "rgba(192,163,110,0.32)", "ok": "#76946a", "warn": "#c34043" },
+      "everforest":       { "title": "Everforest Dusk",          "feel": "high-contrast: forest-green twilight, warm cream ink, sage accent",                        "bg": "#181f23", "tile": "#222a30", "tile-2": "#2a343a", "line": "#344047", "line-2": "#475158", "ink": "#e1d6b5", "ink-2": "#aab9ad", "ink-3": "#8c948a", "ink-4": "#606b66", "accent": "#b8d290", "accent-glow": "rgba(184,210,144,0.42)", "ok": "#92d3a3", "warn": "#f08e90" },
+      "everforest-soft":  { "title": "Everforest Dusk (soft)",   "feel": "lifted forest-grey, warm ink, sage accent dialed back",                                    "bg": "#343f44", "tile": "#3a464c", "tile-2": "#404d54", "line": "#4f585e", "line-2": "#5a6469", "ink": "#d3c6aa", "ink-2": "#9da9a0", "ink-3": "#7a8478", "ink-4": "#56635f", "accent": "#a7c080", "accent-glow": "rgba(167,192,128,0.32)", "ok": "#83c092", "warn": "#e67e80" },
+      "rose-pine":        { "title": "Rose Pine Moon",           "feel": "high-contrast: dark plum, lavender ink, coral accent fully present",                       "bg": "#1a1828", "tile": "#211f33", "tile-2": "#29263e", "line": "#322e4d", "line-2": "#3f3a5a", "ink": "#ecebff", "ink-2": "#a39ec4", "ink-3": "#7e7a98", "ink-4": "#555274", "accent": "#f4a8a5", "accent-glow": "rgba(244,168,165,0.42)", "ok": "#aadce4", "warn": "#f47fa1" },
+      "rose-pine-soft":   { "title": "Rose Pine Moon (soft) — DEFAULT",  "feel": "the canonical lifted recipe — purple-grey bg lifted to glow, lavender ink resonates with bg's purple undertone, coral accent restrained so ink stays the protagonist", "bg": "#2a273f", "tile": "#312e4a", "tile-2": "#383454", "line": "#44415a", "line-2": "#524d70", "ink": "#e0def4", "ink-2": "#908caa", "ink-3": "#6e6a86", "ink-4": "#4a4660", "accent": "#ea9a97", "accent-glow": "rgba(234,154,151,0.35)", "ok": "#9ccfd8", "warn": "#eb6f92" },
+      "hinoki":           { "title": "Hinoki",                   "feel": "high-contrast: warm charcoal cypress, cream ink, desaturated tea-amber accent (NOT neon)", "bg": "#15171a", "tile": "#1b1d20", "tile-2": "#21232a", "line": "#292d35", "line-2": "#353a44", "ink": "#e3dccb", "ink-2": "#aaa294", "ink-3": "#6e6a5e", "ink-4": "#423f38", "accent": "#d49a3a", "accent-glow": "rgba(212,154,58,0.38)", "ok": "#88c99c", "warn": "#e07050" },
+      "hinoki-soft":      { "title": "Hinoki (soft)",            "feel": "lifted wood-grain warm-grey, ink stays warm, accent further toasted",                       "bg": "#2a2620", "tile": "#312d26", "tile-2": "#38332b", "line": "#403a32", "line-2": "#4a443b", "ink": "#d6d0bf", "ink-2": "#9a9282", "ink-3": "#6a6458", "ink-4": "#4a4438", "accent": "#c89656", "accent-glow": "rgba(200,150,86,0.32)", "ok": "#88c99c", "warn": "#d97050" }
+    }
+  },
+
+  "spacing": {
+    "rule": "padding/gap/margin in interactive chrome uses calc(Npx * var(--fz)); borders/radius/shadows/breakpoints stay fixed",
+    "common_steps_px": [2, 4, 6, 8, 10, 12, 14, 18, 20, 22],
+    "fz_range": [0.7, 1.6]
+  },
+
+  "motion": {
+    "durations": {
+      "--dur-fast": "120ms — every micro-interaction",
+      "--dur-slow": "250ms — page-level only (theme switch fade)"
+    },
+    "press_feedback": "transform scale(0.97) on :active, 80ms ease",
+    "animations_are_choreography_not_durations": "decorative animations tuned per effect (0.9s–28s); each MUST have prefers-reduced-motion: reduce opt-out"
+  },
+
+  "elevation": {
+    "vocabulary": "frosted glass, not drop shadows",
+    "frosted_pill_recipe": {
+      "border": "1px solid rgba(255,255,255,0.07); top-edge rgba(255,255,255,0.14)",
+      "background": "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
+      "backdrop_filter": "blur(20px) saturate(180%)",
+      "inset_highlight": "inset 0 1px 0 rgba(255,255,255,0.08)",
+      "subtle_shadow": "0 1px 2px rgba(0,0,0,0.20), 0 4px 12px -4px rgba(0,0,0,0.40)"
+    },
+    "popover_modal_only": "soft outer shadow reserved for popovers and modals; inline buttons never get drop shadows"
+  },
+
+  "z_index": {
+    "decorative_top_9999": "grain texture",
+    "decorative_mid_9998": "vignette",
+    "decorative_low_9997": "falling particle layer",
+    "modal_backdrop_100": ".modal-overlay",
+    "popover_panel_50": ".popover",
+    "tile_internal_1_to_6": "alert effects > xterm > scanlines"
+  },
+
+  "components": {
+    "nav_frosted_pill": { "size": "30×30 px scales with --fz", "radius": "9px", "inner_glyph_color": "var(--accent)", "max_glyph": "14×14", "hover": "top-edge highlight + accent ring", "active": "scale(0.97), inset shadow flip" },
+    "popover":          { "anchor": "below trigger, 8px gap", "bg": "var(--tile)", "border": "1px var(--line-2) + inset 1px var(--accent)", "shadow": "0 12px 32px -8px rgba(0,0,0,0.55)", "open_anim": "fade + 4px translateY, 120ms", "dismiss": ["click-outside", "Escape"] },
+    "modal":            { "backdrop": "rgba(0,0,0,0.55) + blur(2px)", "frame": "matches popover", "min_width": "380–420px", "keys": { "Escape": "cancel", "Enter": "confirm" } },
+    "tile_alert":       { "trigger": "session.status = 'needs'", "styles": ["andon", "kodou", "kokyu", "hotaru", "samurai", "sandangiri", "tatewari", "sakura-rain", "ninja", "shuriken"], "color": "always var(--accent) — auto-themes", "reduced_motion_required": true },
+    "texture_overlay":  { "static_ids": ["grain","scanlines","dots","sakura","seigaiha","topography","pluses","yagasuri","brush","bokeh","bamboo","none"], "animated_ids": ["petals-fall","shuriken-fall"], "intensity_var": "--tex-amt (0.2–2.0)" },
+    "brand_mark":       { "shape": "torii gate SVG (4 strokes) + 'en' wordmark Outfit 600", "color": "var(--accent)", "wordmark_letter_spacing": "0.04em" }
+  },
+
+  "voice": {
+    "casing": "lowercase by default",
+    "verbs": {
+      "ceremonial_when_fitting": ["kindle", "summon", "begin", "ignite"],
+      "plain_when_correct": ["open", "close", "save", "load"]
+    },
+    "examples": {
+      "primary_cta": "kindle one",
+      "transition": "kindling…",
+      "empty_state": "no sessions",
+      "current_selection_label": "focus",
+      "kbd_chord": "⌘ N (space between modifier and key)"
+    },
+    "avoid": ["exclamation marks (default zero)", "marketing superlatives", "second-person hype", "Japanese as costume"]
+  },
+
+  "ai_directive": "When designing in this aesthetic: default rose-pine-soft palette · Space Grotesk 500 body · frosted-glass surfaces with hairline accent rings · 120ms micro-interactions · color-by-token (never hardcode hex once tokens exist) · accent for interactive glyphs · :focus-visible 2px accent outline · prefers-reduced-motion always honored · lowercase voice with rationed Japanese terms · restraint over decoration."
+}</pre>
+  </div>
+</section>
+
+
+<footer>
+  en — brand &amp; aesthetic blueprint · v1.0 · 2026-05-21 · single source of truth
+</footer>
+
+</div>
+
+<script>
+  // Render theme cards
+  const PALETTES = [
+    { id: "kanagawa",         title: "Kanagawa Sumi",                          tier: "high-contrast", bg: "#14141c", tile: "#1a1a23", line: "#2a2c40", ink: "#ece6c4", ink2: "#b8b094", accent: "#d4b274" },
+    { id: "kanagawa-soft",    title: "Kanagawa Sumi (soft)",                   tier: "lifted",        bg: "#2a2a37", tile: "#2f2f3d", line: "#3a3b53", ink: "#dcd7ba", ink2: "#a6a08a", accent: "#c0a36e" },
+    { id: "everforest",       title: "Everforest Dusk",                        tier: "high-contrast", bg: "#181f23", tile: "#222a30", line: "#344047", ink: "#e1d6b5", ink2: "#aab9ad", accent: "#b8d290" },
+    { id: "everforest-soft",  title: "Everforest Dusk (soft)",                 tier: "lifted",        bg: "#343f44", tile: "#3a464c", line: "#4f585e", ink: "#d3c6aa", ink2: "#9da9a0", accent: "#a7c080" },
+    { id: "rose-pine",        title: "Rose Pine Moon",                         tier: "high-contrast", bg: "#1a1828", tile: "#211f33", line: "#322e4d", ink: "#ecebff", ink2: "#a39ec4", accent: "#f4a8a5" },
+    { id: "rose-pine-soft",   title: "Rose Pine Moon (soft) — default",        tier: "lifted ★",      bg: "#2a273f", tile: "#312e4a", line: "#44415a", ink: "#e0def4", ink2: "#908caa", accent: "#ea9a97" },
+    { id: "hinoki",           title: "Hinoki",                                 tier: "high-contrast", bg: "#15171a", tile: "#1b1d20", line: "#292d35", ink: "#e3dccb", ink2: "#aaa294", accent: "#d49a3a" },
+    { id: "hinoki-soft",      title: "Hinoki (soft)",                          tier: "lifted",        bg: "#2a2620", tile: "#312d26", line: "#403a32", ink: "#d6d0bf", ink2: "#9a9282", accent: "#c89656" },
+  ];
+  const grid = document.getElementById("theme-grid");
+  grid.innerHTML = PALETTES.map(p => `
+    <div class="theme-card">
+      <div class="theme-card-head">
+        <span class="theme-card-name">${p.title}</span>
+        <span class="theme-card-id">${p.id}</span>
+      </div>
+      <div class="theme-preview">
+        <div class="theme-preview-stage" style="background: ${p.bg}; color: ${p.ink}">
+          <span class="theme-preview-aa" style="color: ${p.accent}">Aa</span>
+          <span class="theme-preview-cap" style="color: ${p.ink2}">tea-ceremony minimalism</span>
+        </div>
+        <div class="theme-swatches">
+          <div style="background: ${p.bg}"></div>
+          <div style="background: ${p.tile}"></div>
+          <div style="background: ${p.line}"></div>
+          <div style="background: ${p.ink2}"></div>
+          <div style="background: ${p.ink}"></div>
+          <div style="background: ${p.accent}"></div>
+        </div>
+      </div>
+      <div class="theme-card-meta">
+        <span class="pill ${p.tier.startsWith('high') ? 'hc' : ''}">${p.tier}</span>
+        <span><b>accent</b> ${p.accent}</span>
+        <span><b>bg</b> ${p.bg}</span>
+      </div>
+    </div>
+  `).join("");
+
+  // Copy buttons
+  document.querySelectorAll(".copy-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const targetId = btn.dataset.copy;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      try {
+        await navigator.clipboard.writeText(target.textContent);
+        const orig = btn.textContent;
+        btn.textContent = "copied ✓";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.classList.remove("copied");
+        }, 1400);
+      } catch {
+        // fallback: select text
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+  });
+</script>
+</body>
+</html>
+</content>
+</invoke>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EN / 43 — Logo marks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+:root {
+  --bg:          #232136;
+  --tile:        #2a273f;
+  --tile-2:      #312e4a;
+  --line:        #393552;
+  --line-2:      #44415a;
+  --ink:         #e0def4;
+  --ink-2:       #908caa;
+  --ink-3:       #6e6a86;
+  --ink-4:       #4a4660;
+  --accent:      #ea9a97;
+  --accent-glow: rgba(234,154,151,0.35);
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+  --brand: 'Outfit', var(--sans);
+  --jp:    'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  min-height: 100%;
+  padding: 28px 28px 60px;
+}
+
+/* seigaiha texture (lifted from 36-textures.html) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='40' viewBox='0 0 80 40'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='0.7'%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3Ccircle cx='60' cy='20' r='18'/%3E%3Ccircle cx='60' cy='20' r='12'/%3E%3Ccircle cx='60' cy='20' r='6'/%3E%3Ccircle cx='0' cy='40' r='18'/%3E%3Ccircle cx='40' cy='40' r='18'/%3E%3Ccircle cx='80' cy='40' r='18'/%3E%3Ccircle cx='0' cy='0' r='18'/%3E%3Ccircle cx='40' cy='0' r='18'/%3E%3Ccircle cx='80' cy='0' r='18'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 40px;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 60%,
+      rgba(0,0,0,0.16) 100%);
+  z-index: 9998;
+}
+
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── header ─── */
+header.intro {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  padding: 22px 26px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+header.intro h1 {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+header.intro p {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+
+/* ─── grid of options ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  display: flex;
+  flex-direction: column;
+}
+
+/* hero — big preview */
+.hero {
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--tile), white 2%), var(--tile));
+  border-bottom: 1px solid var(--line);
+}
+
+/* simulated app titlebar */
+.titlebar-sim {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 44px;
+  background: color-mix(in oklch, var(--bg), black 35%);
+  border-bottom: 1px solid var(--line-2);
+}
+.titlebar-sim .right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spawn-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+}
+.reset-btn {
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+}
+.pill-trigger {
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pill-trigger .swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* card meta */
+.meta {
+  padding: 14px 18px 16px;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.meta .label {
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.meta .desc {
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  font-family: var(--sans);
+}
+
+/* ─── shared brand wordmark ─── */
+.brand-en {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  line-height: 1;
+}
+.brand-en.large {
+  font-size: 56px;
+}
+
+/* hero rows for some marks */
+.lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ─── 1. seigaiha arc ─── */
+.seigaiha-mark {
+  display: inline-block;
+  position: relative;
+}
+.seigaiha-mark svg {
+  display: block;
+}
+
+/* ─── 2. accent dot ─── */
+.accent-dot {
+  display: inline-block;
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: baseline;
+  margin-left: 0.10em;
+  margin-bottom: 0.05em;
+}
+
+/* ─── 3. grid pictogram ─── */
+.grid-mark {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+.grid-mark.small { width: 14px; }
+.grid-mark.large { width: 44px; gap: 4px; }
+.grid-mark .cell {
+  aspect-ratio: 1;
+  background: var(--ink-4);
+  border-radius: 1.5px;
+}
+.grid-mark.large .cell { border-radius: 3px; }
+.grid-mark .cell.lit {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+
+/* ─── 4. kanji 縁 ─── */
+.kanji {
+  font-family: var(--jp);
+  font-weight: 500;
+  color: var(--ink-2);
+  line-height: 1;
+}
+.kanji.small { font-size: 16px; }
+.kanji.large { font-size: 56px; }
+
+/* ─── 5. brackets ⟨en⟩ ─── */
+.bracket {
+  color: var(--accent);
+  font-family: var(--brand);
+  font-weight: 400;
+}
+
+/* hero variants */
+.hero.dark { background: var(--bg); }
+.hero.light {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--tile), white 8%), color-mix(in oklch, var(--tile), white 3%));
+}
+
+/* full app preview row */
+.app-preview {
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  background: var(--tile);
+}
+.app-preview .titlebar-sim {
+  border-bottom: 1px solid var(--line-2);
+}
+.app-preview .body {
+  padding: 64px 0;
+  text-align: center;
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  background:
+    linear-gradient(180deg, var(--tile), color-mix(in oklch, var(--tile), black 8%));
+}
+
+.app-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(560px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.app-preview-grid .app-preview {
+  margin-top: 0;
+}
+.app-preview .header-label {
+  position: relative;
+  top: -28px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0 0 6px;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 36px 0 12px;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="intro">
+    <h1>EN / 43 — Logo marks</h1>
+    <p>5 directions · same titlebar context · pick one to wire up</p>
+  </header>
+
+  <div class="section-label">Standalone — large preview</div>
+  <div class="grid">
+
+    <!-- 1. Seigaiha arc -->
+    <div class="card">
+      <div class="hero">
+        <div class="lockup">
+          <span class="seigaiha-mark" aria-hidden="true">
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <path d="M2 34 a 20 20 0 0 1 40 0" stroke="var(--accent)" stroke-width="1.6" fill="none"/>
+              <path d="M9 34 a 13 13 0 0 1 26 0" stroke="var(--accent)" stroke-width="1.6" fill="none" opacity="0.8"/>
+              <path d="M16 34 a 6 6 0 0 1 12 0"  stroke="var(--accent)" stroke-width="1.6" fill="none" opacity="0.6"/>
+            </svg>
+          </span>
+          <span class="brand-en large">en</span>
+        </div>
+      </div>
+      <div class="titlebar-sim">
+        <span class="seigaiha-mark" style="margin-right: 8px;" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+            <path d="M2 34 a 20 20 0 0 1 40 0" stroke="var(--accent)" stroke-width="3" fill="none"/>
+            <path d="M9 34 a 13 13 0 0 1 26 0" stroke="var(--accent)" stroke-width="3" fill="none" opacity="0.75"/>
+            <path d="M16 34 a 6 6 0 0 1 12 0"  stroke="var(--accent)" stroke-width="3" fill="none" opacity="0.55"/>
+          </svg>
+        </span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="label">01 · Seigaiha arc</span>
+        <span class="desc">Three nested arcs echo the default seigaiha texture. Brand becomes a visual extension of the wave system. Auto-themes via <code style="color:var(--accent)">--accent</code>. Most cohesive with current aesthetic.</span>
+      </div>
+    </div>
+
+    <!-- 2. Accent dot -->
+    <div class="card">
+      <div class="hero">
+        <span class="brand-en large">en<span class="accent-dot"></span></span>
+      </div>
+      <div class="titlebar-sim">
+        <span class="brand-en">en<span class="accent-dot"></span></span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="label">02 · Wordmark + accent dot</span>
+        <span class="desc">Pure typography. The wordmark <em>is</em> the logo; trailing dot in <code style="color:var(--accent)">--accent</code> acts as the personality. Linear / Arc-style restraint. Zero pictogram weight.</span>
+      </div>
+    </div>
+
+    <!-- 3. Grid pictogram -->
+    <div class="card">
+      <div class="hero">
+        <div class="lockup">
+          <span class="grid-mark large" aria-hidden="true">
+            <span class="cell lit"></span><span class="cell"></span>
+            <span class="cell"></span><span class="cell"></span>
+          </span>
+          <span class="brand-en large">en</span>
+        </div>
+      </div>
+      <div class="titlebar-sim">
+        <span class="grid-mark small" style="margin-right: 8px;" aria-hidden="true">
+          <span class="cell lit"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell"></span>
+        </span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="label">03 · Grid pictogram</span>
+        <span class="desc">2×2 dot grid, one cell lit in <code style="color:var(--accent)">--accent</code>. Signals the product directly — "hub of sessions, one active." Most product-literal but risks YC-startup look.</span>
+      </div>
+    </div>
+
+    <!-- 4. Kanji 縁 -->
+    <div class="card">
+      <div class="hero">
+        <div class="lockup">
+          <span class="kanji large" aria-hidden="false">縁</span>
+          <span class="brand-en large">en</span>
+        </div>
+      </div>
+      <div class="titlebar-sim">
+        <span class="kanji small" style="margin-right: 8px;">縁</span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="label">04 · Kanji 縁 + wordmark</span>
+        <span class="desc">Most direct surfacing of the name's meaning (連 → connection / fate). Highest meaning density, highest cliché risk in a Western dev tool. Consider tucking the kanji into the about / splash instead of the chrome.</span>
+      </div>
+    </div>
+
+    <!-- 5. Brackets ⟨en⟩ -->
+    <div class="card">
+      <div class="hero">
+        <span class="brand-en large"><span class="bracket">⟨</span>en<span class="bracket">⟩</span></span>
+      </div>
+      <div class="titlebar-sim">
+        <span class="brand-en"><span class="bracket">⟨</span>en<span class="bracket">⟩</span></span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="meta">
+        <span class="label">05 · Bracket wrap ⟨en⟩</span>
+        <span class="desc">Angle brackets in <code style="color:var(--accent)">--accent</code>. Terminal-flavored without being literal. Slightly heavier visual weight than dot, more "developer tool" coded.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-label">In context — full hub titlebar</div>
+  <div class="app-preview-grid">
+
+    <div class="app-preview">
+      <div class="titlebar-sim">
+        <span class="seigaiha-mark" style="margin-right: 8px;" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+            <path d="M2 34 a 20 20 0 0 1 40 0" stroke="var(--accent)" stroke-width="3" fill="none"/>
+            <path d="M9 34 a 13 13 0 0 1 26 0" stroke="var(--accent)" stroke-width="3" fill="none" opacity="0.75"/>
+            <path d="M16 34 a 6 6 0 0 1 12 0"  stroke="var(--accent)" stroke-width="3" fill="none" opacity="0.55"/>
+          </svg>
+        </span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger" style="font-size:10.5px;">aA ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">⚠ Andon ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">▦ Quad ▾</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="body">// 01 · seigaiha arc</div>
+    </div>
+
+    <div class="app-preview">
+      <div class="titlebar-sim">
+        <span class="brand-en">en<span class="accent-dot"></span></span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger" style="font-size:10.5px;">aA ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">⚠ Andon ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">▦ Quad ▾</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="body">// 02 · accent dot</div>
+    </div>
+
+    <div class="app-preview">
+      <div class="titlebar-sim">
+        <span class="grid-mark small" style="margin-right: 8px;" aria-hidden="true">
+          <span class="cell lit"></span><span class="cell"></span>
+          <span class="cell"></span><span class="cell"></span>
+        </span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger" style="font-size:10.5px;">aA ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">⚠ Andon ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">▦ Quad ▾</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="body">// 03 · grid pictogram</div>
+    </div>
+
+    <div class="app-preview">
+      <div class="titlebar-sim">
+        <span class="kanji small" style="margin-right: 8px;">縁</span>
+        <span class="brand-en">en</span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger" style="font-size:10.5px;">aA ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">⚠ Andon ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">▦ Quad ▾</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="body">// 04 · kanji 縁</div>
+    </div>
+
+    <div class="app-preview">
+      <div class="titlebar-sim">
+        <span class="brand-en"><span class="bracket">⟨</span>en<span class="bracket">⟩</span></span>
+        <div class="right">
+          <button class="spawn-btn">+</button>
+          <span class="reset-btn">reset sizes</span>
+          <span class="pill-trigger" style="font-size:10.5px;">aA ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">⚠ Andon ▾</span>
+          <span class="pill-trigger" style="font-size:10.5px;">▦ Quad ▾</span>
+          <span class="pill-trigger"><span class="swatch"></span> Rose Pine ▾</span>
+        </div>
+      </div>
+      <div class="body">// 05 · brackets ⟨en⟩</div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>

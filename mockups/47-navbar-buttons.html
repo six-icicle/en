@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EN / 47 — Navbar buttons (3 styles)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+:root {
+  --bg:          #232136;
+  --tile:        #2a273f;
+  --tile-2:      #312e4a;
+  --line:        #393552;
+  --line-2:      #44415a;
+  --ink:         #e0def4;
+  --ink-2:       #908caa;
+  --ink-3:       #6e6a86;
+  --ink-4:       #4a4660;
+  --accent:      #ea9a97;
+  --accent-glow: rgba(234,154,151,0.35);
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+  --brand: 'Outfit', var(--sans);
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  padding: 28px 28px 60px;
+}
+.page { max-width: 1320px; margin: 0 auto; }
+
+header.intro {
+  border: 1px solid var(--line);
+  background: var(--tile);
+  padding: 22px 26px;
+  margin-bottom: 24px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+}
+header.intro h1 {
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2);
+}
+header.intro p { font-family: var(--mono); font-size: 11px; color: var(--ink-3); letter-spacing: 0.04em; }
+
+.section { margin-bottom: 36px; }
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-head h2 {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.20em; text-transform: uppercase; color: var(--ink-2);
+}
+.section-head .sub {
+  font-family: var(--sans); font-size: 12px; color: var(--ink-3);
+}
+
+/* simulated navbar housing */
+.bar {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--bg), black 35%);
+  display: flex; align-items: center;
+  padding: 10px 14px;
+  gap: 10px;
+  position: relative;
+  margin-bottom: 6px;
+  height: 56px;
+}
+.bar.narrow { width: 460px; max-width: 100%; }
+.bar.wide { width: 100%; }
+.bar-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+
+/* shared brand */
+.brand {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  font-family: var(--brand); font-weight: 600; font-size: 16px; color: var(--ink);
+}
+.brand svg { color: var(--accent); flex: none; }
+.spacer { margin-left: auto; }
+.row-right { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ─────────── STYLE A — BRUSHED METAL PILLS ─────────── */
+/* Subtle vertical gradient + 1px inner top highlight + soft drop shadow.
+   Hover lifts highlight; active depresses. Refined macOS-native feel. */
+.A button, .A .pill {
+  flex: none;
+  position: relative;
+  height: 30px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--tile-2), white 6%) 0%,
+      var(--tile) 100%);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 1px 0 rgba(0,0,0,0.35),
+    0 2px 6px -2px rgba(0,0,0,0.4);
+  transition:
+    background 100ms ease,
+    box-shadow 100ms ease,
+    border-color 100ms ease,
+    transform 80ms ease;
+}
+.A button:hover, .A .pill:hover {
+  border-color: color-mix(in oklch, var(--line-2), white 10%);
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--tile-2), white 12%) 0%,
+      color-mix(in oklch, var(--tile), white 3%) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    0 1px 0 rgba(0,0,0,0.4),
+    0 4px 10px -2px rgba(0,0,0,0.55);
+}
+.A button:active, .A .pill:active {
+  transform: translateY(1px);
+  background:
+    linear-gradient(180deg,
+      var(--tile) 0%,
+      color-mix(in oklch, var(--tile-2), black 4%) 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.35),
+    0 0 0 0 rgba(0,0,0,0);
+}
+.A .icon-btn {
+  width: 30px;
+  padding: 0;
+  justify-content: center;
+}
+.A .icon-btn svg { color: var(--ink); }
+.A .pill .swatch {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 0 6px var(--accent-glow);
+}
+.A .pill .caret { font-size: 9px; color: var(--ink-3); margin-left: 2px; }
+.A .fz-stack { display: inline-flex; flex-direction: column; gap: 2px; flex: none; }
+.A .fz-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  height: 14px;
+}
+.A .fz-row .lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  width: 28px; text-align: right; padding-right: 6px;
+}
+.A .fz-row .seg {
+  display: inline-flex;
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--tile-2), white 4%) 0%,
+      var(--tile) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 1px 0 rgba(0,0,0,0.3);
+}
+.A .fz-row .seg button {
+  height: 14px; width: 18px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 11px; line-height: 1;
+  box-shadow: none;
+  padding: 0;
+  color: var(--ink-2);
+}
+.A .fz-row .seg button + button { border-left: 1px solid var(--line); }
+.A .fz-row .seg .val {
+  height: 14px;
+  padding: 0 6px;
+  font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+  display: inline-flex; align-items: center; border-left: 1px solid var(--line); border-right: 1px solid var(--line);
+  background: color-mix(in oklch, var(--tile), black 6%);
+}
+
+/* ─────────── STYLE B — PRESSED KEYCAPS ─────────── */
+/* Sharper shoulders, thicker bottom shadow giving depressable feel.
+   Two-tone gradient + crisp 1px highlight on top edge. */
+.B button, .B .pill {
+  flex: none;
+  position: relative;
+  height: 32px;
+  border: 1px solid color-mix(in oklch, var(--line-2), black 8%);
+  border-radius: 6px;
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--tile-2), white 8%) 0%,
+      color-mix(in oklch, var(--tile-2), white 2%) 50%,
+      var(--tile) 100%);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -1px 0 rgba(0,0,0,0.20),
+    0 2px 0 color-mix(in oklch, var(--bg), black 25%),
+    0 4px 8px -2px rgba(0,0,0,0.55);
+  transition:
+    background 100ms ease,
+    box-shadow 80ms ease,
+    transform 50ms ease;
+}
+.B button:hover, .B .pill:hover {
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklch, var(--tile-2), white 14%) 0%,
+      color-mix(in oklch, var(--tile-2), white 6%) 50%,
+      color-mix(in oklch, var(--tile), white 2%) 100%);
+}
+.B button:active, .B .pill:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 1px 3px rgba(0,0,0,0.30),
+    0 0 0 color-mix(in oklch, var(--bg), black 25%),
+    0 1px 2px rgba(0,0,0,0.4);
+  background:
+    linear-gradient(180deg,
+      var(--tile) 0%,
+      color-mix(in oklch, var(--tile), black 3%) 100%);
+}
+.B .icon-btn { width: 32px; padding: 0; justify-content: center; }
+.B .pill .swatch {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.3), 0 0 6px var(--accent-glow);
+}
+.B .pill .caret { font-size: 9px; color: var(--ink-3); margin-left: 2px; }
+.B .fz-stack { display: inline-flex; flex-direction: column; gap: 4px; flex: none; }
+.B .fz-row { display: inline-flex; align-items: center; gap: 6px; height: 14px; }
+.B .fz-row .lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  width: 28px; text-align: right;
+}
+.B .fz-row .seg {
+  display: inline-flex; gap: 2px;
+}
+.B .fz-row .seg button {
+  height: 14px; width: 16px; padding: 0;
+  font-size: 10px; line-height: 1;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 1px 0 color-mix(in oklch, var(--bg), black 30%),
+    0 2px 4px -1px rgba(0,0,0,0.5);
+}
+.B .fz-row .seg .val {
+  font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+  min-width: 30px; text-align: center;
+}
+
+/* ─────────── STYLE C — FROSTED GLASS ─────────── */
+/* Translucent backgrounds with 1px hairline highlight on top, soft ambient glow on hover.
+   Modern macOS Tahoe / iOS 17 feel. */
+.C button, .C .pill {
+  flex: none;
+  position: relative;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top-color: rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 0 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 1px 2px rgba(0,0,0,0.2),
+    0 4px 12px -4px rgba(0,0,0,0.4);
+  transition:
+    background 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    transform 80ms ease;
+}
+.C button:hover, .C .pill:hover {
+  background:
+    linear-gradient(180deg,
+      rgba(255, 255, 255, 0.10) 0%,
+      rgba(255, 255, 255, 0.04) 100%);
+  border-top-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 0 1px var(--accent-glow),
+    0 4px 16px -4px rgba(234,154,151,0.25);
+}
+.C button:active, .C .pill:active {
+  transform: scale(0.97);
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.10) 0%,
+      rgba(0, 0, 0, 0.04) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.25),
+    0 0 0 0 rgba(0,0,0,0);
+}
+.C .icon-btn { width: 30px; padding: 0; justify-content: center; }
+.C .pill .swatch {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
+.C .pill .caret { font-size: 9px; color: var(--ink-3); margin-left: 2px; }
+.C .fz-stack { display: inline-flex; flex-direction: column; gap: 3px; flex: none; }
+.C .fz-row {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+.C .fz-row .lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-3);
+  padding: 0 8px 0 8px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  height: 100%; display: inline-flex; align-items: center;
+}
+.C .fz-row button {
+  height: 14px; width: 18px;
+  background: transparent; border: none; border-radius: 0;
+  box-shadow: none; padding: 0;
+  font-size: 11px;
+  color: var(--ink-2);
+}
+.C .fz-row .val {
+  font-family: var(--mono); font-size: 9.5px; color: var(--ink-3);
+  min-width: 32px; text-align: center; height: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* shared icon sizing */
+.icon { width: 14px; height: 14px; flex: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="intro">
+    <h1>EN / 47 — Navbar buttons</h1>
+    <p>3 distinct treatments · same buttons · same widths · live hover/press</p>
+  </header>
+
+  <!-- ─── STYLE A ─── -->
+  <div class="section A">
+    <div class="section-head">
+      <h2>Style A · Brushed metal pills</h2>
+      <span class="sub">Subtle gradient · soft drop · refined macOS-native</span>
+    </div>
+
+    <div class="bar-label">Wide</div>
+    <div class="bar wide">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/>
+            <line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/>
+            <line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>
+        en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" title="Spawn (⌘N)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <button>reset sizes</button>
+      <div class="fz-stack">
+        <div class="fz-row">
+          <span class="lbl">app</span>
+          <span class="seg">
+            <button>−</button>
+            <span class="val">100%</span>
+            <button>+</button>
+          </span>
+        </div>
+        <div class="fz-row">
+          <span class="lbl">term</span>
+          <span class="seg">
+            <button>−</button>
+            <span class="val">100%</span>
+            <button>+</button>
+          </span>
+        </div>
+      </div>
+      <span class="pill">⚠ Andon <span class="caret">▾</span></span>
+      <span class="pill">▦ Quad <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span>Rose Pine <span class="caret">▾</span></span>
+    </div>
+
+    <div class="bar-label">Narrow (460px) — buttons should NOT distort</div>
+    <div class="bar narrow">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/><line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/><line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <span class="pill">▦ <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span><span class="caret">▾</span></span>
+    </div>
+  </div>
+
+  <!-- ─── STYLE B ─── -->
+  <div class="section B">
+    <div class="section-head">
+      <h2>Style B · Pressed keycaps</h2>
+      <span class="sub">Stronger 3D · clear bottom shadow · most tactile</span>
+    </div>
+
+    <div class="bar-label">Wide</div>
+    <div class="bar wide">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/><line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/><line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" title="Spawn (⌘N)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <button>reset sizes</button>
+      <div class="fz-stack">
+        <div class="fz-row">
+          <span class="lbl">app</span>
+          <span class="seg">
+            <button>−</button>
+            <span class="val">100%</span>
+            <button>+</button>
+          </span>
+        </div>
+        <div class="fz-row">
+          <span class="lbl">term</span>
+          <span class="seg">
+            <button>−</button>
+            <span class="val">100%</span>
+            <button>+</button>
+          </span>
+        </div>
+      </div>
+      <span class="pill">⚠ Andon <span class="caret">▾</span></span>
+      <span class="pill">▦ Quad <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span>Rose Pine <span class="caret">▾</span></span>
+    </div>
+
+    <div class="bar-label">Narrow (460px)</div>
+    <div class="bar narrow">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/><line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/><line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <span class="pill">▦ <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span><span class="caret">▾</span></span>
+    </div>
+  </div>
+
+  <!-- ─── STYLE C ─── -->
+  <div class="section C">
+    <div class="section-head">
+      <h2>Style C · Frosted glass</h2>
+      <span class="sub">Translucent · backdrop blur · accent ring on hover</span>
+    </div>
+
+    <div class="bar-label">Wide</div>
+    <div class="bar wide">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/><line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/><line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" title="Spawn (⌘N)">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <button>reset sizes</button>
+      <div class="fz-stack">
+        <div class="fz-row">
+          <span class="lbl">app</span>
+          <button>−</button>
+          <span class="val">100%</span>
+          <button>+</button>
+        </div>
+        <div class="fz-row">
+          <span class="lbl">term</span>
+          <button>−</button>
+          <span class="val">100%</span>
+          <button>+</button>
+        </div>
+      </div>
+      <span class="pill">⚠ Andon <span class="caret">▾</span></span>
+      <span class="pill">▦ Quad <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span>Rose Pine <span class="caret">▾</span></span>
+    </div>
+
+    <div class="bar-label">Narrow (460px)</div>
+    <div class="bar narrow">
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 44 44" fill="none">
+          <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M5 12 Q22 8 39 12"/><line x1="11" y1="18" x2="33" y2="18"/>
+            <line x1="14" y1="12" x2="14" y2="36"/><line x1="30" y1="12" x2="30" y2="36"/>
+          </g>
+        </svg>en
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <span class="pill">▦ <span class="caret">▾</span></span>
+      <span class="pill"><span class="swatch"></span><span class="caret">▾</span></span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
