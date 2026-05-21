@@ -9,6 +9,8 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
 
+use crate::hooks::HookConfig;
+
 pub struct PtySession {
     writer: Arc<Mutex<Box<dyn Write + Send>>>,
     master: Arc<Mutex<Box<dyn MasterPty + Send>>>,
@@ -39,6 +41,7 @@ pub struct SessionInfo {
 pub fn spawn_session(
     app: AppHandle,
     state: State<PtyManager>,
+    hooks: State<HookConfig>,
     cwd: Option<String>,
     cols: Option<u16>,
     rows: Option<u16>,
@@ -57,6 +60,8 @@ pub fn spawn_session(
         })
         .map_err(|e| format!("openpty failed: {e}"))?;
 
+    let id = Uuid::new_v4().to_string();
+
     let cmd_str = cmd.unwrap_or_else(|| "claude".to_string());
     let mut command = CommandBuilder::new(&cmd_str);
     // Inherit the parent process env so child processes (e.g. `claude`) see
@@ -72,6 +77,13 @@ pub fn spawn_session(
     // this disables more than the banner (hooks, auto-memory, CLAUDE.md
     // auto-discovery), we'll need to revert and use a different approach.
     command.env("CLAUDE_CODE_SIMPLE", "1");
+    // Status detection: claude hooks read these to curl back to our local
+    // receiver. When unset (claude run outside en), the hook command no-ops.
+    command.env("EN_HUB_SESSION_ID", &id);
+    command.env(
+        "EN_HUB_HOOK_URL",
+        format!("http://127.0.0.1:{}/hook", hooks.port),
+    );
     let cwd_resolved = cwd
         .filter(|s| !s.is_empty())
         .or_else(|| std::env::var("HOME").ok())
@@ -92,7 +104,6 @@ pub fn spawn_session(
         .take_writer()
         .map_err(|e| format!("take_writer failed: {e}"))?;
 
-    let id = Uuid::new_v4().to_string();
     let id_for_thread = id.clone();
     let app_for_thread = app.clone();
 

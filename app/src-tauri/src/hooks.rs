@@ -1,0 +1,180 @@
+use std::path::PathBuf;
+use std::thread;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+use tauri::{AppHandle, Emitter};
+use tiny_http::{Header, Method, Response, Server, StatusCode};
+
+const HOOK_MARKER: &str = "# en-managed";
+const HOOK_EVENTS: &[&str] = &[
+    "UserPromptSubmit",
+    "Stop",
+    "Notification",
+    "SessionStart",
+];
+
+#[derive(Clone)]
+pub struct HookConfig {
+    pub port: u16,
+}
+
+#[derive(Deserialize)]
+struct HookPayload {
+    session_id: String,
+    event: String,
+}
+
+#[derive(Serialize, Clone)]
+pub struct TileStatusEvent {
+    pub status: &'static str,
+    pub event: String,
+}
+
+pub fn start(app: AppHandle) -> Result<HookConfig, String> {
+    let server = Server::http("127.0.0.1:0")
+        .map_err(|e| format!("hook receiver bind failed: {e}"))?;
+    let port = server
+        .server_addr()
+        .to_ip()
+        .map(|sa| sa.port())
+        .ok_or_else(|| "hook receiver could not resolve bound port".to_string())?;
+
+    thread::spawn(move || serve(server, app));
+
+    Ok(HookConfig { port })
+}
+
+fn serve(server: Server, app: AppHandle) {
+    for mut req in server.incoming_requests() {
+        if req.method() != &Method::Post || req.url() != "/hook" {
+            let _ = req.respond(Response::empty(StatusCode(404)));
+            continue;
+        }
+
+        let mut body = String::new();
+        if req.as_reader().read_to_string(&mut body).is_err() {
+            let _ = req.respond(Response::empty(StatusCode(400)));
+            continue;
+        }
+
+        let payload: HookPayload = match serde_json::from_str(&body) {
+            Ok(p) => p,
+            Err(_) => {
+                let _ = req.respond(Response::empty(StatusCode(400)));
+                continue;
+            }
+        };
+
+        if let Some(status) = status_for(&payload.event) {
+            let event_name = format!("tile-status:{}", payload.session_id);
+            let _ = app.emit(
+                &event_name,
+                TileStatusEvent {
+                    status,
+                    event: payload.event.clone(),
+                },
+            );
+        }
+
+        let header = Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..])
+            .expect("static header bytes");
+        let _ = req.respond(
+            Response::from_string("{\"ok\":true}").with_header(header),
+        );
+    }
+}
+
+fn status_for(event: &str) -> Option<&'static str> {
+    match event {
+        "SessionStart" => Some("idle"),
+        "UserPromptSubmit" => Some("working"),
+        "Stop" | "Notification" => Some("needs"),
+        _ => None,
+    }
+}
+
+pub fn install_hooks() -> Result<bool, String> {
+    let home = std::env::var("HOME").map_err(|_| "HOME not set".to_string())?;
+    let dir = PathBuf::from(&home).join(".claude");
+    let path = dir.join("settings.json");
+
+    let existing = if path.exists() {
+        std::fs::read_to_string(&path)
+            .map_err(|e| format!("read {}: {e}", path.display()))?
+    } else {
+        std::fs::create_dir_all(&dir)
+            .map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+        "{}".to_string()
+    };
+
+    if existing.contains(HOOK_MARKER) {
+        return Ok(false);
+    }
+
+    let mut settings: Value = if existing.trim().is_empty() {
+        json!({})
+    } else {
+        serde_json::from_str(&existing)
+            .map_err(|e| format!("parse settings.json: {e}"))?
+    };
+    if !settings.is_object() {
+        return Err("settings.json is not a JSON object".into());
+    }
+
+    let ts = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    if path.exists() {
+        let backup = dir.join(format!("settings.json.en-backup-{ts}"));
+        std::fs::copy(&path, &backup)
+            .map_err(|e| format!("backup settings.json: {e}"))?;
+    }
+
+    let obj = settings.as_object_mut().unwrap();
+    let hooks_root = obj
+        .entry("hooks".to_string())
+        .or_insert_with(|| json!({}));
+    if !hooks_root.is_object() {
+        return Err("settings.hooks is not a JSON object".into());
+    }
+    let hooks_map = hooks_root.as_object_mut().unwrap();
+
+    for event in HOOK_EVENTS {
+        let entry = json!({
+            "hooks": [{
+                "type": "command",
+                "command": hook_command_for(event),
+            }]
+        });
+        let arr = hooks_map
+            .entry((*event).to_string())
+            .or_insert_with(|| json!([]));
+        if let Some(vec) = arr.as_array_mut() {
+            vec.push(entry);
+        } else {
+            return Err(format!("settings.hooks.{event} is not a JSON array"));
+        }
+    }
+
+    let serialized = serde_json::to_string_pretty(&settings)
+        .map_err(|e| format!("serialize settings.json: {e}"))?;
+    let tmp = dir.join(format!("settings.json.en-tmp-{ts}"));
+    std::fs::write(&tmp, serialized)
+        .map_err(|e| format!("write tmp settings.json: {e}"))?;
+    std::fs::rename(&tmp, &path)
+        .map_err(|e| format!("rename tmp settings.json: {e}"))?;
+
+    Ok(true)
+}
+
+fn hook_command_for(event: &str) -> String {
+    format!(
+        r#"{marker}
+if [ -n "$EN_HUB_SESSION_ID" ] && [ -n "$EN_HUB_HOOK_URL" ]; then curl --max-time 0.3 -fsS -X POST -H 'Content-Type: application/json' -d "{{\"session_id\":\"$EN_HUB_SESSION_ID\",\"event\":\"{event}\"}}" "$EN_HUB_HOOK_URL" >/dev/null 2>&1 & fi"#,
+        marker = HOOK_MARKER,
+        event = event,
+    )
+}
