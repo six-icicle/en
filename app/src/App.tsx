@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
   Bug,
   Columns3,
@@ -166,6 +167,15 @@ function basename(path: string): string {
   return parts[parts.length - 1] || path;
 }
 
+/* Shell-quote a path the way Terminal.app does on drag-drop:
+   POSIX single-quoting — wrap in single quotes, escape any embedded
+   single quote with the canonical '\'' dance. Safe for paths with
+   spaces, parens, dollar signs, etc. */
+function shellQuotePath(path: string): string {
+  if (!/[^A-Za-z0-9._\-/~]/.test(path)) return path;
+  return `'${path.replace(/'/g, `'\\''`)}'`;
+}
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(APPEARANCE_DEFAULTS.theme);
   const [texture, setTexture] = useState<Texture>(APPEARANCE_DEFAULTS.texture);
@@ -195,7 +205,7 @@ export default function App() {
   const [tfzMenuOpen, setTfzMenuOpen] = useState(false);
   const tfzMenuRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const { kill, list } = useSessions();
+  const { kill, list, sendInput } = useSessions();
 
   const renameTile = useCallback((key: string, next: string) => {
     const trimmed = next.trim();
@@ -559,6 +569,93 @@ export default function App() {
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
   }, [activeId, tiles, spawn, closeTile]);
+
+  /* Drag-and-drop files/folders/screenshots into a tile.
+     Routes to the tile under the cursor; falls back to the focused tile
+     when dropped on empty grid space. Mirrors Terminal.app's behavior:
+     paths are POSIX-quoted and joined with spaces, no auto-Enter. */
+  const [dragOverKey, setDragOverKey] = useState<string | null>(null);
+  const activeIdRef = useRef(activeId);
+  useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    const tileKeyAt = (x: number, y: number): string | null => {
+      /* First try DOM hit-test — fastest path. */
+      const el = document.elementFromPoint(x, y);
+      const tileEl = el?.closest<HTMLElement>(".tile:not(.empty-state)");
+      if (tileEl?.dataset.sessionKey) return tileEl.dataset.sessionKey;
+      /* Fallback: hit-test against each tile's bounding rect.
+         elementFromPoint can land on overlay siblings (.grid-handle,
+         popovers, decorative overlays) that don't sit inside .tile. */
+      const tiles = document.querySelectorAll<HTMLElement>(
+        '.tile[data-session-key]',
+      );
+      for (const t of tiles) {
+        const r = t.getBoundingClientRect();
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+          return t.dataset.sessionKey ?? null;
+        }
+      }
+      return null;
+    };
+
+    /* StrictMode-safe: cancelled is checked when the async listener
+       registration resolves. If cleanup already ran, we unregister
+       immediately so we never end up with two live listeners. */
+    let cancelled = false;
+    (async () => {
+      const webview = getCurrentWebview();
+      const off = await webview.onDragDropEvent((event) => {
+        const p = event.payload;
+        if (p.type === "enter" || p.type === "over") {
+          const { x, y } = p.position;
+          /* Don't fall back to activeId for the visual hover state —
+             that made the ring stick to the active tile during any
+             frame where elementFromPoint missed (handle, gap, etc.).
+             If we genuinely don't know what tile, show no ring. */
+          setDragOverKey(tileKeyAt(x, y));
+        } else if (p.type === "leave") {
+          setDragOverKey(null);
+        } else if (p.type === "drop") {
+          const { x, y } = p.position;
+          /* Drop routing still falls back to active — better to send
+             the path somewhere reasonable than swallow the drop. */
+          const targetKey = tileKeyAt(x, y) ?? activeIdRef.current;
+          setDragOverKey(null);
+          if (!targetKey || p.paths.length === 0) return;
+          const text = p.paths.map(shellQuotePath).join(" ") + " ";
+          void sendInput(targetKey, text);
+        }
+      });
+      if (cancelled) {
+        off();
+      } else {
+        unlisten = off;
+      }
+    })().catch((err) => {
+      console.error("drag-drop wiring failed:", err);
+    });
+
+    /* Swallow HTML5 drag/drop at the document level so xterm.js's
+       built-in drop handler doesn't ALSO paste the path. Tauri's
+       native onDragDropEvent above is the only path. */
+    const swallow = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener("dragover", swallow, { capture: true });
+    window.addEventListener("drop", swallow, { capture: true });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+      setDragOverKey(null);
+      window.removeEventListener("dragover", swallow, { capture: true });
+      window.removeEventListener("drop", swallow, { capture: true });
+    };
+  }, [sendInput]);
 
   const bumpFz = (delta: number) =>
     setFz((v) => Math.max(0.7, Math.min(1.6, +(v + delta).toFixed(2))));
@@ -939,9 +1036,11 @@ export default function App() {
         {tilesWithStatus.map((s) => (
           <section
             key={s.key}
+            data-session-key={s.key}
             className={`tile ${s.status} ${activeId === s.key ? "active" : ""}`}
             onClick={() => setActiveId(s.key)}
           >
+            {dragOverKey === s.key && <div className="tile-drop-ring" aria-hidden="true" />}
             <header className="t-head">
               <span className="dot"></span>
               {editingKey === s.key ? (

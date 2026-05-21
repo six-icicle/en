@@ -354,5 +354,27 @@ export default function TerminalView({
     if (active) termRef.current?.focus();
   }, [active]);
 
+  /* Block native HTML5 drag-and-drop INSIDE the terminal so xterm.js's
+     hidden textarea doesn't ALSO receive the path. The OS-level drop
+     is handled in App.tsx via Tauri's onDragDropEvent — that sends one
+     copy. Without this, macOS's WebView additionally fires a synthetic
+     drop on the focused textarea → second paste. */
+  useEffect(() => {
+    const host = containerRef.current;
+    if (!host) return;
+    const block = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    host.addEventListener("dragenter", block, { capture: true });
+    host.addEventListener("dragover", block, { capture: true });
+    host.addEventListener("drop", block, { capture: true });
+    return () => {
+      host.removeEventListener("dragenter", block, { capture: true });
+      host.removeEventListener("dragover", block, { capture: true });
+      host.removeEventListener("drop", block, { capture: true });
+    };
+  }, []);
+
   return <div ref={containerRef} className="xterm-host" />;
 }

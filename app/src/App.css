@@ -1269,6 +1269,19 @@ input:focus-visible {
 }
 .tile:hover { background: var(--tile-2); }
 
+/* ─── Drop ring — drag-over visual treatment ───
+   Rendered as a dedicated <div> inside the tile (not a pseudo) so we
+   don't fight `.tile.active::before/::after`'s declarations through
+   the cascade. Spans the full grid via grid-row, sits above xterm
+   via z-index. */
+.tile-drop-ring {
+  position: absolute;
+  inset: 0;
+  grid-row: 1 / -1;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
 
 .t-head {
   display: flex;
@@ -2039,7 +2052,7 @@ pre.term {
   justify-content: center;
   gap: calc(12px * var(--fz));
   background: var(--tile);
-  color: var(--accent);
+  color: var(--ink-3);
   font-family: var(--mono);
 }
 .modal-overlay {
@@ -2182,7 +2195,7 @@ pre.term {
   font-size: calc(13px * var(--fz));
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--ink-2);
 }
 .empty-state .empty-cta {
   margin-top: calc(6px * var(--fz));
@@ -2190,7 +2203,7 @@ pre.term {
   border-radius: 14px;
   border: 1px solid var(--line-2);
   background: transparent;
-  color: var(--accent);
+  color: var(--ink-2);
   font-family: var(--mono);
   font-size: calc(13px * var(--fz));
   cursor: pointer;
@@ -2210,7 +2223,7 @@ pre.term {
   padding: 1px calc(6px * var(--fz));
   border: 1px solid var(--line-2);
   border-radius: 3px;
-  color: var(--accent);
+  color: var(--ink-2);
   background: transparent;
   margin: 0 2px;
 }
