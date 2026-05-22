@@ -8,9 +8,8 @@
        50  .theme-popover panel
    Tile alert effects (over xterm, within .tile):
         6  alert-vfall
-        5  hotaru dot · hanko 待 · alert-vseam · shuriken corner · throw-stick · petal layer
-        4  alert-style-pop · katana sheen · slashes · petal-static · impact-flash
-        3  ninja smoke
+        5  hotaru dot · alert-vseam · shuriken corner · throw-stick · petal layer
+        4  alert-style-pop · slashes · petal-static · impact-flash
         2  .xterm-host · cursor-glow
         1  terminal scanlines · top sheen · .app grid root
    ────────────────────────────────────────────────────── */
@@ -914,18 +913,41 @@ input:focus-visible {
   color: var(--accent);
 }
 .alert-style-option .glyph > svg { display: block; }
-.alert-style-option .glyph .glyph-stack {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-}
-.alert-style-option .glyph .glyph-stack svg { display: block; }
 .alert-style-option .desc {
   font-size: calc(10.5px * var(--fz));
   color: var(--ink-3);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+}
+.alert-style-option { position: relative; }
+
+/* ─── Alert-style live preview (mini-tile that floats out on hover) ───
+   A scaled-down stand-in for `.tile.needs` that lets the alert
+   animations render against an accent-tinted backdrop. Absolute so it
+   floats outside the option's row without resizing the picker. */
+.alert-style-preview {
+  position: absolute;
+  top: 50%;
+  left: -90px;
+  transform: translateY(-50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  background: var(--tile);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 60;
+}
+.alert-style-preview > .tile.needs {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background: var(--tile);
+  border-radius: 6px;
+  overflow: hidden;
+  grid-template-rows: none;
 }
 
 /* ─── Theme popover (combined themes + accent + bg + texture) ─── */
@@ -1325,8 +1347,8 @@ input:focus-visible {
    When a tile is in "needs you" state, the visual treatment
    is determined by the global alert style. Driven by
    document.documentElement.dataset.alertStyle = "<id>".
-   Per-tile DOM extras (laser dot, hanko stamp, petals,
-   shuriken) are rendered conditionally by App.tsx in
+   Per-tile DOM extras (laser dot, slashes, petals, shuriken)
+   are rendered conditionally by App.tsx in
    .tile.needs > .alert-extras.
    ─────────────────────────────────────────────────────── */
 
@@ -1449,57 +1471,7 @@ input:focus-visible {
   100% { top: 0%;   left: 0%;   }
 }
 
-/* 5. SAMURAI — diagonal sheen + corner hanko stamp */
-[data-alert-style="samurai"] .tile.needs {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 55%),
-    inset 0 0 28px -10px var(--accent-glow);
-}
-.alert-extras .katana {
-  position: absolute;
-  inset: -20%;
-  pointer-events: none;
-  background: linear-gradient(135deg,
-    transparent 44%,
-    var(--accent-glow) 50%,
-    transparent 56%);
-  background-size: 220% 220%;
-  background-position: -120% -120%;
-  opacity: 0;
-  z-index: 4;
-  mix-blend-mode: screen;
-  animation: alert-katana 4s ease-in-out infinite;
-}
-@keyframes alert-katana {
-  0%, 70%   { background-position: -120% -120%; opacity: 0; }
-  78%       { background-position: -50% -50%;  opacity: 0; }
-  82%       { opacity: 1; }
-  100%      { background-position: 100% 100%;  opacity: 0; }
-}
-.alert-extras .hanko {
-  position: absolute;
-  top: 44px;
-  right: 14px;
-  width: 30px; height: 30px;
-  background: var(--accent);
-  color: var(--bg);
-  font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", serif;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 2px;
-  line-height: 1;
-  z-index: 5;
-  animation: alert-hanko 4s ease-out infinite;
-}
-@keyframes alert-hanko {
-  0%, 78%   { box-shadow: 0 0 0 0 var(--accent-glow); transform: scale(1); }
-  82%       { box-shadow: 0 0 36px 6px var(--accent-glow); transform: scale(1.08); }
-  100%      { box-shadow: 0 0 0 0 var(--accent-glow); transform: scale(1); }
-}
-
-/* 6. TRIPLE SLASH — three slashes from different directions, each
+/* TRIPLE SLASH — three slashes from different directions, each
    clip-path-revealed across the tile from one edge to the other.
    No final glow — slashes happen, silence follows. Cycle: 5s. */
 [data-alert-style="triple"] .tile.needs {
@@ -1744,51 +1716,7 @@ input:focus-visible {
 .alert-extras .petal.pile:nth-of-type(41) { left: 74%; --rest: calc(100% - 27px); --dx:  6px; --rot:  900deg; --dur: 7.0s; animation-delay: 13.8s; }
 .alert-extras .petal.pile:nth-of-type(42) { left: 16%; --rest: calc(100% - 26px); --dx: -3px; --rot:  720deg; --dur: 7.4s; animation-delay: 14.2s; }
 
-/* 9. NINJA — silent, then sudden corner strike (the original) */
-[data-alert-style="ninja"] .tile.needs {
-  box-shadow:
-    inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 80%),
-    inset 0 0 30px -16px rgba(0,0,0,0.35);
-}
-.alert-extras .smoke {
-  position: absolute;
-  top: 0; right: 0;
-  width: 60%; height: 60%;
-  pointer-events: none;
-  background: radial-gradient(circle at 80% 20%, var(--accent-glow) 0%, transparent 65%);
-  opacity: 0;
-  transform: scale(0.6);
-  transform-origin: 80% 20%;
-  z-index: 3;
-  mix-blend-mode: screen;
-  animation: alert-smoke 5s ease-out infinite;
-}
-@keyframes alert-smoke {
-  0%   { opacity: 0; transform: scale(0.6); }
-  3%   { opacity: 1; transform: scale(1); }
-  25%  { opacity: 0; transform: scale(1.4); }
-  100% { opacity: 0; transform: scale(1.4); }
-}
-.alert-extras .shuriken {
-  position: absolute;
-  top: 44px; right: 14px;
-  width: 22px; height: 22px;
-  color: var(--accent);
-  z-index: 5;
-  opacity: 0;
-  filter: drop-shadow(0 0 6px var(--accent-glow));
-  animation: alert-shuriken 5s ease-out infinite;
-}
-.alert-extras .shuriken svg { width: 100%; height: 100%; display: block; }
-@keyframes alert-shuriken {
-  0%   { opacity: 0; transform: rotate(0deg) scale(0.6); }
-  3%   { opacity: 1; transform: rotate(0deg) scale(1); }
-  20%  { opacity: 0.4; transform: rotate(220deg) scale(1.05); }
-  35%  { opacity: 0; transform: rotate(360deg) scale(0.9); }
-  100% { opacity: 0; transform: rotate(360deg) scale(0.9); }
-}
-
-/* 10. SHURIKEN RAIN — throw + stick. Two waves of 4 shuriken fly in
+/* SHURIKEN RAIN — throw + stick. Two waves of 4 shuriken fly in
    from off-tile, stick at full opacity for ~3s, smoke-fade, repeat
    with new positions. 9s cycle. */
 [data-alert-style="shuriken"] .tile.needs {

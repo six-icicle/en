@@ -9,8 +9,6 @@ import {
   HeartPulse,
   LayoutGrid,
   LayoutPanelLeft,
-  MoveVertical,
-  Sword,
   Wind,
 } from "lucide-react";
 import TerminalView from "./Terminal";
@@ -119,11 +117,9 @@ const ALERT_STYLES: { id: AlertStyle; title: string; desc: string }[] = [
   { id: "heartbeat", title: "Kodou",         desc: "lub-dub" },
   { id: "breath",    title: "Kokyu",         desc: "slow inhale" },
   { id: "hotaru",    title: "Hotaru",        desc: "racing firefly" },
-  { id: "samurai",   title: "Samurai",       desc: "katana sheen" },
   { id: "triple",    title: "Sandangiri",    desc: "three cuts" },
   { id: "vertical",  title: "Tatewari",      desc: "falling cut" },
   { id: "sakura",    title: "Sakura rain",   desc: "petals fall" },
-  { id: "ninja",     title: "Ninja",         desc: "corner strike" },
   { id: "shuriken",  title: "Shuriken",      desc: "throw + stick" },
 ];
 
@@ -191,6 +187,7 @@ export default function App() {
     APPEARANCE_DEFAULTS.alertStyle,
   );
   const [alertMenuOpen, setAlertMenuOpen] = useState(false);
+  const [alertHoverId, setAlertHoverId] = useState<AlertStyle | null>(null);
   const alertMenuRef = useRef<HTMLDivElement | null>(null);
   const [layoutMenuOpen, setLayoutMenuOpen] = useState(false);
   const layoutMenuRef = useRef<HTMLDivElement | null>(null);
@@ -935,7 +932,11 @@ export default function App() {
             </span>
           </button>
           {alertMenuOpen && (
-            <div className="alert-style-popover" role="menu">
+            <div
+              className="alert-style-popover"
+              role="menu"
+              onMouseLeave={() => setAlertHoverId(null)}
+            >
               {ALERT_STYLES.map((s) => (
                 <button
                   key={s.id}
@@ -943,9 +944,12 @@ export default function App() {
                   role="menuitemradio"
                   aria-checked={alertStyle === s.id}
                   data-active={alertStyle === s.id ? "true" : undefined}
+                  onMouseEnter={() => setAlertHoverId(s.id)}
+                  onFocus={() => setAlertHoverId(s.id)}
                   onClick={() => {
                     setAlertStyle(s.id);
                     setAlertMenuOpen(false);
+                    setAlertHoverId(null);
                   }}
                 >
                   <span className="glyph" aria-hidden="true">
@@ -953,6 +957,17 @@ export default function App() {
                   </span>
                   <span>{s.title}</span>
                   <span className="desc">{s.desc}</span>
+                  {alertHoverId === s.id && (
+                    <div
+                      className="alert-style-preview"
+                      data-alert-style={s.id}
+                      aria-hidden="true"
+                    >
+                      <div className="tile needs">
+                        <AlertExtras style={s.id} />
+                      </div>
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
@@ -1190,14 +1205,6 @@ function AlertExtras({ style }: { style: AlertStyle }) {
       </div>
     );
   }
-  if (style === "samurai") {
-    return (
-      <div className="alert-extras" aria-hidden="true">
-        <span className="katana" />
-        <div className="hanko">待</div>
-      </div>
-    );
-  }
   if (style === "triple") {
     return (
       <div className="alert-extras" aria-hidden="true">
@@ -1240,19 +1247,6 @@ function AlertExtras({ style }: { style: AlertStyle }) {
             </span>
           ))}
         </div>
-      </div>
-    );
-  }
-  if (style === "ninja") {
-    return (
-      <div className="alert-extras" aria-hidden="true">
-        <span className="smoke" />
-        <span className="shuriken">
-          <svg viewBox="0 0 32 32" fill="currentColor">
-            <path d="M16 2 L19 13 L30 16 L19 19 L16 30 L13 19 L2 16 L13 13 Z" />
-            <circle cx="16" cy="16" r="2.5" fill="var(--bg)" />
-          </svg>
-        </span>
       </div>
     );
   }
@@ -1340,16 +1334,20 @@ function AlertGlyph({ id }: { id: AlertStyle }) {
     case "heartbeat": return <HeartPulse {...props} />;
     case "breath":    return <Wind {...props} />;
     case "hotaru":    return <Bug {...props} />;
-    case "samurai":   return <Sword {...props} />;
     case "triple":
       return (
-        <span className="glyph-stack">
-          <Sword size={9} strokeWidth={2} />
-          <Sword size={9} strokeWidth={2} />
-          <Sword size={9} strokeWidth={2} />
-        </span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+          <line x1="1" y1="13" x2="6" y2="3" />
+          <line x1="5.5" y1="13" x2="10.5" y2="3" />
+          <line x1="10" y1="13" x2="15" y2="3" />
+        </svg>
       );
-    case "vertical":  return <MoveVertical {...props} />;
+    case "vertical":
+      return (
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+          <line x1="5.5" y1="13" x2="10.5" y2="3" />
+        </svg>
+      );
     case "sakura":    return (
       <svg width="14" height="14" viewBox="0 0 16 16">
         <defs>
@@ -1358,13 +1356,6 @@ function AlertGlyph({ id }: { id: AlertStyle }) {
         <use href="#ag-p" transform="translate(4 3.5) rotate(-30) scale(0.42)" />
         <use href="#ag-p" transform="translate(10.5 7.5) rotate(40) scale(0.52)" />
         <use href="#ag-p" transform="translate(5.5 12) rotate(80) scale(0.38)" />
-      </svg>
-    );
-    case "ninja":     return (
-      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M2.5 8 Q2.5 2.5 8 2.5 Q13.5 2.5 13.5 8 L13.5 13.5 Q13.5 14 13 14 L3 14 Q2.5 14 2.5 13.5 Z" />
-        <line x1="4.5" y1="8" x2="6.5" y2="8" />
-        <line x1="9.5" y1="8" x2="11.5" y2="8" />
       </svg>
     );
     case "shuriken":  return (

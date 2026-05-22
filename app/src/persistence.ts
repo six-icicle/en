@@ -30,17 +30,21 @@ export type AlertStyle =
   | "heartbeat"
   | "breath"
   | "hotaru"
-  | "samurai"
   | "triple"
   | "vertical"
   | "sakura"
-  | "ninja"
   | "shuriken";
 
 // Migrate prior IDs that were renamed.
 const ALERT_STYLE_LEGACY: Record<string, AlertStyle> = {
   tron: "hotaru",
   katana: "triple",
+  // 2026-05-21: removed standalone samurai (katana sheen) style; closest
+  // sibling is the triple-slash sandangiri.
+  samurai: "triple",
+  // 2026-05-21: removed standalone ninja (corner strike) style; closest
+  // sibling is shuriken (throw + stick).
+  ninja: "shuriken",
 };
 const THEME_LEGACY: Record<string, Theme> = {
   // 2026-05-21: existing themes were re-cast as the high-contrast lead and
@@ -112,11 +116,9 @@ const ALERT_STYLES = new Set<AlertStyle>([
   "heartbeat",
   "breath",
   "hotaru",
-  "samurai",
   "triple",
   "vertical",
   "sakura",
-  "ninja",
   "shuriken",
 ]);
 
