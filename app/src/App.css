@@ -463,6 +463,10 @@ body::after {
   height: 100vh;
   position: relative;
   z-index: 1;
+  /* Global brightness modulator, set as inline style on <html>. Defaults
+     to 1 when the var is unset. Applied via filter so it modulates every
+     descendant including textures, the navbar, and xterm canvases. */
+  filter: brightness(var(--app-brightness, 1));
 }
 
 /* ─── Global focus ring for keyboard nav.

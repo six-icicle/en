@@ -179,6 +179,7 @@ export default function App() {
   const [texture, setTexture] = useState<Texture>(APPEARANCE_DEFAULTS.texture);
   const [fz, setFz] = useState(APPEARANCE_DEFAULTS.fz);
   const [tfz, setTfz] = useState(APPEARANCE_DEFAULTS.tfz);
+  const [brightness, setBrightness] = useState(APPEARANCE_DEFAULTS.brightness);
   const [texAmt, setTexAmt] = useState(APPEARANCE_DEFAULTS.texAmt);
   const [accent, setAccent] = useState<string | null>(APPEARANCE_DEFAULTS.accent);
   const [bg, setBg] = useState<string | null>(APPEARANCE_DEFAULTS.bg);
@@ -203,6 +204,8 @@ export default function App() {
   const fzMenuRef = useRef<HTMLDivElement | null>(null);
   const [tfzMenuOpen, setTfzMenuOpen] = useState(false);
   const tfzMenuRef = useRef<HTMLDivElement | null>(null);
+  const [brightnessMenuOpen, setBrightnessMenuOpen] = useState(false);
+  const brightnessMenuRef = useRef<HTMLDivElement | null>(null);
   const [batchMenuOpen, setBatchMenuOpen] = useState(false);
   const batchMenuRef = useRef<HTMLDivElement | null>(null);
   const [killAllOpen, setKillAllOpen] = useState(false);
@@ -432,6 +435,7 @@ export default function App() {
       setLayout(a.layout);
       setFz(a.fz);
       setTfz(a.tfz);
+      setBrightness(a.brightness);
       setTexAmt(a.texAmt);
       setAccent(a.accent);
       setBg(a.bg);
@@ -452,6 +456,7 @@ export default function App() {
       fz,
       tfz,
       texAmt,
+      brightness,
       accent,
       bg,
       alertStyle,
@@ -465,6 +470,7 @@ export default function App() {
     fz,
     tfz,
     texAmt,
+    brightness,
     accent,
     bg,
     alertStyle,
@@ -581,6 +587,31 @@ export default function App() {
       window.removeEventListener("keydown", onKey);
     };
   }, [tfzMenuOpen]);
+
+  useEffect(() => {
+    if (!brightnessMenuOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!brightnessMenuRef.current) return;
+      if (!brightnessMenuRef.current.contains(e.target as Node))
+        setBrightnessMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setBrightnessMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [brightnessMenuOpen]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--app-brightness",
+      brightness.toString(),
+    );
+  }, [brightness]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -882,6 +913,8 @@ export default function App() {
     setFz((v) => Math.max(0.7, Math.min(1.6, +(v + delta).toFixed(2))));
   const bumpTfz = (delta: number) =>
     setTfz((v) => Math.max(0.7, Math.min(1.6, +(v + delta).toFixed(2))));
+  const bumpBrightness = (delta: number) =>
+    setBrightness((v) => Math.max(0.5, Math.min(2.0, +(v + delta).toFixed(2))));
   const bumpTexAmt = (delta: number) =>
     setTexAmt((v) => Math.max(0.2, Math.min(2.0, +(v + delta).toFixed(2))));
 
@@ -1304,6 +1337,47 @@ export default function App() {
             </div>
           )}
         </div>
+        <div className="alert-style-wrap" ref={brightnessMenuRef}>
+          <button
+            className="alert-style-trigger icon-only fz-trigger"
+            aria-expanded={brightnessMenuOpen}
+            aria-haspopup="menu"
+            onClick={() => setBrightnessMenuOpen((v) => !v)}
+            title={`App brightness: ${Math.round(brightness * 100)}%`}
+            aria-label="App brightness"
+          >
+            <span className="fz-trigger-glyph" aria-hidden="true">
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="8" cy="8" r="3" />
+                <line x1="8" y1="1.5" x2="8" y2="3" />
+                <line x1="8" y1="13" x2="8" y2="14.5" />
+                <line x1="1.5" y1="8" x2="3" y2="8" />
+                <line x1="13" y1="8" x2="14.5" y2="8" />
+                <line x1="3.4" y1="3.4" x2="4.5" y2="4.5" />
+                <line x1="11.5" y1="11.5" x2="12.6" y2="12.6" />
+                <line x1="3.4" y1="12.6" x2="4.5" y2="11.5" />
+                <line x1="11.5" y1="4.5" x2="12.6" y2="3.4" />
+              </svg>
+            </span>
+          </button>
+          {brightnessMenuOpen && (
+            <div className="alert-style-popover fz-popover" role="menu">
+              <div className="fz-popover-row">
+                <span className="fz-popover-label">app brightness</span>
+                <button onClick={() => bumpBrightness(-0.1)} title="Dim">−</button>
+                <span className="val">{Math.round(brightness * 100)}%</span>
+                <button onClick={() => bumpBrightness(0.1)} title="Brighten">+</button>
+              </div>
+            </div>
+          )}
+        </div>
         <button
           className="alert-style-trigger icon-only kill-all-btn"
           onClick={() => setKillAllOpen(true)}
@@ -1533,6 +1607,7 @@ export default function App() {
               setFz(APPEARANCE_DEFAULTS.fz);
               setTfz(APPEARANCE_DEFAULTS.tfz);
               setTexAmt(APPEARANCE_DEFAULTS.texAmt);
+              setBrightness(APPEARANCE_DEFAULTS.brightness);
               setAccent(APPEARANCE_DEFAULTS.accent);
               setBg(APPEARANCE_DEFAULTS.bg);
               setAlertStyle(APPEARANCE_DEFAULTS.alertStyle);

@@ -67,6 +67,7 @@ export type Appearance = {
   fz: number;
   tfz: number;
   texAmt: number;
+  brightness: number;
   accent: string | null;
   bg: string | null;
   alertStyle: AlertStyle;
@@ -79,6 +80,7 @@ export const APPEARANCE_DEFAULTS: Appearance = {
   fz: 1,
   tfz: 1,
   texAmt: 1,
+  brightness: 1,
   accent: null,
   bg: null,
   alertStyle: "pulse",
@@ -167,6 +169,10 @@ function validate(raw: unknown): Appearance {
     typeof r.texAmt === "number"
       ? clamp(r.texAmt, 0.2, 2.0)
       : APPEARANCE_DEFAULTS.texAmt;
+  const brightness =
+    typeof r.brightness === "number"
+      ? clamp(r.brightness, 0.5, 2.0)
+      : APPEARANCE_DEFAULTS.brightness;
   const accent =
     typeof r.accent === "string" && HEX_RE.test(r.accent) ? r.accent : null;
   const bg = typeof r.bg === "string" && HEX_RE.test(r.bg) ? r.bg : null;
@@ -179,7 +185,7 @@ function validate(raw: unknown): Appearance {
   } else {
     alertStyle = APPEARANCE_DEFAULTS.alertStyle;
   }
-  return { theme, texture, layout, fz, tfz, texAmt, accent, bg, alertStyle };
+  return { theme, texture, layout, fz, tfz, texAmt, brightness, accent, bg, alertStyle };
 }
 
 export async function loadAppearance(): Promise<Appearance> {
