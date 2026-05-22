@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -143,8 +143,10 @@ function defaultTracks(layout: Layout, count: number): { cols: number[]; rows: n
   if (count === 4) return { cols: [2, 1], rows: [1, 1, 1] };
   if (count === 5) return { cols: [2, 1, 1], rows: [1, 1] };
   if (count === 6) return { cols: [2, 1, 1], rows: [1, 1, 1] };
-  // 7-8: sidebar of 1 big + 3-row stack on the right
-  return { cols: [2, 1, 1, 1], rows: [1, 1] };
+  // 7: primary + 2-col × 3-row right side (1 cell unused)
+  if (count === 7) return { cols: [2, 1, 1], rows: [1, 1, 1] };
+  // 8: primary spans 4 rows + 2-col × 4-row right side (1 cell unused)
+  return { cols: [2, 1, 1], rows: [1, 1, 1, 1] };
 }
 
 const INITIAL_TILES: TileDecl[] = [];
@@ -231,6 +233,169 @@ export default function App() {
     },
     [kill, activeId],
   );
+
+  const [dragKey, setDragKey] = useState<string | null>(null);
+  // Swap-on-drop: the key of the tile the dragged tile would swap with.
+  // null = no swap target (drop is a no-op, ghost snaps back).
+  const [dragSwapKey, setDragSwapKey] = useState<string | null>(null);
+  const [ghostStyle, setGhostStyle] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    name: string;
+  } | null>(null);
+
+  const dragHappenedRef = useRef(false);
+  const tilesRef = useRef(tiles);
+  useEffect(() => {
+    tilesRef.current = tiles;
+  }, [tiles]);
+  const handleTileHeadPointerDown = useCallback(
+    (ev: React.PointerEvent<HTMLElement>, tileKey: string, name: string) => {
+      if (ev.button !== 0) return;
+      const target = ev.target as HTMLElement;
+      // Don't start a drag from interactive children. The .name span is
+      // intentionally NOT excluded — clicking/holding the name should drag
+      // the tile (rename happens only on dblclick, handled separately).
+      if (target.closest(".t-close, .t-reveal, .name-edit")) return;
+
+      const startX = ev.clientX;
+      const startY = ev.clientY;
+      const tileEl = (ev.currentTarget as HTMLElement).closest<HTMLElement>("section.tile");
+      if (!tileEl) return;
+      const GHOST_W = 220;
+      const GHOST_H = 38;
+      let activated = false;
+      let lastSwapKey: string | null = null;
+
+      const onMove = (e: PointerEvent) => {
+        if (!activated) {
+          if (Math.hypot(e.clientX - startX, e.clientY - startY) < 5) return;
+          activated = true;
+          dragHappenedRef.current = true;
+          setDragKey(tileKey);
+          setGhostStyle({
+            x: e.clientX - GHOST_W / 2,
+            y: e.clientY - GHOST_H / 2,
+            w: GHOST_W,
+            h: GHOST_H,
+            name,
+          });
+          document.body.style.cursor = "grabbing";
+        } else {
+          setGhostStyle((prev) =>
+            prev
+              ? { ...prev, x: e.clientX - GHOST_W / 2, y: e.clientY - GHOST_H / 2 }
+              : prev,
+          );
+          // Swap-on-drop: find the nearest non-source tile by center
+          // distance. Whichever tile center is closest to the cursor
+          // becomes the swap target. Works identically in Row, Grid, and
+          // Focus — the geometry of the layout doesn't matter.
+          const grid = gridRef.current;
+          if (!grid) return;
+          const sections = grid.querySelectorAll<HTMLElement>(
+            "section.tile[data-session-key]",
+          );
+          type Nearest = { key: string; dist: number };
+          let nearest: Nearest | null = null;
+          sections.forEach((el) => {
+            const k = el.dataset.sessionKey;
+            if (!k || k === tileKey) return;
+            const r = el.getBoundingClientRect();
+            // Skip if cursor is far outside this tile's bounds. We only
+            // consider tiles within "magnetic range" of the cursor — half
+            // a tile-width/height beyond their edges. Past that, no swap
+            // target (drop = no-op).
+            const padX = r.width * 0.5;
+            const padY = r.height * 0.5;
+            if (
+              e.clientX < r.left - padX ||
+              e.clientX > r.right + padX ||
+              e.clientY < r.top - padY ||
+              e.clientY > r.bottom + padY
+            ) {
+              return;
+            }
+            const cx = r.left + r.width / 2;
+            const cy = r.top + r.height / 2;
+            const d = Math.hypot(e.clientX - cx, e.clientY - cy);
+            if (nearest === null || d < nearest.dist) {
+              nearest = { key: k, dist: d };
+            }
+          });
+          const newSwap = (nearest as Nearest | null)?.key ?? null;
+          lastSwapKey = newSwap;
+          setDragSwapKey(newSwap);
+        }
+      };
+
+      // lastSwapKey hoisted above onMove so finish() reads the latest
+      // candidate synchronously without going through React state.
+      const finish = (commit: boolean) => {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", onUp);
+        document.removeEventListener("pointercancel", onCancel);
+        document.body.style.cursor = "";
+        if (commit && activated && lastSwapKey && lastSwapKey !== tileKey) {
+          setTiles((prev) => {
+            const aIdx = prev.findIndex((t) => t.key === tileKey);
+            const bIdx = prev.findIndex((t) => t.key === lastSwapKey);
+            if (aIdx < 0 || bIdx < 0) return prev;
+            const next = prev.slice();
+            [next[aIdx], next[bIdx]] = [next[bIdx], next[aIdx]];
+            return next;
+          });
+        }
+        setDragSwapKey(null);
+        setDragKey(null);
+        setGhostStyle(null);
+      };
+      const onUp = () => finish(true);
+      const onCancel = () => finish(false);
+
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onCancel);
+    },
+    [],
+  );
+
+  const tileRectsRef = useRef<Map<string, DOMRect>>(new Map());
+  const tilesOrderKey = tiles.map((t) => t.key).join(",");
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const prev = tileRectsRef.current;
+    const next = new Map<string, DOMRect>();
+    const sections = grid.querySelectorAll<HTMLElement>("section.tile[data-session-key]");
+    sections.forEach((el) => {
+      const key = el.dataset.sessionKey;
+      if (!key) return;
+      const rect = el.getBoundingClientRect();
+      next.set(key, rect);
+      const before = prev.get(key);
+      if (before) {
+        const dx = before.left - rect.left;
+        const dy = before.top - rect.top;
+        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+          el.animate(
+            [
+              { transform: `translate(${dx}px, ${dy}px)` },
+              { transform: "translate(0, 0)" },
+            ],
+            {
+              duration: 520,
+              easing: "cubic-bezier(0.34, 1.15, 0.64, 1)",
+              fill: "both",
+            },
+          );
+        }
+      }
+    });
+    tileRectsRef.current = next;
+  }, [tilesOrderKey]);
 
   const tileCount = tiles.length;
   const defaults = useMemo(
@@ -1174,18 +1339,29 @@ export default function App() {
             </button>
           </div>
         )}
-        {tilesWithStatus.map((s) => (
+        {tilesWithStatus.map((s) => {
+          const isSwapTarget = dragKey !== null && dragSwapKey === s.key && dragKey !== s.key;
+          return (
           <section
             key={s.key}
             data-session-key={s.key}
+            data-dragging={dragKey === s.key ? "true" : undefined}
+            data-swap-target={isSwapTarget ? "true" : undefined}
             className={`tile ${s.status} ${activeId === s.key ? "active" : ""}`}
             onClick={() => {
+              if (dragHappenedRef.current) {
+                dragHappenedRef.current = false;
+                return;
+              }
               setActiveId(s.key);
               ackStatus(s.key);
             }}
           >
             {dragOverKey === s.key && <div className="tile-drop-ring" aria-hidden="true" />}
-            <header className="t-head">
+            <header
+              className="t-head"
+              onPointerDown={(ev) => handleTileHeadPointerDown(ev, s.key, s.name)}
+            >
               <span className="dot"></span>
               {editingKey === s.key ? (
                 <input
@@ -1284,7 +1460,8 @@ export default function App() {
               />
             </div>
           </section>
-        ))}
+          );
+        })}
         <GridResizeHandles
           gridRef={gridRef}
           layout={layout}
@@ -1362,6 +1539,22 @@ export default function App() {
             },
           }}
         />
+      )}
+      {ghostStyle && (
+        <div
+          className="tile-drag-ghost"
+          aria-hidden="true"
+          style={{
+            transform: `translate(${ghostStyle.x}px, ${ghostStyle.y}px)`,
+            width: ghostStyle.w,
+            height: ghostStyle.h,
+          }}
+        >
+          <div className="tile-drag-ghost-head">
+            <span className="dot" />
+            <span className="name">{ghostStyle.name}</span>
+          </div>
+        </div>
       )}
     </div>
   );
