@@ -954,6 +954,39 @@ input:focus-visible {
   grid-template-rows: none;
 }
 
+/* Preview cascade override.
+   The global `html[data-alert-style="X"] .tile.needs` rules at 1420+
+   cascade into the preview tile (since `<html>` is its ancestor). The
+   pulse rule uses `:not(.active)` (specificity 0,4,1), so preview
+   rules need to beat 0,4,1. Prefixing with `.alert-style-popover`
+   (the natural DOM ancestor) bumps every preview rule to 0,5,0, which
+   wins on class-count regardless of the `:not(.active)` outlier.
+   Sync this list when adding/removing alert styles. */
+.alert-style-popover .alert-style-preview[data-alert-style="pulse"] .tile.needs {
+  animation: alert-pulse 2.2s ease-in-out infinite;
+}
+.alert-style-popover .alert-style-preview[data-alert-style="heartbeat"] .tile.needs {
+  animation: alert-heartbeat 2.4s linear infinite;
+}
+.alert-style-popover .alert-style-preview[data-alert-style="breath"] .tile.needs {
+  animation: alert-breath 5s cubic-bezier(.45, 0, .55, 1) infinite;
+}
+.alert-style-popover .alert-style-preview[data-alert-style="hotaru"] .tile.needs {
+  animation: none;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 80%),
+    inset 0 0 24px -16px var(--accent-glow);
+}
+.alert-style-popover .alert-style-preview[data-alert-style="triple"] .tile.needs,
+.alert-style-popover .alert-style-preview[data-alert-style="vertical"] .tile.needs,
+.alert-style-popover .alert-style-preview[data-alert-style="sakura"] .tile.needs,
+.alert-style-popover .alert-style-preview[data-alert-style="shuriken"] .tile.needs {
+  animation: none;
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    0 0 4px -1px var(--accent-glow);
+}
+
 /* ─── Theme popover (combined themes + accent + bg + texture) ─── */
 .alert-style-popover.theme-popover {
   min-width: calc(320px * var(--fz));
@@ -1417,10 +1450,10 @@ input:focus-visible {
    ─────────────────────────────────────────────────────── */
 
 /* 1. PULSE — soft accent halo (default) */
-[data-alert-style="pulse"] .tile.needs:not(.active) {
+html[data-alert-style="pulse"] .tile.needs:not(.active) {
   animation: alert-pulse 2.2s ease-in-out infinite;
 }
-[data-alert-style="pulse"] .tile.needs.active {
+html[data-alert-style="pulse"] .tile.needs.active {
   animation: alert-pulse-active 1.8s ease-in-out infinite;
 }
 @keyframes alert-pulse {
@@ -1451,7 +1484,7 @@ input:focus-visible {
 }
 
 /* 2. HEARTBEAT — slowed lub-dub halo */
-[data-alert-style="heartbeat"] .tile.needs {
+html[data-alert-style="heartbeat"] .tile.needs {
   animation: alert-heartbeat 2.4s linear infinite;
 }
 @keyframes alert-heartbeat {
@@ -1482,7 +1515,7 @@ input:focus-visible {
 }
 
 /* 2. BREATH — slow asymmetric inhale/exhale */
-[data-alert-style="breath"] .tile.needs {
+html[data-alert-style="breath"] .tile.needs {
   animation: alert-breath 5s cubic-bezier(.45, 0, .55, 1) infinite;
 }
 @keyframes alert-breath {
@@ -1507,7 +1540,7 @@ input:focus-visible {
 }
 
 /* 4. HOTARU — single bright dot circumnavigates the tile */
-[data-alert-style="hotaru"] .tile.needs {
+html[data-alert-style="hotaru"] .tile.needs {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 80%),
     inset 0 0 24px -16px var(--accent-glow);
@@ -1538,7 +1571,7 @@ input:focus-visible {
 /* TRIPLE SLASH — three slashes from different directions, each
    clip-path-revealed across the tile from one edge to the other.
    No final glow — slashes happen, silence follows. Cycle: 5s. */
-[data-alert-style="triple"] .tile.needs {
+html[data-alert-style="triple"] .tile.needs {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 55%),
     inset 0 0 28px -10px var(--accent-glow);
@@ -1613,7 +1646,7 @@ input:focus-visible {
 /* 7. VERTICAL — bright bar falls from the very top edge of the tile
    (above the header) to the bottom; residual hairline glows briefly
    before fading. Cycle: 4s. */
-[data-alert-style="vertical"] .tile.needs {
+html[data-alert-style="vertical"] .tile.needs {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 55%),
     inset 0 0 28px -10px var(--accent-glow);
@@ -1671,7 +1704,7 @@ input:focus-visible {
 }
 
 /* 4. SAKURA — petals fall and pile up */
-[data-alert-style="sakura"] .tile.needs {
+html[data-alert-style="sakura"] .tile.needs {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 70%),
     inset 0 0 36px -12px var(--accent-glow);
@@ -1783,7 +1816,7 @@ input:focus-visible {
 /* SHURIKEN RAIN — throw + stick. Two waves of 4 shuriken fly in
    from off-tile, stick at full opacity for ~3s, smoke-fade, repeat
    with new positions. 9s cycle. */
-[data-alert-style="shuriken"] .tile.needs {
+html[data-alert-style="shuriken"] .tile.needs {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 82%),
     inset 0 0 26px -14px var(--accent-glow);
