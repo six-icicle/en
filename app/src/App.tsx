@@ -205,7 +205,7 @@ export default function App() {
   const [tfzMenuOpen, setTfzMenuOpen] = useState(false);
   const tfzMenuRef = useRef<HTMLDivElement | null>(null);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const { kill, list, sendInput } = useSessions();
+  const { kill, list, sendInput, ackStatus } = useSessions();
 
   const renameTile = useCallback((key: string, next: string) => {
     const trimmed = next.trim();
@@ -1040,7 +1040,10 @@ export default function App() {
             key={s.key}
             data-session-key={s.key}
             className={`tile ${s.status} ${activeId === s.key ? "active" : ""}`}
-            onClick={() => setActiveId(s.key)}
+            onClick={() => {
+              setActiveId(s.key);
+              ackStatus(s.key);
+            }}
           >
             {dragOverKey === s.key && <div className="tile-drop-ring" aria-hidden="true" />}
             <header className="t-head">

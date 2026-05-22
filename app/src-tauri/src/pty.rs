@@ -73,12 +73,10 @@ pub fn spawn_session(
         command.env(k, v);
     }
     command.env("TERM", "xterm-256color");
-    // Suppress claude's rich welcome banner (set by `claude --bare`). If
-    // this disables more than the banner (hooks, auto-memory, CLAUDE.md
-    // auto-discovery), we'll need to revert and use a different approach.
-    command.env("CLAUDE_CODE_SIMPLE", "1");
     // Status detection: claude hooks read these to curl back to our local
     // receiver. When unset (claude run outside en), the hook command no-ops.
+    // (Removed CLAUDE_CODE_SIMPLE=1 — it suppressed the banner but also
+    // disabled the hooks system entirely, breaking status detection.)
     command.env("EN_HUB_SESSION_ID", &id);
     command.env(
         "EN_HUB_HOOK_URL",

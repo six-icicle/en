@@ -1308,6 +1308,16 @@ input:focus-visible {
 }
 .tile.working .t-head .dot { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
 .tile.needs   .t-head .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 1s infinite; }
+
+/* AlertExtras wrapper — overlay only, no grid/flow space.
+   Without this it consumes a grid row and squeezes .t-body to zero
+   height, so xterm renders blank when status flips to "needs". */
+.alert-extras {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
 .tile.idle    .t-head .dot { background: var(--ink-3); }
 .tile.stale   .t-head .dot { background: var(--ink-4); }
 
@@ -2052,7 +2062,7 @@ pre.term {
   justify-content: center;
   gap: calc(12px * var(--fz));
   background: var(--tile);
-  color: var(--ink-3);
+  color: var(--accent);
   font-family: var(--mono);
 }
 .modal-overlay {
@@ -2195,7 +2205,7 @@ pre.term {
   font-size: calc(13px * var(--fz));
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-2);
+  color: var(--accent);
 }
 .empty-state .empty-cta {
   margin-top: calc(6px * var(--fz));
@@ -2203,7 +2213,7 @@ pre.term {
   border-radius: 14px;
   border: 1px solid var(--line-2);
   background: transparent;
-  color: var(--ink-2);
+  color: var(--accent);
   font-family: var(--mono);
   font-size: calc(13px * var(--fz));
   cursor: pointer;
@@ -2223,7 +2233,7 @@ pre.term {
   padding: 1px calc(6px * var(--fz));
   border: 1px solid var(--line-2);
   border-radius: 3px;
-  color: var(--ink-2);
+  color: var(--accent);
   background: transparent;
   margin: 0 2px;
 }

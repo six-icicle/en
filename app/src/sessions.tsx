@@ -56,6 +56,7 @@ type Ctx = {
     onData: (bytes: Uint8Array) => void,
     onExit: () => void,
   ): () => void;
+  ackStatus(key: string): void;
 };
 
 const SessionsContext = createContext<Ctx | null>(null);
@@ -244,6 +245,17 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  /* User-acknowledge: flip a "needs" tile back to "idle" when the user
+     engages with it (e.g. clicks it). The next hook from claude
+     (UserPromptSubmit/Stop) will overwrite as appropriate — this just
+     stops the alert animation immediately so the UI feels responsive. */
+  const ackStatus = useCallback((key: string): void => {
+    const cur = sessionsRef.current.get(key);
+    if (!cur || cur.status !== "needs") return;
+    sessionsRef.current.set(key, { ...cur, status: "idle" });
+    setTick((t) => t + 1);
+  }, []);
+
   const resize = useCallback(
     async (key: string, cols: number, rows: number): Promise<void> => {
       const cur = sessionsRef.current.get(key);
@@ -319,6 +331,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     pauseResize,
     resumeResize,
     subscribe,
+    ackStatus,
   };
   return (
     <SessionsContext.Provider value={ctx}>{children}</SessionsContext.Provider>
