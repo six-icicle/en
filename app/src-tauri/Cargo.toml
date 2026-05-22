@@ -29,4 +29,5 @@ base64 = "0.22"
 uuid = { version = "1", features = ["v4"] }
 anyhow = "1"
 tiny_http = "0.12"
+fs2 = "0.4"
 

@@ -1,7 +1,9 @@
+use std::fs::OpenOptions;
 use std::path::PathBuf;
 use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use fs2::FileExt;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
@@ -100,12 +102,32 @@ pub fn install_hooks() -> Result<bool, String> {
     let dir = PathBuf::from(&home).join(".claude");
     let path = dir.join("settings.json");
 
+    std::fs::create_dir_all(&dir)
+        .map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
+
+    // Advisory file lock guards the whole read→merge→write→rename cycle.
+    // Two en instances launching simultaneously would otherwise race:
+    // both read the pre-install file, both merge in their en block,
+    // last writer wins and the other's identical block is "lost" — for
+    // identical en blocks the outcome is fine, but if the launches
+    // straddle a HOOK_EVENTS schema change the older binary would clobber
+    // the newer entries. Lock makes the operation strictly serialized.
+    let lock_path = dir.join(".en-hooks.lock");
+    let lock_file = OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .open(&lock_path)
+        .map_err(|e| format!("open lock {}: {e}", lock_path.display()))?;
+    lock_file
+        .lock_exclusive()
+        .map_err(|e| format!("lock {}: {e}", lock_path.display()))?;
+    // lock_file dropped at function exit → unlocked automatically.
+
     let existing = if path.exists() {
         std::fs::read_to_string(&path)
             .map_err(|e| format!("read {}: {e}", path.display()))?
     } else {
-        std::fs::create_dir_all(&dir)
-            .map_err(|e| format!("mkdir {}: {e}", dir.display()))?;
         "{}".to_string()
     };
 
@@ -119,10 +141,12 @@ pub fn install_hooks() -> Result<bool, String> {
         return Err("settings.json is not a JSON object".into());
     }
 
-    let ts = SystemTime::now()
+    // Nanos + pid suffix so two launches in the same second can't collide
+    // on the backup filename (or the .en-tmp filename mid-rename).
+    let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+        .unwrap_or_default();
+    let stamp = format!("{}-{}-{}", now.as_secs(), now.subsec_nanos(), std::process::id());
 
     let obj = settings.as_object_mut().unwrap();
     let hooks_root = obj
@@ -189,14 +213,14 @@ pub fn install_hooks() -> Result<bool, String> {
     }
 
     if path.exists() {
-        let backup = dir.join(format!("settings.json.en-backup-{ts}"));
+        let backup = dir.join(format!("settings.json.en-backup-{stamp}"));
         std::fs::copy(&path, &backup)
             .map_err(|e| format!("backup settings.json: {e}"))?;
     }
 
     let serialized = serde_json::to_string_pretty(&settings)
         .map_err(|e| format!("serialize settings.json: {e}"))?;
-    let tmp = dir.join(format!("settings.json.en-tmp-{ts}"));
+    let tmp = dir.join(format!("settings.json.en-tmp-{stamp}"));
     std::fs::write(&tmp, serialized)
         .map_err(|e| format!("write tmp settings.json: {e}"))?;
     std::fs::rename(&tmp, &path)
