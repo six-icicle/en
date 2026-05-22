@@ -804,34 +804,32 @@ export default function App() {
                 <div className="batch-popover-label">
                   how many? <span className="batch-cap">{tiles.length}/{MAX_TILES}</span>
                 </div>
-                <div className="batch-grid">
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
-                    const room = MAX_TILES - tiles.length;
-                    const disabled = n > room;
-                    return (
-                      <button
-                        key={n}
-                        className="batch-option"
-                        role="menuitem"
-                        disabled={disabled}
-                        onClick={() => {
-                          setBatchMenuOpen(false);
-                          void spawnBatch(n);
-                        }}
-                        title={
-                          disabled
-                            ? `Only ${room} slot${room === 1 ? "" : "s"} left`
-                            : `Pick ${n} folder${n === 1 ? "" : "s"}`
-                        }
-                      >
-                        <span className="batch-kanji" aria-hidden="true">
-                          {["一", "二", "三", "四", "五", "六", "七", "八"][n - 1]}
-                        </span>
-                        <span className="batch-num">{n}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
+                  const room = MAX_TILES - tiles.length;
+                  const disabled = n > room;
+                  return (
+                    <button
+                      key={n}
+                      className="alert-style-option batch-option"
+                      role="menuitem"
+                      disabled={disabled}
+                      onClick={() => {
+                        setBatchMenuOpen(false);
+                        void spawnBatch(n);
+                      }}
+                      title={
+                        disabled
+                          ? `Only ${room} slot${room === 1 ? "" : "s"} left`
+                          : `Pick ${n} folder${n === 1 ? "" : "s"}`
+                      }
+                    >
+                      <span className="glyph batch-kanji" aria-hidden="true">
+                        {["一", "二", "三", "四", "五", "六", "七", "八"][n - 1]}
+                      </span>
+                      <span>{n === 1 ? "one folder" : `${n} folders`}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

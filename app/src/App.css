@@ -1219,33 +1219,6 @@ input:focus-visible {
   color: var(--ink-3);
   margin-bottom: calc(10px * var(--fz));
 }
-.batch-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: calc(6px * var(--fz));
-}
-.batch-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(2px * var(--fz));
-  padding: calc(8px * var(--fz)) 0;
-  background: transparent;
-  border: 1px solid var(--line-2);
-  border-radius: 4px;
-  color: var(--ink);
-  cursor: pointer;
-  transition:
-    background var(--dur-fast),
-    border-color var(--dur-fast),
-    color var(--dur-fast);
-}
-.batch-option:hover:not(:disabled) {
-  background: var(--tile-2);
-  border-color: var(--accent);
-  color: var(--accent);
-}
 .batch-option:disabled {
   opacity: 0.32;
   cursor: not-allowed;
@@ -1258,19 +1231,12 @@ input:focus-visible {
   margin-left: calc(6px * var(--fz));
   text-transform: none;
 }
-.batch-kanji {
+.batch-option .batch-kanji {
   font-family: "Hiragino Mincho ProN", "Yu Mincho", "Songti SC", serif;
-  font-size: calc(20px * var(--fz));
+  font-size: calc(18px * var(--fz));
   line-height: 1;
   letter-spacing: 0;
 }
-.batch-num {
-  font-family: var(--mono);
-  font-size: calc(9px * var(--fz));
-  letter-spacing: 0.10em;
-  color: var(--ink-3);
-}
-.batch-option:hover:not(:disabled) .batch-num { color: var(--accent); }
 
 /* ─── Kill-all (skull) trigger ───
    Sits at the trailing edge of the titlebar. Resting glyph reads in
