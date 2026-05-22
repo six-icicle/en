@@ -1961,10 +1961,13 @@ html[data-alert-style="shuriken"] .tile.needs {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
+  margin-left: auto; /* trailing edge unless preceded by .t-reveal */
   opacity: 0;
   transition: opacity var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
 }
+/* When .t-reveal precedes .t-close, the reveal absorbs the auto-margin
+   spacer and close sits at the gap-controlled distance after it. */
+.t-reveal + .t-close { margin-left: 0; }
 .tile:hover .t-close,
 .tile.active .t-close,
 .t-close:focus-visible { opacity: 1; }
@@ -1973,6 +1976,32 @@ html[data-alert-style="shuriken"] .tile.needs {
   border-color: var(--warn);
   background: var(--bg);
 }
+
+/* Reveal-in-Finder icon. Mirrors .t-close's hover-reveal pattern but
+   uses the chrome family palette (ink-3 → accent on hover) instead of
+   the destructive warn-red. Sits to the LEFT of .t-close so the close
+   stays at the trailing edge. */
+.t-reveal {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
+}
+.tile:hover .t-reveal,
+.tile.active .t-reveal,
+.t-reveal:focus-visible { opacity: 1; }
+.t-reveal:hover { color: var(--accent); }
+.t-reveal svg { width: 13px; height: 13px; display: block; }
 
 .t-body {
   padding: calc(8px * var(--fz)) calc(10px * var(--fz));

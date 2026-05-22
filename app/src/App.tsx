@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { openPath } from "@tauri-apps/plugin-opener";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
@@ -1220,6 +1221,31 @@ export default function App() {
                 </span>
               )}
               <span className="meta">{s.meta}</span>
+              {s.cwd && (
+                <button
+                  className="t-reveal"
+                  title="Open in Finder"
+                  aria-label="Open in Finder"
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    void openPath(s.cwd!);
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+                    <path d="M11 13l3-3" />
+                    <path d="M14 13V10h-3" />
+                  </svg>
+                </button>
+              )}
               <button
                 className="t-close"
                 title="Close session (⌘W)"

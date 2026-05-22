@@ -11,6 +11,10 @@
     "core:window:allow-set-fullscreen",
     "core:window:allow-is-fullscreen",
     "opener:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [{ "path": "**" }]
+    },
     "dialog:allow-open",
     "store:default"
   ]
