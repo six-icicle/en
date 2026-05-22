@@ -1,3 +1,4 @@
+mod appearance;
 mod hooks;
 mod pty;
 
@@ -12,6 +13,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .manage(PtyManager::default())
         .setup(|app| {
+            // Run before any JS executes so tauri-plugin-store can't
+            // observe (and later overwrite) a corrupt file.
+            appearance::quarantine_if_corrupt(app.handle());
+
             let cfg = hooks::start(app.handle().clone())?;
             eprintln!("[en-hooks] receiver listening on 127.0.0.1:{}", cfg.port);
             app.manage(cfg);

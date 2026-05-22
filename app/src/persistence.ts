@@ -187,7 +187,12 @@ export async function loadAppearance(): Promise<Appearance> {
     const store = await getStore();
     const raw = await store.get(KEY);
     return validate(raw);
-  } catch {
+  } catch (e) {
+    // Native side (appearance::quarantine_if_corrupt in lib.rs) moves
+    // unparseable settings.json files aside before the store plugin
+    // opens them, so reaching this branch means the plugin itself
+    // errored — surface it once so the user has a chance to notice.
+    console.warn("[en/persistence] failed to load appearance store:", e);
     return { ...APPEARANCE_DEFAULTS };
   }
 }
