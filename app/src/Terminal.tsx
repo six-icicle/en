@@ -5,6 +5,14 @@ import { WebglAddon } from "@xterm/addon-webgl";
 import { useSessions, type SessionDecl } from "./sessions";
 import type { Theme } from "./persistence";
 
+/* WebKit caps WebGL contexts at ~8 per page; xterm's WebGL renderer
+   claims one per terminal. Cap ourselves at 6 in prod so HMR/devtools/
+   incidental contexts always have headroom. In dev we halve to 3 because
+   React StrictMode double-mounts effects — disposed contexts aren't
+   reaped by the GPU before the second mount runs, so 6 prod = 12 dev. */
+const WEBGL_CAP = import.meta.env.DEV ? 3 : 6;
+let webglContextCount = 0;
+
 type Props = {
   decl: SessionDecl;
   theme: Theme;
@@ -206,12 +214,15 @@ export default function TerminalView({
     term.open(containerRef.current);
 
     let webgl: WebglAddon | null = null;
-    try {
-      webgl = new WebglAddon();
-      webgl.onContextLoss(() => webgl?.dispose());
-      term.loadAddon(webgl);
-    } catch {
-      webgl = null; // fall back to default DOM renderer
+    if (webglContextCount < WEBGL_CAP) {
+      try {
+        webgl = new WebglAddon();
+        webgl.onContextLoss(() => webgl?.dispose());
+        term.loadAddon(webgl);
+        webglContextCount++;
+      } catch {
+        webgl = null; // fall back to default canvas renderer
+      }
     }
 
     termRef.current = term;
@@ -321,7 +332,10 @@ export default function TerminalView({
       window.removeEventListener("en:refit", refit);
       onDataDispose.dispose();
       unsubscribe();
-      webgl?.dispose();
+      if (webgl) {
+        webgl.dispose();
+        webglContextCount = Math.max(0, webglContextCount - 1);
+      }
       term.dispose();
       termRef.current = null;
       fitRef.current = null;

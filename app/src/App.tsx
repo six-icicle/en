@@ -5,7 +5,6 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
   Bug,
   Columns3,
-  Grid3x3,
   HeartPulse,
   LayoutGrid,
   LayoutPanelLeft,
@@ -105,10 +104,11 @@ const TEXTURES: { id: Texture; title: string }[] = [
   { id: "shuriken-fall", title: "Shuriken rain" },
 ];
 
+const MAX_TILES = 8;
+
 const LAYOUTS: { id: Layout; title: string; desc: string }[] = [
   { id: "row",   title: "Row",   desc: "single row" },
-  { id: "grid",  title: "Quad",  desc: "2×2" },
-  { id: "wide",  title: "Hex",   desc: "2×3" },
+  { id: "grid",  title: "Grid",  desc: "2 × 1–4" },
   { id: "focus", title: "Focus", desc: "active big" },
 ];
 
@@ -130,21 +130,20 @@ function defaultTracks(layout: Layout, count: number): { cols: number[]; rows: n
     return { cols: Array(count).fill(1), rows: [1] };
   }
   if (layout === "grid") {
+    /* 2 rows × 1–4 cols. Side-by-side at 2; otherwise ceil(count/2)
+       columns and 2 rows. Odd counts leave one trailing empty cell. */
     if (count === 2) return { cols: [1, 1], rows: [1] };
-    const rows = Math.ceil(count / 2);
-    return { cols: [1, 1], rows: Array(rows).fill(1) };
-  }
-  if (layout === "wide") {
-    if (count === 2) return { cols: [1, 1], rows: [1] };
-    if (count === 3) return { cols: [1, 1, 1], rows: [1] };
-    return { cols: [1, 1, 1], rows: count <= 6 ? [1, 1] : [1, 1, 1] };
+    const cols = Math.min(4, Math.ceil(count / 2));
+    return { cols: Array(cols).fill(1), rows: [1, 1] };
   }
   // focus
   if (count === 2) return { cols: [2, 1], rows: [1] };
   if (count === 3) return { cols: [2, 1], rows: [1, 1] };
   if (count === 4) return { cols: [2, 1], rows: [1, 1, 1] };
   if (count === 5) return { cols: [2, 1, 1], rows: [1, 1] };
-  return { cols: [1, 1, 1], rows: [1, 1, 1] };
+  if (count === 6) return { cols: [2, 1, 1], rows: [1, 1, 1] };
+  // 7-8: sidebar of 1 big + 3-row stack on the right
+  return { cols: [2, 1, 1, 1], rows: [1, 1] };
 }
 
 const INITIAL_TILES: TileDecl[] = [];
@@ -201,6 +200,9 @@ export default function App() {
   const fzMenuRef = useRef<HTMLDivElement | null>(null);
   const [tfzMenuOpen, setTfzMenuOpen] = useState(false);
   const tfzMenuRef = useRef<HTMLDivElement | null>(null);
+  const [batchMenuOpen, setBatchMenuOpen] = useState(false);
+  const batchMenuRef = useRef<HTMLDivElement | null>(null);
+  const [killAllOpen, setKillAllOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const { kill, list, sendInput, ackStatus } = useSessions();
 
@@ -381,6 +383,23 @@ export default function App() {
   }, [fzMenuOpen]);
 
   useEffect(() => {
+    if (!batchMenuOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (!batchMenuRef.current) return;
+      if (!batchMenuRef.current.contains(e.target as Node)) setBatchMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setBatchMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointer);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointer);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [batchMenuOpen]);
+
+  useEffect(() => {
     if (!tfzMenuOpen) return;
     const onPointer = (e: MouseEvent) => {
       if (!tfzMenuRef.current) return;
@@ -437,7 +456,13 @@ export default function App() {
   // Sessions are ensured by the TerminalView for each tile, after xterm
   // measures itself, so the PTY is spawned at the real cols/rows.
 
+  const tileCountRef = useRef(tiles.length);
+  useEffect(() => {
+    tileCountRef.current = tiles.length;
+  }, [tiles.length]);
+
   const spawn = useCallback(async () => {
+    if (tileCountRef.current >= MAX_TILES) return;
     let chosen: string | null = null;
     try {
       const result = await openDialog({
@@ -462,6 +487,39 @@ export default function App() {
     };
     setTiles((prev) => [...prev, decl]);
     setActiveId(key);
+  }, []);
+
+  const spawnBatch = useCallback(async (n: number) => {
+    const room = MAX_TILES - tileCountRef.current;
+    if (room <= 0) return;
+    const want = Math.min(n, room);
+    let picks: string[] = [];
+    try {
+      const result = await openDialog({
+        directory: true,
+        multiple: true,
+        title: `Pick up to ${want} folder${want === 1 ? "" : "s"}`,
+      });
+      picks = Array.isArray(result) ? result : result ? [result] : [];
+    } catch {
+      return;
+    }
+    if (picks.length === 0) return;
+    const chosen = picks.slice(0, want);
+    const stamp = Date.now().toString(36);
+    const decls: TileDecl[] = chosen.map((cwd, i) => {
+      const name = basename(cwd);
+      return {
+        key: `${name}-${stamp}-${i}`,
+        name,
+        path: deriveDisplayPath(cwd),
+        cwd,
+        meta: "",
+        status: "working",
+      };
+    });
+    setTiles((prev) => [...prev, ...decls]);
+    setActiveId(decls[decls.length - 1].key);
   }, []);
 
   useEffect(() => {
@@ -708,7 +766,12 @@ export default function App() {
           <button
             className="spawn-btn"
             onClick={spawn}
-            title="Kindle a new session (⌘N)"
+            disabled={tiles.length >= MAX_TILES}
+            title={
+              tiles.length >= MAX_TILES
+                ? `Hub at capacity (${MAX_TILES})`
+                : "Kindle a new session (⌘N)"
+            }
             aria-label="Kindle new session"
           >
             <svg
@@ -724,6 +787,53 @@ export default function App() {
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </button>
+          <div className="alert-style-wrap" ref={batchMenuRef}>
+            <button
+              className="alert-style-trigger icon-only batch-trigger"
+              aria-expanded={batchMenuOpen}
+              aria-haspopup="menu"
+              onClick={() => setBatchMenuOpen((v) => !v)}
+              title="Kindle multiple sessions at once"
+              aria-label="Kindle multiple sessions"
+            >
+              <span className="batch-trigger-glyph" aria-hidden="true">#</span>
+            </button>
+            {batchMenuOpen && (
+              <div className="alert-style-popover batch-popover" role="menu">
+                <div className="batch-popover-label">
+                  how many? <span className="batch-cap">{tiles.length}/{MAX_TILES}</span>
+                </div>
+                <div className="batch-grid">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => {
+                    const room = MAX_TILES - tiles.length;
+                    const disabled = n > room;
+                    return (
+                      <button
+                        key={n}
+                        className="batch-option"
+                        role="menuitem"
+                        disabled={disabled}
+                        onClick={() => {
+                          setBatchMenuOpen(false);
+                          void spawnBatch(n);
+                        }}
+                        title={
+                          disabled
+                            ? `Only ${room} slot${room === 1 ? "" : "s"} left`
+                            : `Pick ${n} folder${n === 1 ? "" : "s"}`
+                        }
+                      >
+                        <span className="batch-kanji" aria-hidden="true">
+                          {["一", "二", "三", "四", "五", "六", "七", "八"][n - 1]}
+                        </span>
+                        <span className="batch-num">{n}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             className="reset-sizes-btn"
             onClick={() => setResetMenuOpen(true)}
@@ -1030,6 +1140,21 @@ export default function App() {
             </div>
           )}
         </div>
+        <button
+          className="alert-style-trigger icon-only kill-all-btn"
+          onClick={() => setKillAllOpen(true)}
+          disabled={tiles.length === 0}
+          title={
+            tiles.length === 0
+              ? "No sessions to extinguish"
+              : `Extinguish all sessions (${tiles.length})`
+          }
+          aria-label="Extinguish all sessions"
+        >
+          <span className="trigger-glyph" aria-hidden="true">
+            <SkullGlyph />
+          </span>
+        </button>
       </div>
 
       <div
@@ -1153,6 +1278,17 @@ export default function App() {
           focus <b>{tilesWithStatus.find((s) => s.key === activeId)?.name ?? "—"}</b>
         </span>
       </div>
+      {killAllOpen && (
+        <ConfirmKillAllModal
+          count={tiles.length}
+          onCancel={() => setKillAllOpen(false)}
+          onConfirm={() => {
+            const keys = tiles.map((t) => t.key);
+            setKillAllOpen(false);
+            for (const k of keys) closeTile(k);
+          }}
+        />
+      )}
       {pendingClose !== null && (
         <ConfirmCloseModal
           name={tiles.find((t) => t.key === pendingClose)?.name ?? "session"}
@@ -1318,7 +1454,6 @@ function LayoutGlyph({ id }: { id: Layout }) {
   switch (id) {
     case "row":   return <Columns3 {...props} />;
     case "grid":  return <LayoutGrid {...props} />;
-    case "wide":  return <Grid3x3 {...props} />;
     case "focus": return <LayoutPanelLeft {...props} />;
   }
 }
@@ -1368,6 +1503,82 @@ function AlertGlyph({ id }: { id: AlertStyle }) {
       </svg>
     );
   }
+}
+
+function SkullGlyph() {
+  /* Minimal single-stroke skull — two dot eyes, three teeth.
+     14×14 viewBox to match the layout/alert lucide glyphs. */
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 7.5 C3 4.5 5 2.5 8 2.5 C11 2.5 13 4.5 13 7.5 L13 10 L11 10 L11 12 L9 12 L9 10.5 L7 10.5 L7 12 L5 12 L5 10 L3 10 Z" />
+      <circle cx="6" cy="7" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="10" cy="7" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function ConfirmKillAllModal({
+  count,
+  onCancel,
+  onConfirm,
+}: {
+  count: number;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const confirmRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    confirmRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCancel();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        onConfirm();
+      }
+    };
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", onKey, { capture: true });
+  }, [onCancel, onConfirm]);
+  return (
+    <div className="modal-overlay" onClick={onCancel}>
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-title">Extinguish all sessions</div>
+        <div className="modal-body">
+          End <b>{count}</b> session{count === 1 ? "" : "s"}? Any in-progress
+          work will be lost.
+        </div>
+        <div className="modal-actions">
+          <button className="modal-cancel" onClick={onCancel}>
+            cancel <kbd>esc</kbd>
+          </button>
+          <button
+            ref={confirmRef}
+            className="modal-confirm"
+            onClick={onConfirm}
+          >
+            extinguish all <kbd>↵</kbd>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function WindowControls() {

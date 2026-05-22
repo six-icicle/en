@@ -24,7 +24,7 @@ export type Texture =
   | "brush"
   | "bokeh"
   | "bamboo";
-export type Layout = "row" | "grid" | "wide" | "focus";
+export type Layout = "row" | "grid" | "focus";
 export type AlertStyle =
   | "pulse"
   | "heartbeat"
@@ -110,7 +110,8 @@ const TEXTURES = new Set<Texture>([
   "bokeh",
   "bamboo",
 ]);
-const LAYOUTS = new Set<Layout>(["row", "grid", "wide", "focus"]);
+const LAYOUTS = new Set<Layout>(["row", "grid", "focus"]);
+const LAYOUT_LEGACY: Record<string, Layout> = { wide: "grid" };
 const ALERT_STYLES = new Set<AlertStyle>([
   "pulse",
   "heartbeat",
@@ -156,7 +157,9 @@ function validate(raw: unknown): Appearance {
     : APPEARANCE_DEFAULTS.texture;
   const layout = LAYOUTS.has(r.layout as Layout)
     ? (r.layout as Layout)
-    : APPEARANCE_DEFAULTS.layout;
+    : typeof r.layout === "string" && r.layout in LAYOUT_LEGACY
+      ? LAYOUT_LEGACY[r.layout]
+      : APPEARANCE_DEFAULTS.layout;
   const fz = typeof r.fz === "number" ? clamp(r.fz, 0.7, 1.6) : APPEARANCE_DEFAULTS.fz;
   const tfz =
     typeof r.tfz === "number" ? clamp(r.tfz, 0.7, 1.6) : APPEARANCE_DEFAULTS.tfz;
