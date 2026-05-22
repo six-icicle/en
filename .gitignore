@@ -31,3 +31,6 @@ pass-code.md
 
 # Local Claude worktrees (in-flight branch checkouts)
 .claude/worktrees/
+
+# Audit run outputs (per-session, archived locally only)
+.claude/audits/

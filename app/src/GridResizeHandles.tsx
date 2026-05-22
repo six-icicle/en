@@ -1,11 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactElement, RefObject } from "react";
 import { useSessions } from "./sessions";
+import type { Layout } from "./persistence";
 
 const HANDLE_THICKNESS = 6;
 const MIN_TRACK_PX = 100;
-
-type Layout = "row" | "grid" | "wide" | "focus";
 
 type Props = {
   gridRef: RefObject<HTMLDivElement | null>;

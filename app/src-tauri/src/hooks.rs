@@ -27,9 +27,9 @@ struct HookPayload {
 }
 
 #[derive(Serialize, Clone)]
-pub struct TileStatusEvent {
-    pub status: &'static str,
-    pub event: String,
+struct TileStatusEvent {
+    status: &'static str,
+    event: String,
 }
 
 pub fn start(app: AppHandle) -> Result<HookConfig, String> {

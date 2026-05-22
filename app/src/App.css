@@ -1973,12 +1973,6 @@ input:focus-visible {
     radial-gradient(ellipse 80% 40% at 50% 0%, var(--sheen) 0%, transparent 60%);
   z-index: 1;
 }
-pre.term {
-  white-space: pre-wrap;
-  font-family: var(--mono);
-  position: relative;
-  z-index: 2;
-}
 .xterm-host {
   position: relative;
   z-index: 2;
@@ -2000,21 +1994,6 @@ pre.term {
   background: var(--line-2);
   border-radius: 3px;
 }
-.p { color: var(--accent); }
-.c { color: var(--ink); }
-.t { color: var(--ink-2); }
-.r { color: var(--ink-3); }
-.k { color: var(--ink-2); }
-.cur {
-  display: inline-block;
-  width: 9px; height: 17px;
-  background: var(--accent);
-  vertical-align: text-top;
-  animation: cur 1s steps(1) infinite;
-}
-.cur.dim { background: var(--ink-3); }
-@keyframes cur { 50% { opacity: 0; } }
-
 .tile:not(.active) .t-body { opacity: 0.7; }
 .tile.stale .t-body { opacity: 0.4; }
 
