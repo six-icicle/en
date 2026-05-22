@@ -225,6 +225,19 @@ export default function TerminalView({
       }
     }
 
+    term.attachCustomKeyEventHandler((event) => {
+      if (event.type !== "keydown" || event.key !== "Backspace") return true;
+      if (event.ctrlKey && !event.metaKey && !event.altKey) {
+        sendInput(sessionKey, "\x17");
+        return false;
+      }
+      if (event.metaKey && !event.ctrlKey && !event.altKey) {
+        sendInput(sessionKey, "\x15");
+        return false;
+      }
+      return true;
+    });
+
     termRef.current = term;
     fitRef.current = fit;
 
