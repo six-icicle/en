@@ -109,10 +109,6 @@ pub fn install_hooks() -> Result<bool, String> {
         "{}".to_string()
     };
 
-    if existing.contains(HOOK_MARKER) {
-        return Ok(false);
-    }
-
     let mut settings: Value = if existing.trim().is_empty() {
         json!({})
     } else {
@@ -127,11 +123,6 @@ pub fn install_hooks() -> Result<bool, String> {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_secs())
         .unwrap_or(0);
-    if path.exists() {
-        let backup = dir.join(format!("settings.json.en-backup-{ts}"));
-        std::fs::copy(&path, &backup)
-            .map_err(|e| format!("backup settings.json: {e}"))?;
-    }
 
     let obj = settings.as_object_mut().unwrap();
     let hooks_root = obj
@@ -142,21 +133,65 @@ pub fn install_hooks() -> Result<bool, String> {
     }
     let hooks_map = hooks_root.as_object_mut().unwrap();
 
+    // Per-event upsert: replace en's existing entry's command if present
+    // (so HOOK_EVENTS can grow or the command body can change in a future
+    // release without duplicating), otherwise push a fresh entry. Foreign
+    // entries are left untouched.
+    let mut changed = false;
     for event in HOOK_EVENTS {
-        let entry = json!({
-            "hooks": [{
-                "type": "command",
-                "command": hook_command_for(event),
-            }]
-        });
+        let want_cmd = hook_command_for(event);
         let arr = hooks_map
             .entry((*event).to_string())
             .or_insert_with(|| json!([]));
-        if let Some(vec) = arr.as_array_mut() {
-            vec.push(entry);
-        } else {
+        let Some(vec) = arr.as_array_mut() else {
             return Err(format!("settings.hooks.{event} is not a JSON array"));
+        };
+        let mut found = false;
+        for entry in vec.iter_mut() {
+            let Some(inner) = entry.get_mut("hooks").and_then(Value::as_array_mut) else {
+                continue;
+            };
+            for h in inner.iter_mut() {
+                let is_ours = h
+                    .get("command")
+                    .and_then(Value::as_str)
+                    .map(|c| c.starts_with(HOOK_MARKER))
+                    .unwrap_or(false);
+                if is_ours {
+                    let cur = h.get("command").and_then(Value::as_str).unwrap_or("");
+                    if cur != want_cmd {
+                        if let Some(o) = h.as_object_mut() {
+                            o.insert("command".to_string(), Value::String(want_cmd.clone()));
+                            changed = true;
+                        }
+                    }
+                    found = true;
+                    break;
+                }
+            }
+            if found {
+                break;
+            }
         }
+        if !found {
+            vec.push(json!({
+                "hooks": [{
+                    "type": "command",
+                    "command": want_cmd,
+                }]
+            }));
+            changed = true;
+        }
+    }
+
+    if !changed {
+        return Ok(false);
+    }
+
+    if path.exists() {
+        let backup = dir.join(format!("settings.json.en-backup-{ts}"));
+        std::fs::copy(&path, &backup)
+            .map_err(|e| format!("backup settings.json: {e}"))?;
     }
 
     let serialized = serde_json::to_string_pretty(&settings)
