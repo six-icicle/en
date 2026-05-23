@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Palette Explore — Blues + Greens (dark bg / colored text)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #0a0a0a;
+    --page-ink: #d0d0d0;
+    --page-ink-2: #888;
+    --page-line: #222;
+    --font-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--page-bg);
+    color: var(--page-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 32px 80px;
+  }
+  .page { max-width: 1380px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--page-line);
+    padding-bottom: 14px;
+    margin-bottom: 36px;
+  }
+  h1 {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  header .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--page-ink-2);
+  }
+  .lede {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--page-ink-2);
+    margin-bottom: 32px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    border-top: 1px solid var(--page-line);
+    padding-top: 14px;
+    margin: 32px 0 18px;
+  }
+  .section-head .num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    background: #fff;
+    color: #000;
+    padding: 2px 8px;
+    text-transform: uppercase;
+  }
+  .section-head .num.b { background: #84a0c6; }
+  .section-head .num.g { background: #87a878; color: #0a0a0a; }
+  .section-head h2 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .section-head .sub {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--page-ink-2);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  @media (max-width: 980px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    border: 1px solid var(--page-line);
+    overflow: hidden;
+  }
+  .card-mock {
+    padding: 0;
+    height: 240px;
+    display: flex;
+    flex-direction: column;
+  }
+  .mock-titlebar {
+    height: 38px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .mock-titlebar .brand-dot {
+    width: 8px; height: 8px;
+    margin-right: 8px;
+  }
+  .mock-titlebar .clock {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    opacity: 0.6;
+  }
+  .mock-body {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mock-line {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .mock-line.label {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    opacity: 0.7;
+  }
+  .mock-line.body {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .mock-row {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    align-items: center;
+  }
+  .mock-btn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid;
+    cursor: default;
+  }
+  .mock-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mock-status .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+
+  /* card meta strip */
+  .card-meta {
+    border-top: 1px solid var(--page-line);
+    padding: 14px 16px;
+    background: #0e0e0e;
+  }
+  .card-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #f0f0f0;
+    margin-bottom: 4px;
+  }
+  .card-tag {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--page-ink-2);
+    margin-bottom: 12px;
+    line-height: 1.45;
+  }
+  .swatch-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--page-line);
+  }
+  .sw {
+    flex: 1;
+    padding: 8px 10px;
+    border-right: 1px solid var(--page-line);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .sw:last-child { border-right: none; }
+  .sw .sw-label {
+    text-transform: uppercase;
+    color: var(--page-ink-2);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .sw .sw-hex {
+    color: #e8e8e8;
+    font-weight: 500;
+  }
+  .sw .sw-chip {
+    display: block;
+    width: 100%;
+    height: 18px;
+    margin-bottom: 6px;
+    border: 1px solid var(--page-line);
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 18px;
+    border-top: 1px solid var(--page-line);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--page-ink-2);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>Palette Explore — Blues + Greens</h1>
+  <div class="meta">DARK BG · COLORED TEXT &amp; ACCENT · 2026-05-22</div>
+</header>
+<div class="lede">Each card renders a mini en-app titlebar + tile in the actual theme colors. Text isn't pure-white — it's tinted blue or green to match the palette. Click around, pick the one that hits.</div>
+
+
+<!-- ─────────── BLUES ─────────── -->
+<div class="section-head">
+  <span class="num b">B</span>
+  <h2>Blues</h2>
+  <span class="sub">dark bg · blue-tinted text · blue/cyan accents</span>
+</div>
+
+<div class="grid">
+
+  <!-- 1. Tokyo Night — lavender-blue ink, cobalt accent -->
+  <div class="card">
+    <div class="card-mock" style="background:#1a1b26; color:#c0caf5;">
+      <div class="mock-titlebar" style="border-color:#292e42; color:#7aa2f7;">
+        <span class="brand-dot" style="background:#7aa2f7;"></span>
+        TOKYO · NIGHT
+        <span class="clock">21:04</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#565f89;">Operator</div>
+        <div class="mock-line body" style="color:#c0caf5;">Reading the long blue dusk over the rail-yards.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#7aa2f7; border-color:#7aa2f7; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#c0caf5; border-color:#414868; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#7aa2f7;">
+            <span class="dot" style="background:#7aa2f7; box-shadow:0 0 8px #7aa2f7;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Tokyo Night</div>
+      <div class="card-tag">Lavender-blue body text on deep navy. Cobalt accent. Iconic, modern, holds up across long sessions.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#1a1b26;"></span><div class="sw-label">bg</div><div class="sw-hex">#1a1b26</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#c0caf5;"></span><div class="sw-label">ink</div><div class="sw-hex">#c0caf5</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#7aa2f7;"></span><div class="sw-label">accent</div><div class="sw-hex">#7aa2f7</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#565f89;"></span><div class="sw-label">muted</div><div class="sw-hex">#565f89</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Iceberg — quiet cool blue, scholarly -->
+  <div class="card">
+    <div class="card-mock" style="background:#161821; color:#c6c8d1;">
+      <div class="mock-titlebar" style="border-color:#1e2132; color:#84a0c6;">
+        <span class="brand-dot" style="background:#84a0c6;"></span>
+        ICEBERG
+        <span class="clock">04:12</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#6b7089;">Section</div>
+        <div class="mock-line body" style="color:#c6c8d1;">A quiet hour before the floor wakes up.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#84a0c6; border-color:#84a0c6; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#c6c8d1; border-color:#2a2e42; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#84a0c6;">
+            <span class="dot" style="background:#84a0c6; box-shadow:0 0 8px #84a0c6;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Iceberg</div>
+      <div class="card-tag">Cool gray-blue text, steel-blue accent. Quietest of the four — scholarly, almost archival. Pairs with serif body type.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#161821;"></span><div class="sw-label">bg</div><div class="sw-hex">#161821</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#c6c8d1;"></span><div class="sw-label">ink</div><div class="sw-hex">#c6c8d1</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#84a0c6;"></span><div class="sw-label">accent</div><div class="sw-hex">#84a0c6</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#6b7089;"></span><div class="sw-label">muted</div><div class="sw-hex">#6b7089</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Cobalt Mono — heavy blue text on cobalt, warm gold accent for contrast -->
+  <div class="card">
+    <div class="card-mock" style="background:#001932; color:#9bcaff;">
+      <div class="mock-titlebar" style="border-color:#073a66; color:#ffc600;">
+        <span class="brand-dot" style="background:#ffc600;"></span>
+        COBALT
+        <span class="clock">09:00</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#5c8bbb;">Operator</div>
+        <div class="mock-line body" style="color:#9bcaff;">Cobalt screen, gold lamp. Old IDEs felt this way.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#ffc600; border-color:#ffc600; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#9bcaff; border-color:#073a66; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#ffc600;">
+            <span class="dot" style="background:#ffc600; box-shadow:0 0 8px #ffc600;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Cobalt</div>
+      <div class="card-tag">Saturated blue text on a true cobalt bg, with a single gold accent for warmth. The "Sublime Cobalt2" memory — bold, opinionated, retro-IDE.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#001932;"></span><div class="sw-label">bg</div><div class="sw-hex">#001932</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#9bcaff;"></span><div class="sw-label">ink</div><div class="sw-hex">#9bcaff</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#ffc600;"></span><div class="sw-label">accent</div><div class="sw-hex">#ffc600</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#5c8bbb;"></span><div class="sw-label">muted</div><div class="sw-hex">#5c8bbb</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Deep Sea — full-cyan palette, all-blue mood -->
+  <div class="card">
+    <div class="card-mock" style="background:#0a1828; color:#7fb8e0;">
+      <div class="mock-titlebar" style="border-color:#13283f; color:#4fc3f7;">
+        <span class="brand-dot" style="background:#4fc3f7;"></span>
+        DEEP · SEA
+        <span class="clock">02:30</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#456c8a;">Channel</div>
+        <div class="mock-line body" style="color:#7fb8e0;">Sonar chirp, cold pressure, slow drift in blue.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#4fc3f7; border-color:#4fc3f7; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#7fb8e0; border-color:#1e3a55; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#4fc3f7;">
+            <span class="dot" style="background:#4fc3f7; box-shadow:0 0 8px #4fc3f7;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Deep Sea</div>
+      <div class="card-tag">Entirely blue palette — cyan accent, sky-blue body text, no warmth anywhere. Submarine / sonar mood. The most "all-in" blue of the set.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#0a1828;"></span><div class="sw-label">bg</div><div class="sw-hex">#0a1828</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#7fb8e0;"></span><div class="sw-label">ink</div><div class="sw-hex">#7fb8e0</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#4fc3f7;"></span><div class="sw-label">accent</div><div class="sw-hex">#4fc3f7</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#456c8a;"></span><div class="sw-label">muted</div><div class="sw-hex">#456c8a</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ─────────── GREENS ─────────── -->
+<div class="section-head">
+  <span class="num g">G</span>
+  <h2>Greens</h2>
+  <span class="sub">dark bg · green-tinted text · sage/mint/phosphor accents</span>
+</div>
+
+<div class="grid">
+
+  <!-- 1. Matrix Dim — phosphor terminal, true green text -->
+  <div class="card">
+    <div class="card-mock" style="background:#0a1410; color:#7fdb8f;">
+      <div class="mock-titlebar" style="border-color:#13251c; color:#50fa7b;">
+        <span class="brand-dot" style="background:#50fa7b;"></span>
+        PHOSPHOR
+        <span class="clock">23:59</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#3a6b48;">Stream</div>
+        <div class="mock-line body" style="color:#7fdb8f;">Green rain on dark glass. The terminal myth, dialed back.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#50fa7b; border-color:#50fa7b; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#7fdb8f; border-color:#1c3a26; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#50fa7b;">
+            <span class="dot" style="background:#50fa7b; box-shadow:0 0 8px #50fa7b;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Phosphor</div>
+      <div class="card-tag">True green body text on near-black bg — the CRT terminal myth, but tuned (#7fdb8f, not pure neon, so it doesn't burn). Most "all-green" of the set.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#0a1410;"></span><div class="sw-label">bg</div><div class="sw-hex">#0a1410</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#7fdb8f;"></span><div class="sw-label">ink</div><div class="sw-hex">#7fdb8f</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#50fa7b;"></span><div class="sw-label">accent</div><div class="sw-hex">#50fa7b</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#3a6b48;"></span><div class="sw-label">muted</div><div class="sw-hex">#3a6b48</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Forest Pine — sage body text, mossy accent -->
+  <div class="card">
+    <div class="card-mock" style="background:#131c17; color:#a8c4a0;">
+      <div class="mock-titlebar" style="border-color:#1f2c25; color:#87a878;">
+        <span class="brand-dot" style="background:#87a878;"></span>
+        FOREST · PINE
+        <span class="clock">06:14</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#5c7263;">Section</div>
+        <div class="mock-line body" style="color:#a8c4a0;">Light through pine, slow ground, low conversation.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#87a878; border-color:#87a878; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#a8c4a0; border-color:#283729; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#87a878;">
+            <span class="dot" style="background:#87a878; box-shadow:0 0 8px #87a878;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Forest Pine</div>
+      <div class="card-tag">Sage body text on deep evergreen, mossy accent. Natural, hushed, "long walk in the woods." Most restrained of the greens.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#131c17;"></span><div class="sw-label">bg</div><div class="sw-hex">#131c17</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#a8c4a0;"></span><div class="sw-label">ink</div><div class="sw-hex">#a8c4a0</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#87a878;"></span><div class="sw-label">accent</div><div class="sw-hex">#87a878</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#5c7263;"></span><div class="sw-label">muted</div><div class="sw-hex">#5c7263</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Mint Lab — sci-fi mint, cool teal accent -->
+  <div class="card">
+    <div class="card-mock" style="background:#0d1f1a; color:#7fdbb6;">
+      <div class="mock-titlebar" style="border-color:#173028; color:#00d4a4;">
+        <span class="brand-dot" style="background:#00d4a4;"></span>
+        MINT · LAB
+        <span class="clock">11:11</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#3e7d6a;">Run</div>
+        <div class="mock-line body" style="color:#7fdbb6;">Cold-room mint, instrument hum, glassy surfaces.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#00d4a4; border-color:#00d4a4; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#7fdbb6; border-color:#1f4338; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#00d4a4;">
+            <span class="dot" style="background:#00d4a4; box-shadow:0 0 8px #00d4a4;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Mint Lab</div>
+      <div class="card-tag">Mint-green body text + saturated teal accent on a near-black-green bg. Sci-fi, modern, "instrument panel" energy. Cooler than Pine.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#0d1f1a;"></span><div class="sw-label">bg</div><div class="sw-hex">#0d1f1a</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#7fdbb6;"></span><div class="sw-label">ink</div><div class="sw-hex">#7fdbb6</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#00d4a4;"></span><div class="sw-label">accent</div><div class="sw-hex">#00d4a4</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#3e7d6a;"></span><div class="sw-label">muted</div><div class="sw-hex">#3e7d6a</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Gruvbox Green — earthy yellow-green retro -->
+  <div class="card">
+    <div class="card-mock" style="background:#1d2021; color:#b8bb26;">
+      <div class="mock-titlebar" style="border-color:#2c2e2a; color:#b8bb26;">
+        <span class="brand-dot" style="background:#b8bb26;"></span>
+        GRUVBOX · LIME
+        <span class="clock">15:30</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-line label" style="color:#7c6f64;">Track</div>
+        <div class="mock-line body" style="color:#b8bb26;">Lime cassette, brown leather binding, retro warm.</div>
+        <div class="mock-row">
+          <span class="mock-btn" style="color:#b8bb26; border-color:#b8bb26; background:transparent;">SUBMIT</span>
+          <span class="mock-btn" style="color:#a89984; border-color:#3c3836; background:transparent;">CANCEL</span>
+          <span class="mock-status" style="color:#b8bb26;">
+            <span class="dot" style="background:#b8bb26; box-shadow:0 0 8px #b8bb26;"></span>NOMINAL
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="card-meta">
+      <div class="card-name">Gruvbox Lime</div>
+      <div class="card-tag">Yellow-green body text on warm dark earth. Earthy, retro, vinyl-store warmth — the green that isn't cold.</div>
+      <div class="swatch-row">
+        <div class="sw"><span class="sw-chip" style="background:#1d2021;"></span><div class="sw-label">bg</div><div class="sw-hex">#1d2021</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#b8bb26;"></span><div class="sw-label">ink</div><div class="sw-hex">#b8bb26</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#b8bb26;"></span><div class="sw-label">accent</div><div class="sw-hex">#b8bb26</div></div>
+        <div class="sw"><span class="sw-chip" style="background:#7c6f64;"></span><div class="sw-label">muted</div><div class="sw-hex">#7c6f64</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<footer>
+  <span>BLUES + GREENS · 2026-05-22</span>
+  <span>~/Documents/claude-projects/en/mockups/blues-greens-explore.html</span>
+</footer>
+
+</div>
+</body>
+</html>

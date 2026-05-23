@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>en — Washi vs Rose Pine palette explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #1a1825;
+    color: #e0def4;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 40px 56px 80px;
+  }
+
+  .pageheader {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 4px;
+  }
+  .wm {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 26px; letter-spacing: 0.04em;
+    color: #ea9a97;
+  }
+  .pt {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; color: #908caa; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ps {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #6e6a86; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 32px;
+  }
+
+  /* ─── Token explainer table ─── */
+  .grid {
+    display: grid;
+    grid-template-columns: 110px 1fr 230px 230px 230px;
+    gap: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 56px;
+  }
+  .grid > div {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    font-size: 13px;
+    line-height: 1.45;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 76px;
+  }
+  .grid > div:nth-child(5n) { border-right: none; }
+  .grid > div:nth-last-child(-n+5) { border-bottom: none; }
+
+  .grid .h {
+    background: rgba(255,255,255,0.03);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: #908caa;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    min-height: 44px;
+    align-items: center;
+  }
+  .grid .h.rosepine { color: #ea9a97; }
+  .grid .h.before { color: #908caa; }
+  .grid .h.after  { color: #9ccfd8; }
+
+  .grid .name {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px; color: #c4c0d8;
+    align-items: center;
+  }
+  .grid .role {
+    font-size: 12.5px; color: #b8b4cc; line-height: 1.55;
+    flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .grid .role b { color: #e0def4; font-weight: 500; }
+  .grid .role .uses {
+    font-size: 11px; color: #908caa;
+  }
+
+  .swatch-cell {
+    flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .swatch-card {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+  }
+  .sw {
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.12);
+    flex: none;
+  }
+  .sw.outline { border: 1px solid rgba(255,255,255,0.25); background: transparent !important; }
+  .hex {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #b8b4cc; letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+  .hex .L { color: #6e6a86; font-size: 9.5px; display: block; margin-top: 2px; }
+  .hex .delta {
+    color: #9ccfd8; font-weight: 500; display: block; margin-top: 3px; font-size: 10px;
+  }
+  .hex .broken {
+    color: #eb6f92; font-weight: 500; display: block; margin-top: 3px; font-size: 10px;
+  }
+
+  .row.changed-bg { background: rgba(234,154,151,0.04); }
+  .row.changed-bg.h { background: rgba(234,154,151,0.07); }
+
+  /* ─── Side-by-side mock app ─── */
+  .compare-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: 18px;
+    color: #e0def4; margin-bottom: 16px;
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .col-title {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 16px;
+    margin-bottom: 10px;
+  }
+  .col-title.rosepine { color: #ea9a97; }
+  .col-title.before { color: #908caa; }
+  .col-title.after { color: #9ccfd8; }
+
+  .frame {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+    height: 460px;
+    display: grid;
+    grid-template-rows: 44px 1fr 32px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  /* Rose Pine Moon (soft) */
+  .frame.rosepine {
+    --bg:      #2a273f;
+    --tile:    #312e4a;
+    --tile-2:  #383454;
+    --line:    #44415a;
+    --line-2:  #524d70;
+    --ink:     #e0def4;
+    --ink-2:   #908caa;
+    --ink-3:   #6e6a86;
+    --ink-4:   #4a4660;
+    --accent:  #ea9a97;
+    --accent-glow: rgba(234,154,151,0.35);
+  }
+  /* Washi BEFORE */
+  .frame.before {
+    --bg:      #f5efe4;
+    --tile:    #fbf6eb;
+    --tile-2:  #f0e9dc;
+    --line:    rgba(26,22,20,0.10);
+    --line-2:  rgba(26,22,20,0.18);
+    --ink:     #1a1614;
+    --ink-2:   #524a44;
+    --ink-3:   #8a7f76;
+    --ink-4:   #b8ada3;
+    --accent:  #bc002d;
+    --accent-glow: rgba(188,0,45,0.22);
+  }
+  /* Washi AFTER — v2: neutral light end, dodger blue --ok, hue-shifted --warn */
+  .frame.after {
+    --bg:      #ebedf0;  /* slight cool tint, no warm */
+    --tile:    #f1f3f6;
+    --tile-2:  #f8fafc;
+    --line:    rgba(0,0,0,0.10);
+    --line-2:  rgba(0,0,0,0.16);
+    --ink:     #0f0c0a;
+    --ink-2:   #524a44;
+    --ink-3:   #6e6a66;
+    --ink-4:   #b0adaa;
+    --accent:  #bc002d;
+    --accent-glow: rgba(188,0,45,0.22);
+    --ok:      #2a78c8;
+    --warn:    #94004f;
+  }
+
+  .frame .navbar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink) 8%) 0%,
+      var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; padding: 0 14px; gap: 6px;
+    color: var(--ink);
+  }
+  .brand-wm {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: 15px; letter-spacing: 0.04em;
+    margin-right: 8px;
+  }
+  .disc {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+    margin-right: 8px;
+  }
+  .pill {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: var(--tile-2);
+    border: 1px solid var(--line);
+    border-top-color: var(--line-2);
+    display: grid; place-items: center;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .pill.dot-pill {
+    background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    overflow: hidden;
+    background-color: var(--bg);
+  }
+  .tile {
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 36px 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .tile.active::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    z-index: 3;
+  }
+  .tile.active::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 60px;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 100% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: 2;
+  }
+  .head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    color: var(--ink);
+  }
+  .tile.active .head { color: var(--accent); }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4);
+  }
+  .tile.active .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+  .tbody {
+    padding: 10px 12px;
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.7;
+  }
+  .tbody .ink2 { color: var(--ink-2); }
+  .tbody .ink3 { color: var(--ink-3); }
+  .tbody .ink4 { color: var(--ink-4); }
+  .tbody .accent { color: var(--accent); }
+
+  .popover {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 180px;
+    background: var(--tile-2);
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    padding: 6px;
+    box-shadow: 0 12px 32px -8px rgba(0,0,0,0.3);
+    z-index: 4;
+    display: flex; flex-direction: column; gap: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+  }
+  .popover .opt {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .popover .opt:nth-child(2) {
+    background: var(--tile);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .popover .opt:nth-child(3) {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in oklch, var(--tile), var(--accent) 8%);
+  }
+  .popover .glyph {
+    width: 14px; height: 12px;
+    color: var(--accent);
+    display: grid; place-items: center;
+  }
+
+  .foot {
+    background: linear-gradient(0deg,
+      color-mix(in oklch, var(--bg), var(--ink) 8%) 0%,
+      var(--bg) 100%);
+    border-top: 1px solid var(--line);
+    display: flex; align-items: center;
+    padding: 0 12px; gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+
+  .annotations {
+    margin-top: 56px;
+    padding: 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    line-height: 1.65;
+  }
+  .annotations h3 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600; font-size: 16px; color: #e0def4;
+    margin: 0 0 12px;
+  }
+  .annotations h3 + ul { margin: 0 0 24px; }
+  .annotations ul { padding-left: 22px; }
+  .annotations li {
+    color: #b8b4cc; font-size: 13px; margin-bottom: 8px;
+  }
+  .annotations code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    background: rgba(234,154,151,0.10);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #ea9a97;
+  }
+  .recipe {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 20px;
+  }
+  .recipe-card {
+    padding: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    background: rgba(0,0,0,0.18);
+  }
+  .recipe-card h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: #908caa;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+  .recipe-card .stack {
+    display: flex; flex-direction: column; gap: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .recipe-card .stack .step {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .recipe-card .stack .sq {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+</style>
+</head>
+<body>
+
+<div class="pageheader">
+  <div class="wm">en</div>
+  <div class="pt">/ palette explainer</div>
+</div>
+<div class="ps">rose pine (reference) · washi before · washi after — every token in plain english</div>
+
+<!-- ╭─── PALETTE TOKEN TABLE ───╮ -->
+<div class="grid">
+  <div class="h">Token</div>
+  <div class="h">Plain-English role + where it appears</div>
+  <div class="h rosepine">Rose Pine Moon (soft)</div>
+  <div class="h before">Washi BEFORE (current)</div>
+  <div class="h after">Washi AFTER (proposed)</div>
+
+  <!-- bg -->
+  <div class="row name">--bg</div>
+  <div class="row role">
+    <span><b>App canvas — the main background of the whole window.</b></span>
+    <span class="uses">where: behind everything · the gap between tiles · navbar gradient base · foot bar gradient base · the layer the app's brightness filter sits on top of</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#2a273f"></div><div class="hex">#2a273f<span class="L">17% L · darkest of the dark stack</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#f5efe4"></div><div class="hex">#f5efe4<span class="L">94% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#ebedf0"></div><div class="hex">#ebedf0<span class="L">93% L · slight cool tint</span><span class="delta">↻ neutral, no warm</span></div></div>
+  </div>
+
+  <!-- tile -->
+  <div class="row name">--tile</div>
+  <div class="row role">
+    <span><b>Body of each terminal — the surface behind the xterm output.</b></span>
+    <span class="uses">where: inside-tile background, sleeping-tile body bg, drag-ghost body bg, modal cards' body bg</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#312e4a"></div><div class="hex">#312e4a<span class="L">19% L · +2 from bg ↑</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#fbf6eb"></div><div class="hex">#fbf6eb<span class="L">97% L · +3 from bg ↑</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#f1f3f6"></div><div class="hex">#f1f3f6<span class="L">95% L · +2 from bg ↑</span><span class="delta">↻ neutral cool</span></div></div>
+  </div>
+
+  <!-- tile-2 — THE BUG -->
+  <div class="row changed-bg name">--tile-2</div>
+  <div class="row changed-bg role">
+    <span><b>Most-lifted surface — the "above tile" tone.</b></span>
+    <span class="uses">where: tile header bar (the row with the name + ×), popover backgrounds, tile hover state, frosted-pill base, navbar gradient bottom stop</span>
+    <span style="color:#eb6f92;font-size:11px;margin-top:4px">⚠ <b>Currently broken:</b> Washi has it darker than --tile, so hovers go DOWN. Should be the LIGHTEST in the cream stack.</span>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#383454"></div><div class="hex">#383454<span class="L">22% L · +3 from tile ↑</span></div></div>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#f0e9dc"></div><div class="hex">#f0e9dc<span class="L">92% L · -5 from tile ↓</span><span class="broken">backwards! goes DOWN</span></div></div>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#f8fafc"></div><div class="hex">#f8fafc<span class="L">98% L · +3 from tile ↑</span><span class="delta">↑ now LIGHTEST = lifted, neutral</span></div></div>
+  </div>
+
+  <!-- line -->
+  <div class="row name">--line</div>
+  <div class="row role">
+    <span><b>Faintest divider — barely-there separator.</b></span>
+    <span class="uses">where: tile-head bottom edge, gaps between tiles in the grid, popover internal section dividers, foot bar top border</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#44415a"></div><div class="hex">#44415a<span class="L">28% L · solid color</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw outline" style="border-color:rgba(26,22,20,0.10)"></div><div class="hex">rgba(26,22,20,0.10)<span class="L">10% black over cream</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw outline" style="border-color:rgba(26,22,20,0.10)"></div><div class="hex">rgba(26,22,20,0.10)<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- line-2 -->
+  <div class="row name">--line-2</div>
+  <div class="row role">
+    <span><b>Stronger border — visible structural divider.</b></span>
+    <span class="uses">where: frosted-pill outer border, popover frame outer border, theme-picker dot rest border, name-edit input shell, kbd-key glyph borders in foot</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#524d70"></div><div class="hex">#524d70<span class="L">35% L · solid color</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw outline" style="border-color:rgba(26,22,20,0.18)"></div><div class="hex">rgba(26,22,20,0.18)<span class="L">18% black over cream</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw outline" style="border-color:rgba(26,22,20,0.18)"></div><div class="hex">rgba(26,22,20,0.18)<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- ink-4 -->
+  <div class="row name">--ink-4</div>
+  <div class="row role">
+    <span><b>Faintest text/icon — "almost invisible" elements.</b></span>
+    <span class="uses">where: idle status dot color (when no claude is running), name-edit input border faded, sleeping-tile chrome inactive states</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#4a4660"></div><div class="hex">#4a4660<span class="L">30% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#b8ada3"></div><div class="hex">#b8ada3<span class="L">71% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#b8ada3"></div><div class="hex">#b8ada3<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- ink-3 -->
+  <div class="row name">--ink-3</div>
+  <div class="row role">
+    <span><b>Low-emphasis text — supporting copy / dim labels.</b></span>
+    <span class="uses">where: tile path text, popover description (right-side caption), close-× resting color, kbd glyph color in foot, batch popover hint, sleeping-tile cwd label</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#6e6a86"></div><div class="hex">#6e6a86<span class="L">46% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#8a7f76"></div><div class="hex">#8a7f76<span class="L">53% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#8a7f76"></div><div class="hex">#8a7f76<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- ink-2 -->
+  <div class="row name">--ink-2</div>
+  <div class="row role">
+    <span><b>Medium-emphasis text — body copy, default labels.</b></span>
+    <span class="uses">where: popover non-active option text, tile meta text, foot bar default text, alert-style trigger glyph color, modal body text</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#908caa"></div><div class="hex">#908caa<span class="L">60% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#524a44"></div><div class="hex">#524a44<span class="L">30% L</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#524a44"></div><div class="hex">#524a44<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- ink (CHANGED) -->
+  <div class="row changed-bg name">--ink</div>
+  <div class="row changed-bg role">
+    <span><b>Strongest text — the "main read" tone.</b></span>
+    <span class="uses">where: tile name in header, modal titles, "en" wordmark, "Welcome back Austin!" banner, prompt input, active-tile head text</span>
+    <span style="color:#9ccfd8;font-size:11px;margin-top:4px">ℹ Step from ink-2 → ink is dramatic on rose-pine (60→90, jump of 30). On washi it's gentle (30→8, jump of 22). Pulling deeper makes that final "main text" pop.</span>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#e0def4"></div><div class="hex">#e0def4<span class="L">90% L · +30 from ink-2 ↑</span></div></div>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#1a1614"></div><div class="hex">#1a1614<span class="L">8% L · -22 from ink-2 ↓</span></div></div>
+  </div>
+  <div class="row changed-bg swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#0f0c0a"></div><div class="hex">#0f0c0a<span class="L">5% L · -25 from ink-2 ↓</span><span class="delta">deeper sumi for dramatic step</span></div></div>
+  </div>
+
+  <!-- accent -->
+  <div class="row name">--accent</div>
+  <div class="row role">
+    <span><b>The signature color — what makes this theme "this theme."</b></span>
+    <span class="uses">where: active-tile top hairline + bloom, brand disc, slash commands in terminal, drop-bar ring during drag, popover-active border, alert pulse color, foot kbd text, "en" wordmark accent on hover</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#ea9a97"></div><div class="hex">#ea9a97<span class="L">peach</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#bc002d"></div><div class="hex">#bc002d<span class="L">hinomaru red</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#bc002d"></div><div class="hex">#bc002d<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- accent-glow -->
+  <div class="row name">--accent-glow</div>
+  <div class="row role">
+    <span><b>Halo behind the accent — the "lift" sparkle.</b></span>
+    <span class="uses">where: radial bloom under active-tile top hairline, swap-target inset ring during drag, alert-pulse outer halo</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:rgba(234,154,151,0.35)"></div><div class="hex">rgba(234,154,151,0.35)</div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:rgba(188,0,45,0.22)"></div><div class="hex">rgba(188,0,45,0.22)</div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:rgba(188,0,45,0.22)"></div><div class="hex">rgba(188,0,45,0.22)<span class="delta">unchanged</span></div></div>
+  </div>
+
+  <!-- ok -->
+  <div class="row name">--ok</div>
+  <div class="row role">
+    <span><b>Success / "working" state color.</b></span>
+    <span class="uses">where: status dot in tile head when claude is actively working (the green pulse)</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#9ccfd8"></div><div class="hex">#9ccfd8<span class="L">cyan-mint</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#4a7d3a"></div><div class="hex">#4a7d3a<span class="L">forest green</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#2a78c8"></div><div class="hex">#2a78c8<span class="L">dodger blue (HSL 212° 65% 47%)</span><span class="delta">↻ confident blue, sumi-restraint</span></div></div>
+  </div>
+
+  <!-- warn -->
+  <div class="row name">--warn</div>
+  <div class="row role">
+    <span><b>Destructive / warning color.</b></span>
+    <span class="uses">where: "extinguish all" + "close session" confirm modal text, kill-all skull on hover. ONLY confirm modals — chrome icons no longer use this.</span>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#eb6f92"></div><div class="hex">#eb6f92<span class="L">rose-pink</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#a83020"></div><div class="hex">#a83020<span class="L">brick</span></div></div>
+  </div>
+  <div class="row swatch-cell">
+    <div class="swatch-card"><div class="sw" style="background:#94004f"></div><div class="hex">#94004f<span class="L">deep magenta-rose</span><span class="delta">↻ accent shifted -19° hue, same as rose-pine's recipe</span></div></div>
+  </div>
+</div>
+
+<!-- ╭─── SIDE-BY-SIDE MOCK APP ───╮ -->
+<div class="compare-title">3-up rendered comparison</div>
+<div class="compare">
+
+  <!-- ROSE PINE -->
+  <div>
+    <div class="col-title rosepine">★ Rose Pine Moon (soft) — reference</div>
+    <div class="frame rosepine">
+      <div class="navbar">
+        <div class="brand-wm">en</div>
+        <div class="disc"></div>
+        <div class="pill">+</div>
+        <div class="pill">#</div>
+        <div class="pill">↻</div>
+        <div class="pill dot-pill"></div>
+        <div class="pill">▤</div>
+        <div class="pill">●</div>
+        <div class="pill">Aa</div>
+        <div class="pill">⌘</div>
+        <div class="pill">☼</div>
+      </div>
+      <div class="body">
+        <div class="tile active">
+          <div class="head">
+            <span class="dot"></span>
+            <span>disco-analysis</span>
+          </div>
+          <div class="tbody">
+            <div>$ <span class="accent">claude</span> chat</div>
+            <div class="ink2">opus 4.7 / 1m context</div>
+            <div class="ink3">~/projects/disco-analysis</div>
+            <div>analyzing transcript…</div>
+          </div>
+          <div class="popover">
+            <div class="opt"><span class="glyph">●</span> Andon</div>
+            <div class="opt"><span class="glyph">●</span> Hotaru</div>
+            <div class="opt"><span class="glyph">●</span> Hinode</div>
+            <div class="opt"><span class="glyph">●</span> Sakura</div>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="head">
+            <span class="dot"></span>
+            <span>brands-v4</span>
+          </div>
+          <div class="tbody">
+            <div>building deck</div>
+            <div class="ink3">3 charts done</div>
+            <div class="ink4">idle</div>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <span>navigate ⌘ ←→</span>
+        <span>close ⌘ W</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WASHI BEFORE -->
+  <div>
+    <div class="col-title before">↩ Washi BEFORE — current state</div>
+    <div class="frame before">
+      <div class="navbar">
+        <div class="brand-wm">en</div>
+        <div class="disc"></div>
+        <div class="pill">+</div>
+        <div class="pill">#</div>
+        <div class="pill">↻</div>
+        <div class="pill dot-pill"></div>
+        <div class="pill">▤</div>
+        <div class="pill">●</div>
+        <div class="pill">Aa</div>
+        <div class="pill">⌘</div>
+        <div class="pill">☼</div>
+      </div>
+      <div class="body">
+        <div class="tile active">
+          <div class="head">
+            <span class="dot"></span>
+            <span>disco-analysis</span>
+          </div>
+          <div class="tbody">
+            <div>$ <span class="accent">claude</span> chat</div>
+            <div class="ink2">opus 4.7 / 1m context</div>
+            <div class="ink3">~/projects/disco-analysis</div>
+            <div>analyzing transcript…</div>
+          </div>
+          <div class="popover">
+            <div class="opt"><span class="glyph">●</span> Andon</div>
+            <div class="opt"><span class="glyph">●</span> Hotaru</div>
+            <div class="opt"><span class="glyph">●</span> Hinode</div>
+            <div class="opt"><span class="glyph">●</span> Sakura</div>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="head">
+            <span class="dot"></span>
+            <span>brands-v4</span>
+          </div>
+          <div class="tbody">
+            <div>building deck</div>
+            <div class="ink3">3 charts done</div>
+            <div class="ink4">idle</div>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <span>navigate ⌘ ←→</span>
+        <span>close ⌘ W</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WASHI AFTER -->
+  <div>
+    <div class="col-title after">→ Washi AFTER — fixed lifted recipe</div>
+    <div class="frame after">
+      <div class="navbar">
+        <div class="brand-wm">en</div>
+        <div class="disc"></div>
+        <div class="pill">+</div>
+        <div class="pill">#</div>
+        <div class="pill">↻</div>
+        <div class="pill dot-pill"></div>
+        <div class="pill">▤</div>
+        <div class="pill">●</div>
+        <div class="pill">Aa</div>
+        <div class="pill">⌘</div>
+        <div class="pill">☼</div>
+      </div>
+      <div class="body">
+        <div class="tile active">
+          <div class="head">
+            <span class="dot"></span>
+            <span>disco-analysis</span>
+          </div>
+          <div class="tbody">
+            <div>$ <span class="accent">claude</span> chat</div>
+            <div class="ink2">opus 4.7 / 1m context</div>
+            <div class="ink3">~/projects/disco-analysis</div>
+            <div>analyzing transcript…</div>
+          </div>
+          <div class="popover">
+            <div class="opt"><span class="glyph">●</span> Andon</div>
+            <div class="opt"><span class="glyph">●</span> Hotaru</div>
+            <div class="opt"><span class="glyph">●</span> Hinode</div>
+            <div class="opt"><span class="glyph">●</span> Sakura</div>
+          </div>
+        </div>
+        <div class="tile">
+          <div class="head">
+            <span class="dot"></span>
+            <span>brands-v4</span>
+          </div>
+          <div class="tbody">
+            <div>building deck</div>
+            <div class="ink3">3 charts done</div>
+            <div class="ink4">idle</div>
+          </div>
+        </div>
+      </div>
+      <div class="foot">
+        <span>navigate ⌘ ←→</span>
+        <span>close ⌘ W</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╭─── ANNOTATIONS ───╮ -->
+<div class="annotations">
+  <h3>Why Rose Pine reads great and Washi BEFORE doesn't</h3>
+  <ul>
+    <li>Rose Pine follows the <b>lifted-bg recipe</b>: each step from <code>--bg</code> → <code>--tile</code> → <code>--tile-2</code> goes UP in lightness. Surfaces feel "lit from within."</li>
+    <li>Washi BEFORE: <code>--tile-2</code> goes DARKER than <code>--tile</code>. Hovers go DOWN, not UP. Tile-head bar reads as recessed instead of elevated.</li>
+    <li>Rose Pine's <code>--ink</code> jump is dramatic — 60% L → 90% L (huge gap). The tile-name in the active head really pops. Washi's <code>--ink</code> only jumps 30% → 8% (similar magnitude). Pulling to 5% gives that same dramatic "this is the loudest text" feel.</li>
+  </ul>
+
+  <h3>How the new --ok and --warn were derived (math)</h3>
+  <ul style="margin-bottom: 24px;">
+    <li><b>--warn</b> follows rose-pine's recipe: hue −19° from accent, sat +10pp, lightness −8pp.<br>
+      Washi accent <code>#bc002d</code> = HSL(346° 100% 37%) → shifted = HSL(327° 100% 29%) = <b>#94004f</b> (deep magenta-rose, sibling to shu-iro)</li>
+    <li><b>--ok</b> = dodger-blue territory tuned for cream readability: HSL(212° 65% 47%) = <b>#2a78c8</b>. Confident-AI blue without RGB-cheap.</li>
+    <li><b>Light tones</b> stripped of warmth: subtle cool tint (HSL(218° 16% L)) instead of warm cream (HSL(36° 30% L)). Reads as "lit room" not "tea-stained paper."</li>
+  </ul>
+
+  <h3>The 4 changes</h3>
+  <div class="recipe">
+    <div class="recipe-card">
+      <h4>Lifted-bg recipe (cool neutral, no warm)</h4>
+      <div class="stack">
+        <div class="step"><div class="sq" style="background:#ebedf0"></div><span>--bg &nbsp;&nbsp;&nbsp;<span style="color:#6e6a86">canvas, 93% L</span></span></div>
+        <div class="step"><div class="sq" style="background:#f1f3f6"></div><span>--tile &nbsp;<span style="color:#6e6a86">tile body, 95% L</span></span></div>
+        <div class="step"><div class="sq" style="background:#f8fafc"></div><span>--tile-2 <span style="color:#6e6a86">most lifted, 98% L</span></span></div>
+      </div>
+    </div>
+    <div class="recipe-card">
+      <h4>Ink stack (final step is dramatic)</h4>
+      <div class="stack">
+        <div class="step"><div class="sq" style="background:#b8ada3"></div><span>--ink-4 &nbsp;<span style="color:#6e6a86">faintest, 71% L</span></span></div>
+        <div class="step"><div class="sq" style="background:#8a7f76"></div><span>--ink-3 &nbsp;<span style="color:#6e6a86">low, 53% L</span></span></div>
+        <div class="step"><div class="sq" style="background:#524a44"></div><span>--ink-2 &nbsp;<span style="color:#6e6a86">medium, 30% L</span></span></div>
+        <div class="step"><div class="sq" style="background:#0f0c0a"></div><span>--ink &nbsp;&nbsp;<span style="color:#6e6a86">strongest, 5% L · jumps 25 points</span></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

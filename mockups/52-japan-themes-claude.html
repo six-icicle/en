@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>en — Japan flag theme proposals (Claude)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #1a1825;
+    color: #e0def4;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 48px;
+  }
+
+  /* ─── page chrome ─── */
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .page-wordmark {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: #eb6f92;
+  }
+  .page-title {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: #908caa;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .page-subtitle {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #6e6a86;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 56px;
+  }
+
+  /* Each section is one theme proposal — a self-contained "app render" inside
+     a card, plus a sidebar describing the design intent. */
+  .proposal {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 40px;
+    margin-bottom: 80px;
+  }
+  .proposal-meta {
+    padding-top: 32px;
+  }
+  .proposal-num {
+    display: inline-block;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    color: #6e6a86;
+    letter-spacing: 0.14em;
+    margin-bottom: 8px;
+  }
+  .proposal-name {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: #e0def4;
+    letter-spacing: 0.02em;
+    margin-bottom: 14px;
+  }
+  .proposal-name .ja {
+    font-family: 'Hiragino Mincho ProN', serif;
+    font-weight: 400;
+    color: #908caa;
+    margin-left: 6px;
+  }
+  .proposal-blurb {
+    font-size: 14px;
+    color: #e0def4;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .proposal-blurb b { font-weight: 500; }
+  .proposal-swatches {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin: 16px 0 18px;
+  }
+  .swatch {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+  .swatch::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: -16px;
+    left: 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 8px;
+    color: #6e6a86;
+    letter-spacing: 0.08em;
+  }
+  .proposal-notes {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    color: #908caa;
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+    margin-top: 28px;
+  }
+  .proposal-notes b { color: #e0def4; font-weight: 500; }
+
+  /* ─── App render frame (mimics the actual en window) ─── */
+  .app-render {
+    width: 720px;
+    height: 460px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    position: relative;
+    display: grid;
+    grid-template-rows: 44px 1fr 32px;
+  }
+
+  /* ╭───────────────────────────╮
+     │  CONCEPT 1 — WASHI HINOMARU │
+     │  Light theme                │
+     ╰───────────────────────────╯ */
+  .washi {
+    --bg:        #f4ede0;  /* washi paper, not white */
+    --tile:      #efe6d4;
+    --tile-2:    #e9dfc8;
+    --line:      rgba(60, 32, 14, 0.10);
+    --line-2:    rgba(60, 32, 14, 0.18);
+    --ink:       #2d1810;  /* sumi-black, warm */
+    --ink-2:     #5a3d28;
+    --ink-3:     #8a6d52;
+    --ink-4:     #b09c81;
+    --accent:    #bc002d;  /* hinomaru official red, deepened slightly */
+    --accent-glow: rgba(188, 0, 45, 0.22);
+    --sheen:     rgba(255,255,255,0.6);
+  }
+
+  /* ╭───────────────────────────╮
+     │  CONCEPT 2 — SUMI KYOKUJITSU │
+     │  Dark theme, rays as texture │
+     ╰───────────────────────────╯ */
+  .sumi {
+    --bg:        #1c1822;  /* deep sumi w/ purple chroma */
+    --tile:      #25212e;
+    --tile-2:    #2e2939;
+    --line:      rgba(255, 255, 255, 0.05);
+    --line-2:    rgba(255, 255, 255, 0.10);
+    --ink:       #ede4d3;  /* warm cream */
+    --ink-2:     #b8ad99;
+    --ink-3:     #847a68;
+    --ink-4:     #524a3e;
+    --accent:    #e84a3a;  /* vermillion (shu-iro 朱色), brighter for dark bg */
+    --accent-glow: rgba(232, 74, 58, 0.42);
+    --sheen:     rgba(255, 224, 200, 0.04);
+  }
+
+  /* ╭───────────────────────────╮
+     │  CONCEPT 3 — ASAHI          │
+     │  Twilight gradient bg       │
+     ╰───────────────────────────╯ */
+  .asahi {
+    --bg:        #2a2540;  /* sky-indigo top, gradient applied in .app */
+    --tile:      #322d4a;
+    --tile-2:    #3a3554;
+    --line:      rgba(255, 255, 255, 0.06);
+    --line-2:    rgba(255, 255, 255, 0.12);
+    --ink:       #f4e4d0;
+    --ink-2:     #d4a99a;
+    --ink-3:     #9a7a78;
+    --ink-4:     #6a5560;
+    --accent:    #ef6850;  /* sun-vermillion */
+    --accent-glow: rgba(239, 104, 80, 0.40);
+    --sheen:     rgba(255, 220, 200, 0.06);
+  }
+
+  /* ─── App render — shared structure across all 3 concepts ─── */
+  .app-render {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+  .asahi .app-render {
+    background: linear-gradient(180deg,
+      #2a2540 0%,
+      #3d3050 38%,
+      #5e3a52 64%,
+      #c4827a 90%,
+      #f4e4d0 100%);
+  }
+
+  /* navbar */
+  .nb {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 22%) 0%,
+      var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+    position: relative;
+  }
+  .nb::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: var(--sheen);
+  }
+  .wc { display: flex; gap: 6px; margin-right: 14px; }
+  .wc .btn { width: 12px; height: 12px; border-radius: 50%;
+    background: color-mix(in oklch, var(--ink-3), transparent 70%); }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    margin-right: 16px;
+  }
+  .brand svg { color: var(--accent); }
+  .brand .wm {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .pill {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    background: color-mix(in oklch, var(--bg), var(--ink-4) 8%);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    box-shadow: inset 0 1px 0 var(--sheen);
+  }
+  .pill.theme {
+    background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+    border-color: var(--line-2);
+  }
+  .pill.skull { color: var(--ink-3); margin-left: auto; }
+
+  /* tile grid */
+  .tg {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .t {
+    background: var(--tile);
+    display: grid;
+    grid-template-rows: 38px 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+  .t.active::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    z-index: 3;
+  }
+  .t.active::after {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 60px;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 100% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: 2;
+  }
+  .t.needs::before {
+    content: ''; position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px var(--accent), inset 0 0 18px var(--accent-glow);
+    pointer-events: none;
+    animation: pulse 1.4s ease-in-out infinite;
+    z-index: 3;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.55; }
+    50%     { opacity: 1; }
+  }
+  .t .head {
+    display: flex; align-items: center; gap: 9px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+    color: var(--ink);
+    position: relative;
+  }
+  .t .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-4); }
+  .t.working .dot { background: #76946a; box-shadow: 0 0 6px #76946a; }
+  .t.needs .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+  .t .name { color: var(--ink); font-weight: 500; letter-spacing: 0.02em; }
+  .t.active .name { color: var(--accent); }
+  .t .body {
+    padding: 12px 14px;
+    color: var(--ink-2);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+    overflow: hidden;
+  }
+  .t .body .accent { color: var(--accent); }
+  .t .body .dim { color: var(--ink-3); }
+
+  /* foot */
+  .ft {
+    background: linear-gradient(0deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 22%) 0%,
+      var(--bg) 100%);
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 14px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+  .ft .right { margin-left: auto; }
+  .ft .right b { color: var(--accent); font-weight: 500; }
+  .ft kbd {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    padding: 1px 5px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    color: var(--accent);
+    background: transparent;
+    margin: 0 2px;
+  }
+
+  /* ─── Concept-specific decorations ─── */
+
+  /* Washi: subtle paper grain, no other texture */
+  .washi .app-render::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(60, 32, 14, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(60, 32, 14, 0.03) 0%, transparent 50%);
+    mix-blend-mode: multiply;
+  }
+
+  /* Sumi: 16-ray asahi pattern as the body texture, low alpha */
+  .sumi .app-render::before {
+    content: '';
+    position: absolute;
+    top: 44px;
+    left: 0; right: 0;
+    bottom: 32px;
+    pointer-events: none;
+    background:
+      conic-gradient(
+        from 0deg at 50% 100%,
+        rgba(232, 74, 58, 0.07) 0deg,
+        transparent 11.25deg,
+        rgba(232, 74, 58, 0.07) 22.5deg,
+        transparent 33.75deg,
+        rgba(232, 74, 58, 0.07) 45deg,
+        transparent 56.25deg,
+        rgba(232, 74, 58, 0.07) 67.5deg,
+        transparent 78.75deg,
+        rgba(232, 74, 58, 0.07) 90deg,
+        transparent 101.25deg,
+        rgba(232, 74, 58, 0.07) 112.5deg,
+        transparent 123.75deg,
+        rgba(232, 74, 58, 0.07) 135deg,
+        transparent 146.25deg,
+        rgba(232, 74, 58, 0.07) 157.5deg,
+        transparent 168.75deg,
+        rgba(232, 74, 58, 0.07) 180deg,
+        transparent 191.25deg
+      );
+    z-index: 0;
+  }
+  .sumi .tg { position: relative; z-index: 1; }
+
+  /* Asahi: a subtle sun disc behind the navbar, peeking through */
+  .asahi .app-render {
+    position: relative;
+  }
+  .asahi .app-render::after {
+    content: '';
+    position: absolute;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239, 104, 80, 0.85) 0%, rgba(239, 104, 80, 0.5) 60%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(0.5px);
+  }
+  .asahi .tg { position: relative; z-index: 1; }
+  .asahi .t { background: color-mix(in oklch, var(--tile), transparent 6%); backdrop-filter: blur(2px); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-wordmark">en</div>
+  <div class="page-title">/ japan flag theme proposals — claude</div>
+</div>
+<div class="page-subtitle">three directions for filling the red/white aesthetic gap</div>
+
+<!-- ╭─────────────────────────╮
+     │  CONCEPT 1 — WASHI HINOMARU │
+     ╰─────────────────────────╯ -->
+<div class="proposal washi">
+  <div class="app-render">
+    <div class="nb">
+      <div class="wc"><div class="btn"></div><div class="btn"></div><div class="btn"></div></div>
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="8" r="5"/>
+        </svg>
+        <span class="wm">en</span>
+      </div>
+      <div class="pill">+</div>
+      <div class="pill">#</div>
+      <div class="pill">↻</div>
+      <div class="pill theme"></div>
+      <div class="pill">▤</div>
+      <div class="pill">●</div>
+      <div class="pill">Aa</div>
+      <div class="pill">⌘</div>
+      <div class="pill">☼</div>
+      <div class="pill skull">☠</div>
+    </div>
+    <div class="tg">
+      <div class="t active">
+        <div class="head"><span class="dot"></span><span class="name">disco-analysis</span></div>
+        <div class="body">
+          <div>$ <span class="accent">claude</span> chat</div>
+          <div class="dim">opus 4.7 / 1m context</div>
+          <div>analyzing transcript…</div>
+        </div>
+      </div>
+      <div class="t working">
+        <div class="head"><span class="dot"></span><span class="name">brands-v4</span></div>
+        <div class="body">
+          <div>building deck</div>
+          <div class="dim">3 charts done</div>
+        </div>
+      </div>
+      <div class="t needs">
+        <div class="head"><span class="dot"></span><span class="name">marketingsetup</span></div>
+        <div class="body">
+          <div class="accent">[1] proceed</div>
+          <div class="accent">[2] exit</div>
+        </div>
+      </div>
+    </div>
+    <div class="ft">
+      <span>navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd></span>
+      <span>close <kbd>⌘</kbd><kbd>W</kbd></span>
+      <span class="right">focus <b>disco-analysis</b></span>
+    </div>
+  </div>
+
+  <div class="proposal-meta">
+    <div class="proposal-num">CONCEPT 01</div>
+    <div class="proposal-name">Washi Hinomaru<span class="ja">日の丸 · 和紙</span></div>
+    <div class="proposal-blurb">
+      en's <b>first light theme</b>. Cream washi-paper bg (not pure white — that reads
+      Microsoft), warm sumi-black ink, and the deep <b>hinomaru red</b> as the accent.
+      Reads like a tea-room scroll. Restraint over volume; the red is precious because
+      sparse.
+    </div>
+    <div class="proposal-swatches">
+      <div class="swatch" style="background:#f4ede0" data-label="bg"></div>
+      <div class="swatch" style="background:#efe6d4" data-label="tile"></div>
+      <div class="swatch" style="background:#2d1810" data-label="ink"></div>
+      <div class="swatch" style="background:#5a3d28" data-label="ink-2"></div>
+      <div class="swatch" style="background:#8a6d52" data-label="ink-3"></div>
+      <div class="swatch" style="background:#bc002d" data-label="accent"></div>
+    </div>
+    <div class="proposal-notes">
+      <b>palette:</b> washi cream → sumi → hinomaru<br>
+      <b>brand mark:</b> filled red disc (sun, not torii)<br>
+      <b>texture pairing:</b> grain (paper fibers)<br>
+      <b>tradeoff:</b> first non-dark theme — light theme infrastructure may need a
+      cross-theme audit pass.
+    </div>
+  </div>
+</div>
+
+<!-- ╭─────────────────────────╮
+     │  CONCEPT 2 — SUMI KYOKUJITSU │
+     ╰─────────────────────────╯ -->
+<div class="proposal sumi">
+  <div class="app-render">
+    <div class="nb">
+      <div class="wc"><div class="btn"></div><div class="btn"></div><div class="btn"></div></div>
+      <div class="brand">
+        <svg width="16" height="16" viewBox="-8 -8 16 16" fill="currentColor">
+          <circle cx="0" cy="0" r="3"/>
+          <g stroke="currentColor" stroke-width="0.6">
+            <line x1="0" y1="-7" x2="0" y2="-4"/>
+            <line x1="0" y1="4" x2="0" y2="7"/>
+            <line x1="-7" y1="0" x2="-4" y2="0"/>
+            <line x1="4" y1="0" x2="7" y2="0"/>
+            <line x1="-5" y1="-5" x2="-2.8" y2="-2.8"/>
+            <line x1="2.8" y1="2.8" x2="5" y2="5"/>
+            <line x1="-5" y1="5" x2="-2.8" y2="2.8"/>
+            <line x1="2.8" y1="-2.8" x2="5" y2="-5"/>
+          </g>
+        </svg>
+        <span class="wm">en</span>
+      </div>
+      <div class="pill">+</div>
+      <div class="pill">#</div>
+      <div class="pill">↻</div>
+      <div class="pill theme"></div>
+      <div class="pill">▤</div>
+      <div class="pill">●</div>
+      <div class="pill">Aa</div>
+      <div class="pill">⌘</div>
+      <div class="pill">☼</div>
+      <div class="pill skull">☠</div>
+    </div>
+    <div class="tg">
+      <div class="t active">
+        <div class="head"><span class="dot"></span><span class="name">disco-analysis</span></div>
+        <div class="body">
+          <div>$ <span class="accent">claude</span> chat</div>
+          <div class="dim">opus 4.7 / 1m context</div>
+          <div>analyzing transcript…</div>
+        </div>
+      </div>
+      <div class="t working">
+        <div class="head"><span class="dot"></span><span class="name">brands-v4</span></div>
+        <div class="body">
+          <div>building deck</div>
+          <div class="dim">3 charts done</div>
+        </div>
+      </div>
+      <div class="t needs">
+        <div class="head"><span class="dot"></span><span class="name">marketingsetup</span></div>
+        <div class="body">
+          <div class="accent">[1] proceed</div>
+          <div class="accent">[2] exit</div>
+        </div>
+      </div>
+    </div>
+    <div class="ft">
+      <span>navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd></span>
+      <span>close <kbd>⌘</kbd><kbd>W</kbd></span>
+      <span class="right">focus <b>disco-analysis</b></span>
+    </div>
+  </div>
+
+  <div class="proposal-meta">
+    <div class="proposal-num">CONCEPT 02</div>
+    <div class="proposal-name">Sumi Kyokujitsu<span class="ja">墨旭日</span></div>
+    <div class="proposal-blurb">
+      Stays in en's <b>dark family</b>. Charcoal-purple bg, vermillion (朱色 shu-iro)
+      accent. The <b>16 rising-sun rays</b> become an <i>ambient texture</i> at low alpha,
+      modulated by the existing texAmt slider. Quiet at rest, glowing when you turn it up.
+    </div>
+    <div class="proposal-swatches">
+      <div class="swatch" style="background:#1c1822" data-label="bg"></div>
+      <div class="swatch" style="background:#25212e" data-label="tile"></div>
+      <div class="swatch" style="background:#ede4d3" data-label="ink"></div>
+      <div class="swatch" style="background:#b8ad99" data-label="ink-2"></div>
+      <div class="swatch" style="background:#847a68" data-label="ink-3"></div>
+      <div class="swatch" style="background:#e84a3a" data-label="accent"></div>
+    </div>
+    <div class="proposal-notes">
+      <b>palette:</b> sumi-purple → cream-ink → shu-iro<br>
+      <b>brand mark:</b> sun + 8 rays glyph (replaces torii for this theme)<br>
+      <b>new texture:</b> "asahi-rays" — conic gradient, becomes 15th texture option<br>
+      <b>tradeoff:</b> rays texture might be too on-the-nose; could stay subtle by capping
+      max alpha at ~0.10.
+    </div>
+  </div>
+</div>
+
+<!-- ╭─────────────────────────╮
+     │  CONCEPT 3 — ASAHI         │
+     ╰─────────────────────────╯ -->
+<div class="proposal asahi">
+  <div class="app-render">
+    <div class="nb">
+      <div class="wc"><div class="btn"></div><div class="btn"></div><div class="btn"></div></div>
+      <div class="brand">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="8" cy="8" r="4.5"/>
+        </svg>
+        <span class="wm">en</span>
+      </div>
+      <div class="pill">+</div>
+      <div class="pill">#</div>
+      <div class="pill">↻</div>
+      <div class="pill theme"></div>
+      <div class="pill">▤</div>
+      <div class="pill">●</div>
+      <div class="pill">Aa</div>
+      <div class="pill">⌘</div>
+      <div class="pill">☼</div>
+      <div class="pill skull">☠</div>
+    </div>
+    <div class="tg">
+      <div class="t active">
+        <div class="head"><span class="dot"></span><span class="name">disco-analysis</span></div>
+        <div class="body">
+          <div>$ <span class="accent">claude</span> chat</div>
+          <div class="dim">opus 4.7 / 1m context</div>
+          <div>analyzing transcript…</div>
+        </div>
+      </div>
+      <div class="t working">
+        <div class="head"><span class="dot"></span><span class="name">brands-v4</span></div>
+        <div class="body">
+          <div>building deck</div>
+          <div class="dim">3 charts done</div>
+        </div>
+      </div>
+      <div class="t needs">
+        <div class="head"><span class="dot"></span><span class="name">marketingsetup</span></div>
+        <div class="body">
+          <div class="accent">[1] proceed</div>
+          <div class="accent">[2] exit</div>
+        </div>
+      </div>
+    </div>
+    <div class="ft">
+      <span>navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd></span>
+      <span>close <kbd>⌘</kbd><kbd>W</kbd></span>
+      <span class="right">focus <b>disco-analysis</b></span>
+    </div>
+  </div>
+
+  <div class="proposal-meta">
+    <div class="proposal-num">CONCEPT 03</div>
+    <div class="proposal-name">Asahi<span class="ja">朝日 · sunrise</span></div>
+    <div class="proposal-blurb">
+      Not a flag — a <b>flag-atmosphere</b>. Twilight gradient bg from indigo at the top
+      to washi-cream at the horizon. A soft sun disc lives at the seam, behind the tiles,
+      hinted not stated. Tiles get a slight transparency + backdrop-blur, so the sky
+      shows through. Most painterly of the three.
+    </div>
+    <div class="proposal-swatches">
+      <div class="swatch" style="background:#2a2540" data-label="sky"></div>
+      <div class="swatch" style="background:#5e3a52" data-label="dusk"></div>
+      <div class="swatch" style="background:#c4827a" data-label="hzn"></div>
+      <div class="swatch" style="background:#322d4a" data-label="tile"></div>
+      <div class="swatch" style="background:#f4e4d0" data-label="ink"></div>
+      <div class="swatch" style="background:#ef6850" data-label="sun"></div>
+    </div>
+    <div class="proposal-notes">
+      <b>palette:</b> indigo → dusk → cream + sun-vermillion<br>
+      <b>brand mark:</b> minimalist filled disc<br>
+      <b>special:</b> tiles use backdrop-blur to let the sky show through<br>
+      <b>tradeoff:</b> the gradient bg is the most "different" of the three — breaks
+      the flat-bg precedent of every other en theme. Risk: feels gimmicky over time.
+      Reward: feels alive.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

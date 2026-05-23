@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en" data-theme="hinode">
+<head>
+<meta charset="utf-8" />
+<title>en — hinode (日の出) theme proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ────────────────────────────────────────────────────────────
+   hinode (日の出) — sunrise.
+   en's first light theme. Washi-paper bg lifted UP toward warm cream
+   (never pure white — that would fight the lifted recipe). Sumi-ink
+   text warmed slightly so it never reads as ink-on-paper-stark.
+   Accent is shu-iro (朱色) — the vermillion pigment of torii gates and
+   shrine doors. Not flag-RGB-red. Deeper, more pigmented, more silent.
+
+   The composition motif: a single rising-sun disc. Not the flag's
+   centered emblem; placed off-axis like a sun cresting a tatami window.
+   ──────────────────────────────────────────────────────────── */
+:root,
+[data-theme="hinode"] {
+  /* Light recipe — bg pulled UP from warm-paper toward a cleaner reading
+     surface, but still warm enough to read as washi (japanese paper),
+     never bleached white. */
+  --bg:        #f4ece0;   /* washi cream — warm paper */
+  --tile:      #ede2d0;   /* primary surface, one step BELOW bg
+                              (light-theme inversion: surfaces sit BENEATH
+                              the field, like sumi ink resting in a well) */
+  --tile-2:    #e4d6bf;   /* hover / elevated surface */
+  --line:      #d6c4a8;   /* hairline divider */
+  --line-2:    #c4ad88;   /* visible border */
+
+  --ink:       #2a1f17;   /* sumi-warmed — never pure black */
+  --ink-2:     #5a4838;   /* body */
+  --ink-3:     #8a7561;   /* labels, captions */
+  --ink-4:     #b59e84;   /* disabled */
+
+  /* Shu-iro — vermillion. The pigment of torii. Sits at ~RGB(200,70,58).
+     Pure flag-red (#bc002d) reads as too cold/saturated against warm
+     washi; we shift toward earth so it reads as pigment, not signal. */
+  --accent:        #c8463a;
+  --accent-glow:   rgba(200, 70, 58, 0.32);
+  --accent-deep:   #9c2e26;   /* deeper sun-disc center */
+
+  --ok:        #6f8a3e;   /* moss green — bamboo */
+  --warn:      #b53d2e;   /* darker shu for alerts */
+
+  --grain-opacity: 0.42;
+  --grain-blend:   multiply;
+  --vignette:      rgba(120, 80, 50, 0.10);  /* warm vignette, not cold black */
+  --sheen:         rgba(255, 245, 225, 0.6);
+
+  --mono:     'JetBrains Mono', ui-monospace, monospace;
+  --sans:     'Space Grotesk', system-ui, sans-serif;
+  --display:  'Outfit', 'Space Grotesk', sans-serif;
+  --dur-fast: 120ms;
+  --dur-slow: 250ms;
+  --fz:       1;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  font-weight: 500;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(16px * var(--fz));
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ────────────────────────────────────────────────────────────
+   Washi paper texture.
+   Subtle fractal noise tinted with warm pigment. Multiply blend so it
+   reads as paper fibers absorbing dye, not as overlay haze. The point
+   is texture you sense before you see it.
+   ──────────────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.018 0.22' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.62 0 0 0 0 0.48 0 0 0 0 0.34 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E");
+  background-size: 320px 320px;
+}
+
+/* Soft warm vignette — like morning light entering a tatami room. */
+body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background:
+    radial-gradient(ellipse 90% 70% at 78% 22%, rgba(255, 220, 180, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at center, transparent 60%, var(--vignette) 100%);
+}
+
+.app {
+  display: grid;
+  grid-template-rows: 44px 1fr 32px;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* ────────────────────────────────────────────────────────────
+   Frosted-pill recipe (inverted for light theme).
+   On dark themes, the pill is bright glass on dark void. On hinode,
+   the pill is a darkened-paper recess — a mochi pressed slightly into
+   the page. Same vocabulary, opposite light direction.
+   ──────────────────────────────────────────────────────────── */
+.frosted-pill {
+  flex: none;
+  position: relative;
+  height: calc(30px * var(--fz));
+  width: calc(30px * var(--fz));
+  border: 1px solid rgba(80, 55, 35, 0.10);
+  border-top-color: rgba(80, 55, 35, 0.05);
+  border-bottom-color: rgba(80, 55, 35, 0.16);
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 248, 235, 0.55) 0%,
+      rgba(220, 200, 170, 0.20) 100%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  color: var(--accent);
+  font-family: var(--mono);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(80, 55, 35, 0.06),
+    0 1px 2px rgba(120, 80, 50, 0.10);
+  transition:
+    background var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    transform 80ms ease;
+}
+.frosted-pill:hover {
+  background:
+    linear-gradient(180deg,
+      rgba(255, 250, 240, 0.75) 0%,
+      rgba(230, 210, 180, 0.30) 100%);
+  border-color: var(--accent-glow);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 0 1px var(--accent-glow),
+    0 4px 14px -4px var(--accent-glow);
+}
+.frosted-pill:active {
+  transform: scale(0.97);
+  box-shadow:
+    inset 0 2px 4px rgba(120, 80, 50, 0.18),
+    0 0 0 0 transparent;
+}
+.frosted-pill svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+/* ────────────────────────────────────────────────────────────
+   TITLEBAR
+   ──────────────────────────────────────────────────────────── */
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--line-2);
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--bg), white 18%) 0%,
+    var(--bg) 100%);
+  position: relative;
+}
+/* Subtle hairline glow at the bottom edge — a single line of dawn. */
+.titlebar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(200, 70, 58, 0.20) 25%,
+    rgba(200, 70, 58, 0.32) 50%,
+    rgba(200, 70, 58, 0.20) 75%,
+    transparent 100%);
+  pointer-events: none;
+}
+
+/* Window controls — paper-recessed dots */
+.window-controls {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+}
+.wc {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--ink-3), transparent 50%);
+  background: color-mix(in oklch, var(--ink-3), transparent 70%);
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--dur-fast), transform 80ms;
+}
+.wc:hover { background: var(--accent); border-color: var(--accent); }
+
+/* Brand mark — rising sun disc + 'en' wordmark.
+   The disc is a single solid circle in shu-iro. Off-center so it reads
+   as a sun rising rather than a flag emblem. A faint inner gradient
+   gives it the depth of pigment-on-paper rather than flat ink. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.brand-sun {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 35%,
+      color-mix(in oklch, var(--accent), white 15%) 0%,
+      var(--accent) 40%,
+      var(--accent-deep) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 200, 0.25),
+    0 1px 2px rgba(156, 46, 38, 0.20),
+    0 0 12px var(--accent-glow);
+  flex: none;
+  position: relative;
+}
+/* The disc has a soft dawn-halo emanating to the right — the direction
+   of light. Single ray, not the imperial 16. */
+.brand-sun::after {
+  content: '';
+  position: absolute;
+  inset: -8px -16px -8px -8px;
+  background: radial-gradient(ellipse 60% 50% at 30% 50%,
+    var(--accent-glow) 0%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+.brand-name { color: var(--ink); }
+.brand-dot { color: var(--accent); margin-left: 1px; }
+
+/* Status — calm observational mono */
+.status {
+  margin-left: 18px;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.status .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background: var(--ink-4);
+}
+.status .dot.ok { background: var(--ok); box-shadow: 0 0 6px rgba(111, 138, 62, 0.45); }
+.status .dot.warn { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); animation: pulse 1s infinite; }
+.status b { color: var(--ink); font-weight: 500; }
+
+@keyframes pulse { 50% { opacity: 0.4; } }
+
+/* Trailing cluster — frosted pills, separators */
+.cluster {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cluster-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 1px solid var(--line);
+}
+.cluster-group:first-child { border-left: none; padding-left: 0; }
+
+/* Theme dot — paper recess showing the active palette */
+.theme-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+}
+
+/* ────────────────────────────────────────────────────────────
+   GRID
+   ──────────────────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+}
+
+.tile {
+  position: relative;
+  background: var(--tile);
+  display: grid;
+  grid-template-rows: 38px 1fr;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+.tile:hover { background: var(--tile-2); }
+
+.t-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 12px;
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--tile), white 8%) 0%,
+    var(--tile) 100%);
+  position: relative;
+}
+.t-head::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--sheen);
+}
+.t-head .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--ink-4);
+  flex: none;
+}
+.tile.working .t-head .dot {
+  background: var(--ok);
+  box-shadow: 0 0 6px rgba(111, 138, 62, 0.55);
+}
+.tile.needs .t-head .dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulse 1s infinite;
+}
+.tile.idle .t-head .dot { background: var(--ink-3); }
+
+.t-head .name {
+  color: var(--ink);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  flex: none;
+}
+.t-head .path {
+  color: var(--ink-2);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.t-head .meta {
+  color: var(--ink-3);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  flex: none;
+}
+
+.t-body {
+  padding: 14px 18px;
+  background: var(--tile);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  position: relative;
+}
+/* Faint horizontal "tatami weave" — only on light theme tiles. */
+.t-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(80, 55, 35, 0.025) 0 1px,
+      transparent 1px 4px);
+  z-index: 1;
+}
+
+pre.term {
+  white-space: pre-wrap;
+  font-family: var(--mono);
+  position: relative;
+  z-index: 2;
+}
+.p { color: var(--accent); }
+.c { color: var(--ink); }
+.t { color: var(--ink-2); }
+.r { color: var(--ink-3); }
+
+.cur {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--accent);
+  vertical-align: text-top;
+  animation: cur 1s steps(1) infinite;
+}
+.cur.dim { background: var(--ink-3); }
+@keyframes cur { 50% { opacity: 0; } }
+
+.tile:not(.active) .t-body { opacity: 0.78; }
+
+/* ACTIVE tile — accent inset ring + soft sun-bloom from top */
+.tile.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  z-index: 3;
+}
+.tile.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 100% at 50% 0%,
+      var(--accent-glow) 0%,
+      transparent 70%);
+  opacity: 0.5;
+  z-index: 2;
+}
+.tile.active .t-head .name { color: var(--accent); }
+.tile.active {
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    inset 0 0 24px -8px var(--accent-glow);
+}
+
+/* NEEDS tile — pulsing accent halo (the breath alert) */
+.tile.needs {
+  animation: alert-breath 5s cubic-bezier(.45, 0, .55, 1) infinite;
+}
+@keyframes alert-breath {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 45%),
+      inset 0 0 18px -10px var(--accent-glow),
+      0 0 3px -1px var(--accent-glow);
+  }
+  60% {
+    box-shadow:
+      inset 0 0 0 1px var(--accent),
+      inset 0 0 36px -8px var(--accent-glow),
+      0 0 22px 1px var(--accent-glow);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 45%),
+      inset 0 0 18px -10px var(--accent-glow),
+      0 0 3px -1px var(--accent-glow);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   FOOT BAR
+   ──────────────────────────────────────────────────────────── */
+.foot {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 18px;
+  border-top: 1px solid var(--line-2);
+  background: linear-gradient(180deg,
+    var(--bg) 0%,
+    color-mix(in oklch, var(--bg), var(--ink-4) 8%) 100%);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.foot kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 2px;
+}
+.foot .group { display: flex; align-items: center; gap: 6px; }
+.foot .right { margin-left: auto; color: var(--ink-2); }
+.foot .right b { color: var(--accent); font-weight: 500; }
+
+/* ────────────────────────────────────────────────────────────
+   DROP BAR (drag-over visual). One accent moment.
+   ──────────────────────────────────────────────────────────── */
+.dropbar {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  background: var(--tile);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent-glow),
+    0 12px 32px -8px rgba(156, 46, 38, 0.25);
+  pointer-events: none;
+}
+.dropbar-disc {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ────────────────────────────────────────────────────────────
+   POPOVER — alert-style example
+   ──────────────────────────────────────────────────────────── */
+.popover-wrap {
+  position: absolute;
+  top: 60px;
+  right: 110px;
+  z-index: 25;
+  pointer-events: none;
+}
+.popover {
+  min-width: 240px;
+  background: var(--tile);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  box-shadow:
+    0 12px 32px -8px rgba(120, 80, 50, 0.22),
+    inset 0 0 0 1px var(--accent);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--mono);
+}
+.popover-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border-radius: 4px;
+  color: var(--ink-2);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.popover-row:hover {
+  background: var(--tile-2);
+  color: var(--ink);
+}
+.popover-row[data-active="true"] {
+  color: var(--accent);
+  background: var(--tile-2);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.popover-row .glyph {
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+}
+.popover-row .desc {
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ────────────────────────────────────────────────────────────
+   PROPOSAL FRAME — small annotated panel describing the theme.
+   Sits centered-bottom; doesn't disrupt the simulated app.
+   ──────────────────────────────────────────────────────────── */
+.spec-card {
+  position: fixed;
+  left: 20px;
+  bottom: 50px;
+  z-index: 40;
+  width: 320px;
+  background: var(--tile);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 32px -8px rgba(120, 80, 50, 0.18);
+}
+.spec-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spec-title .sun {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.spec-kanji {
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
+}
+.spec-body {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+.spec-swatches {
+  display: flex;
+  gap: 4px;
+  margin-top: 10px;
+}
+.spec-swatches .sw {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  border: 1px solid var(--line-2);
+}
+
+/* ────────────────────────────────────────────────────────────
+   Reduced-motion respect
+   ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tile.needs { animation: none; box-shadow: inset 0 0 0 1px var(--accent), 0 0 12px -2px var(--accent-glow); }
+  .status .dot.warn { animation: none; }
+  .cur { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ────────────────────────── TITLEBAR ────────────────────────── -->
+  <div class="titlebar">
+    <div class="window-controls">
+      <button class="wc" aria-label="close"></button>
+      <button class="wc" aria-label="minimize"></button>
+      <button class="wc" aria-label="maximize"></button>
+    </div>
+
+    <div class="brand">
+      <span class="brand-sun" aria-hidden="true"></span>
+      <span class="brand-name">en<span class="brand-dot">·</span></span>
+    </div>
+
+    <div class="status">
+      <span><span class="dot ok"></span>2 working</span>
+      <span><span class="dot warn"></span>1 needs you</span>
+      <span><span class="dot"></span>1 idle</span>
+    </div>
+
+    <div class="cluster">
+      <!-- spawn / refresh group -->
+      <div class="cluster-group">
+        <button class="frosted-pill" title="kindle one">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+            <line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/>
+          </svg>
+        </button>
+        <button class="frosted-pill" title="reset">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.5 7 a4.5 4.5 0 1 1 1.5 3.3"/>
+            <polyline points="2.5,4 2.5,7 5.5,7"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- theme / texture / alert / size group -->
+      <div class="cluster-group">
+        <button class="frosted-pill" title="theme">
+          <span class="theme-dot" aria-hidden="true"></span>
+        </button>
+        <button class="frosted-pill" title="texture">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="3.5" cy="3.5" r="2"/>
+            <circle cx="10.5" cy="3.5" r="2"/>
+            <circle cx="3.5" cy="10.5" r="2"/>
+            <circle cx="10.5" cy="10.5" r="2"/>
+          </svg>
+        </button>
+        <button class="frosted-pill" title="alert style">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+            <circle cx="7" cy="7" r="3"/>
+            <line x1="7" y1="1.5" x2="7" y2="3"/>
+            <line x1="7" y1="11" x2="7" y2="12.5"/>
+            <line x1="1.5" y1="7" x2="3" y2="7"/>
+            <line x1="11" y1="7" x2="12.5" y2="7"/>
+          </svg>
+        </button>
+        <button class="frosted-pill" title="font size" style="font-family:var(--display);font-weight:600;font-size:13px;color:var(--accent);">
+          Aa
+        </button>
+        <button class="frosted-pill" title="kill all" style="color:var(--ink-3);">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+            <path d="M3 6 a4 4 0 0 1 8 0 v2 a2 2 0 0 1 -2 2 h-4 a2 2 0 0 1 -2 -2 z"/>
+            <circle cx="5.5" cy="6.5" r="0.6" fill="currentColor"/>
+            <circle cx="8.5" cy="6.5" r="0.6" fill="currentColor"/>
+            <line x1="6" y1="10" x2="6" y2="12.5"/>
+            <line x1="8" y1="10" x2="8" y2="12.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ────────────────────────── GRID ────────────────────────── -->
+  <div class="grid">
+
+    <!-- Active working tile -->
+    <section class="tile working active">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">en-hub</span>
+        <span class="path">~/work/en/app</span>
+        <span class="meta">04:21</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Add the hinode theme block to App.css and wire the
+  swatch button into the theme picker.
+
+<span class="c">⏺ Reading App.css to find the theme cascade.</span>
+
+<span class="t">⏺ Read(src/App.css)</span>
+  <span class="r">⎿  Found 8 themes at lines 24–193.
+     Each follows the same token shape.</span>
+
+<span class="c">⏺ Adding hinode below hinoki-soft. Light variant —
+  bg pulled UP (per the lifted recipe), warm vignette,
+  shu-iro accent. Matching the family contract.</span>
+
+<span class="t">⏺ Edit(src/App.css)</span>
+  <span class="r">⎿  Added [data-theme="hinode"] block, 18 tokens.
+     Added swatch fill to .themes button[data-set="hinode"].</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+      </div>
+    </section>
+
+    <!-- Working tile -->
+    <section class="tile working">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">paper-wire</span>
+        <span class="path">~/decks/r26/release</span>
+        <span class="meta">03:36</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Resume — accent thread audit on slide 33
+
+<span class="c">⏺ Walking the deck for accent overrides.</span>
+
+<span class="t">⏺ Bash(rg "card-heading" assets/ -n)</span>
+  <span class="r">⎿  (no matches — clean)</span>
+
+<span class="c">⏺ The accent thread carries through all five
+  release-note pages. Done.</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <!-- Needs tile (alert state) -->
+    <section class="tile needs">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">sdo-audit</span>
+        <span class="path">~/work/disco2demo</span>
+        <span class="meta">prompt</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ Reference docs sync-verified via md5.
+
+One open question:
+
+Retrofit Company C's existing artifacts to the new
+shape?</span>
+
+<span class="r">  1.  Yes, retrofit now
+  2.  No, leave Company C as-is
+  3.  Type something.</span>
+
+<span class="t">↵ to select</span>  <span class="r">· ↑/↓ navigate · esc cancel</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <!-- Idle tile -->
+    <section class="tile idle">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">demo-prep</span>
+        <span class="path">~/sdo/spring/mythos</span>
+        <span class="meta">idle 4m</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ 8 tasks (7 done, 1 in progress, 0 open)
+
+  ▸ Offer to update Company C artifacts
+  ✓ Verify all 4 skills are in sync via md5
+  ✓ Edit craft-demo SKILL.md line 82
+  ✓ Edit pov-framework.md line 183
+  ✓ Sync reference files to map-solution
+   … +3 completed</span>
+
+<span class="r">austin@ltmh6va ~ %</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Drop bar (one accent moment, simulated) -->
+  <div class="dropbar">
+    <span class="dropbar-disc"></span>
+    <span>kindling new session — release to drop</span>
+  </div>
+
+  <!-- Popover (one accent moment, simulated) -->
+  <div class="popover-wrap">
+    <div class="popover">
+      <button class="popover-row">
+        <span class="glyph">
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4">
+            <circle cx="7" cy="7" r="4"/>
+          </svg>
+        </span>
+        <span>pulse</span>
+        <span class="desc">soft halo</span>
+      </button>
+      <button class="popover-row" data-active="true">
+        <span class="glyph">
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+            <path d="M2 9 q2 -3 5 0 q3 -4 5 0"/>
+          </svg>
+        </span>
+        <span>breath</span>
+        <span class="desc">slow inhale</span>
+      </button>
+      <button class="popover-row">
+        <span class="glyph">
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="currentColor">
+            <circle cx="3" cy="7" r="1.4"/>
+            <circle cx="7" cy="3.5" r="1.4"/>
+            <circle cx="11" cy="7" r="1.4"/>
+            <circle cx="7" cy="10.5" r="1.4"/>
+          </svg>
+        </span>
+        <span>hotaru</span>
+        <span class="desc">single firefly</span>
+      </button>
+      <button class="popover-row">
+        <span class="glyph">
+          <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+            <path d="M2 12 L12 2"/>
+            <path d="M3 2 L11 11"/>
+            <path d="M12 12 L2 6"/>
+          </svg>
+        </span>
+        <span>sandangiri</span>
+        <span class="desc">three slashes</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ────────────────────────── FOOT ────────────────────────── -->
+  <div class="foot">
+    <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+    <span class="group">send <kbd>⌘</kbd><kbd>↵</kbd></span>
+    <span class="group">kindle <kbd>⌘</kbd><kbd>N</kbd></span>
+    <span class="right">focus <b>en-hub</b></span>
+  </div>
+</div>
+
+<!-- ────────────────────────── SPEC CARD ────────────────────────── -->
+<div class="spec-card">
+  <div class="spec-title">
+    <span class="sun"></span>
+    <span>hinode</span>
+    <span class="spec-kanji">日の出 · sunrise</span>
+  </div>
+  <div class="spec-body">
+    en's first light theme. Washi cream lifted UP toward
+    paper, sumi ink warmed so it never reads as ink-on-stark.
+    Accent is shu-iro — the vermillion pigment of torii
+    gates, not flag-RGB. The brand mark carries a single
+    rising-sun disc; no imperial rays.
+  </div>
+  <div class="spec-swatches">
+    <span class="sw" style="background:#f4ece0" title="bg · washi"></span>
+    <span class="sw" style="background:#ede2d0" title="tile"></span>
+    <span class="sw" style="background:#d6c4a8" title="line"></span>
+    <span class="sw" style="background:#5a4838" title="ink-2"></span>
+    <span class="sw" style="background:#2a1f17" title="ink"></span>
+    <span class="sw" style="background:#c8463a" title="accent · shu-iro"></span>
+  </div>
+</div>
+
+</body>
+</html>

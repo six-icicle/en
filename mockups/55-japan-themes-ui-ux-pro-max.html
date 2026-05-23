@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="hinomaru">
+<head>
+<meta charset="UTF-8" />
+<title>en — hinomaru proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+/* ───────────────────── HINOMARU ─────────────────────
+   en's first light theme. Inverts the lifted-bg recipe:
+   instead of bg pulled UP from black, bg pulled DOWN from
+   white into a warm washi cream. Ink stays sumi-warm (never
+   pure black). Accent is shu-iro (朱色) — the vermillion of
+   torii gates and temple seals, washi-stained so it reads
+   as pigment, not RGB.
+
+   This is the only theme in the family where texture comes
+   FROM the paper surface itself, not laid on top. The grid
+   and grain are chromatic warmth, not luminance noise.
+   ────────────────────────────────────────────────────── */
+:root,
+[data-theme="hinomaru"] {
+  /* warm washi cream — pulled DOWN from #fffefb, never pure white */
+  --bg:        #f1ead9;
+  /* tile lifts UP from bg toward fresh paper — opposite of dark themes */
+  --tile:      #f7f1e0;
+  --tile-2:    #fbf6e7;
+  /* hairlines: warm tan, never gray */
+  --line:      #e2d8be;
+  --line-2:    #cdc0a0;
+  /* sumi ink — warm-black with brown undertone, the calligraphy color */
+  --ink:       #1f1a14;
+  --ink-2:     #4d4538;
+  --ink-3:     #7d7363;
+  --ink-4:     #a89e87;
+  /* shu-iro vermillion — washi-stained, not RGB red. The temple-gate red. */
+  --accent:    #bc4a3c;
+  --accent-glow: rgba(188, 74, 60, 0.22);
+  /* matcha green for ok, deeper crimson for warn (so warn ≠ accent) */
+  --ok:        #6f8b4f;
+  --warn:      #8c2a2a;
+
+  /* texture/elevation tokens — inverted for light theme */
+  --grain-opacity: 0.05;
+  --grain-blend: multiply;       /* multiply darkens cream, screen would wash out */
+  --vignette: rgba(120, 90, 50, 0.10);  /* warm tan vignette, not black */
+  --sheen: rgba(0, 0, 0, 0.012);
+
+  /* type + motion (locked, match the family) */
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Space Grotesk', system-ui, sans-serif;
+  --display: 'Outfit', 'Space Grotesk', sans-serif;
+  --fz: 1;
+  --tex-amt: 1;
+  --dur-fast: 120ms;
+  --dur-slow: 250ms;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--sans);
+  font-weight: 500;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(16px * var(--fz));
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ───────────────────── TEXTURE: WASHI ─────────────────────
+   Soft fractal noise simulating fibers in handmade paper.
+   Multiply blend so it darkens the cream slightly rather than
+   screening pure white over it. */
+body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: calc(0.10 * var(--tex-amt));
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.18' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.42 0 0 0 0 0.34 0 0 0 0 0.20 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+/* Tan vignette toward edges — paper darkens at the deckle */
+body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  background: radial-gradient(ellipse at center, transparent 50%, var(--vignette) 100%);
+}
+
+.app {
+  display: grid;
+  grid-template-rows: calc(46px * var(--fz)) 1fr calc(34px * var(--fz));
+  height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* keyboard focus ring — uses accent at full strength */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ───────────────────── NAVBAR ─────────────────────
+   Light variant of the lifted nav: the gradient is INVERTED
+   (lighter at top, slightly deeper at bottom — "paper laid on
+   washi"). Hairline at bottom is line-2 darker tan, not white. */
+.navbar {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--fz));
+  padding: 0 calc(20px * var(--fz));
+  border-bottom: 1px solid var(--line-2);
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--bg), white 30%) 0%,
+    var(--bg) 100%);
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── window controls ─── */
+.window-controls {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: calc(6px * var(--fz));
+}
+.wc {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--ink-3), transparent 50%);
+  background: color-mix(in oklch, var(--ink-3), transparent 70%);
+  padding: 0;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform 80ms ease;
+}
+.wc:hover { background: var(--accent); border-color: var(--accent); }
+.wc:active { transform: scale(0.92); }
+
+/* ─── brand mark: hinomaru disc + wordmark ─── */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(10px * var(--fz));
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: calc(16px * var(--fz));
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  flex: none;
+  margin-right: calc(8px * var(--fz));
+}
+.brand .disc {
+  width: calc(14px * var(--fz));
+  height: calc(14px * var(--fz));
+  border-radius: 50%;
+  background: var(--accent);
+  /* faint inner shadow gives it pigment-on-paper depth */
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--accent), black 15%),
+    0 0 0 0.5px color-mix(in oklch, var(--accent), black 25%);
+  flex: none;
+}
+.brand .word { color: var(--ink); }
+.brand .word .dot { color: var(--accent); }
+
+/* ─── frosted nav pills (light variant) ───
+   Gradient is darker-on-paper (subtle warm shadow), border picks
+   up the paper-shadow tone. Hover reveals the accent ring. */
+.nav-pill {
+  flex: none;
+  position: relative;
+  width: calc(30px * var(--fz));
+  height: calc(30px * var(--fz));
+  border: 1px solid color-mix(in oklch, var(--line-2), transparent 20%);
+  border-top-color: color-mix(in oklch, white, var(--bg) 40%);
+  border-radius: 9px;
+  background: linear-gradient(180deg,
+    rgba(255, 252, 240, 0.65) 0%,
+    rgba(225, 215, 190, 0.30) 100%);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 2px rgba(50, 35, 15, 0.08),
+    0 3px 8px -3px rgba(50, 35, 15, 0.16);
+  transition:
+    background var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    transform 80ms ease;
+}
+.nav-pill:hover {
+  background: linear-gradient(180deg,
+    rgba(255, 252, 240, 0.85) 0%,
+    rgba(225, 215, 190, 0.40) 100%);
+  border-color: var(--accent);
+  border-top-color: color-mix(in oklch, var(--accent), white 50%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 0 0 1px var(--accent-glow),
+    0 4px 12px -3px var(--accent-glow);
+}
+.nav-pill:active {
+  transform: scale(0.97);
+  box-shadow:
+    inset 0 2px 4px rgba(50, 35, 15, 0.12),
+    0 0 0 0 rgba(0, 0, 0, 0);
+}
+.nav-pill svg { width: 14px; height: 14px; display: block; }
+/* glyph fallback for non-svg pills */
+.nav-pill .glyph {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: calc(13px * var(--fz));
+  line-height: 1;
+}
+
+/* ─── status group ─── */
+.status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: calc(14px * var(--fz));
+  font-family: var(--mono);
+  font-size: calc(11px * var(--fz));
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+}
+.status .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: calc(6px * var(--fz));
+  background: var(--ink-4);
+}
+.status .dot.ok   { background: var(--ok);   box-shadow: 0 0 5px color-mix(in oklch, var(--ok), transparent 60%); }
+.status .dot.warn { background: var(--warn); box-shadow: 0 0 6px color-mix(in oklch, var(--warn), transparent 50%); animation: pulse 1s infinite; }
+.status b { color: var(--ink); font-weight: 500; }
+@keyframes pulse { 50% { opacity: 0.45; } }
+
+/* divider between groups */
+.div {
+  width: 1px;
+  height: calc(20px * var(--fz));
+  background: var(--line);
+  margin: 0 calc(4px * var(--fz));
+}
+
+/* ───────────────────── GRID ─────────────────────
+   Hairline grid uses line-2 (darker tan) so the divisions are
+   visible on light bg — opposite of dark themes where line is lighter
+   than bg. */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: var(--line-2);
+  position: relative;
+  z-index: 1;
+}
+
+/* ───────────────────── TILE ───────────────────── */
+.tile {
+  position: relative;
+  background: var(--tile);
+  display: grid;
+  grid-template-rows: calc(38px * var(--fz)) 1fr;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+.tile:hover { background: var(--tile-2); }
+
+.t-head {
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--fz));
+  padding: 0 calc(18px * var(--fz));
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: calc(11px * var(--fz));
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--tile-2), white 25%) 0%,
+    var(--tile) 100%);
+  position: relative;
+}
+.t-head::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.t-head .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--ink-4);
+  flex: none;
+}
+.tile.working .t-head .dot { background: var(--ok); box-shadow: 0 0 5px color-mix(in oklch, var(--ok), transparent 60%); }
+.tile.needs   .t-head .dot { background: var(--warn); box-shadow: 0 0 7px color-mix(in oklch, var(--warn), transparent 40%); animation: pulse 0.9s infinite; }
+.tile.idle    .t-head .dot { background: var(--ink-3); }
+
+.t-head .name { color: var(--ink); font-family: var(--sans); font-weight: 600; font-size: calc(12px * var(--fz)); letter-spacing: 0.02em; }
+.t-head .path { color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.t-head .meta { color: var(--ink-3); letter-spacing: 0.04em; flex: none; }
+
+.t-body {
+  padding: calc(16px * var(--fz)) calc(20px * var(--fz));
+  background: var(--tile);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: calc(12px * var(--fz));
+  line-height: 1.65;
+  color: var(--ink-2);
+  position: relative;
+}
+/* very faint horizontal striations — the paper grain */
+.t-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg,
+      rgba(31, 26, 20, 0.018) 0 1px,
+      transparent 1px 3px);
+  z-index: 1;
+}
+
+pre.term {
+  white-space: pre-wrap;
+  font-family: var(--mono);
+  position: relative;
+  z-index: 2;
+}
+.p { color: var(--accent); }
+.c { color: var(--ink); }
+.t { color: var(--ink-2); }
+.r { color: var(--ink-3); }
+.cur {
+  display: inline-block;
+  width: 8px; height: 14px;
+  background: var(--accent);
+  vertical-align: text-top;
+  animation: cur 1s steps(1) infinite;
+}
+.cur.dim { background: var(--ink-3); }
+@keyframes cur { 50% { opacity: 0; } }
+
+.tile:not(.active) .t-body { opacity: 0.78; }
+
+/* ─── ACTIVE — accent line + soft bloom from top ─── */
+.tile.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  z-index: 3;
+}
+.tile.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, var(--accent-glow) 0%, transparent 70%);
+  opacity: 0.5;
+  z-index: 2;
+}
+.tile.active .t-head .name { color: var(--accent); }
+.tile.active {
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    inset 0 0 24px -8px var(--accent-glow);
+}
+
+/* ─── NEEDS — hinomaru disc alert
+   Rather than a generic pulse, a soft vermillion disc rises from
+   the top edge — an echo of the flag's central motif as a state. */
+.tile.needs::before {
+  content: '';
+  position: absolute;
+  top: calc(38px * var(--fz));
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center,
+    color-mix(in oklch, var(--accent), transparent 45%) 0%,
+    color-mix(in oklch, var(--accent), transparent 75%) 40%,
+    transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+  animation: hinomaru-rise 3.2s ease-in-out infinite;
+}
+@keyframes hinomaru-rise {
+  0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 0.85; transform: translate(-50%, -50%) scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile.needs::before { animation: none; opacity: 0.7; }
+}
+
+/* ───────────────────── DROP-BAR (popover preview) ───────────────────── */
+.drop-bar {
+  position: absolute;
+  top: calc(50px * var(--fz));
+  right: calc(24px * var(--fz));
+  background: var(--tile-2);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 50;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px var(--accent-glow),
+    0 12px 32px -8px rgba(50, 35, 15, 0.25);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-2);
+}
+.drop-bar .label {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0 8px;
+  font-size: 9px;
+}
+.drop-bar .swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--dur-fast), border-color var(--dur-fast);
+}
+.drop-bar .swatch:hover { transform: scale(1.08); border-color: var(--accent); }
+.drop-bar .swatch[data-active="true"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--accent), 0 0 6px var(--accent-glow);
+}
+
+/* ───────────────────── FOOT ───────────────────── */
+.foot {
+  display: flex;
+  align-items: center;
+  padding: 0 calc(20px * var(--fz));
+  gap: calc(18px * var(--fz));
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg,
+    var(--bg) 0%,
+    color-mix(in oklch, var(--bg), var(--ink-4) 8%) 100%);
+  font-family: var(--mono);
+  font-size: calc(11px * var(--fz));
+  color: var(--ink-3);
+  position: relative;
+  z-index: 2;
+}
+.foot kbd {
+  font-family: var(--mono);
+  font-size: calc(10px * var(--fz));
+  padding: 1px 6px;
+  border: 1px solid var(--line-2);
+  border-radius: 3px;
+  color: var(--ink-2);
+  background: color-mix(in oklch, var(--bg), white 30%);
+  margin: 0 2px;
+}
+.foot .group { display: flex; align-items: center; gap: 6px; }
+.foot .right { margin-left: auto; color: var(--ink-3); }
+.foot .right b { color: var(--accent); font-weight: 500; }
+
+/* ───────────────────── CAPTION (top of file) ───────────────────── */
+.caption {
+  position: fixed;
+  bottom: calc(46px * var(--fz));
+  left: calc(20px * var(--fz));
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.caption b { color: var(--ink-2); font-weight: 500; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ─────────── NAVBAR ─────────── -->
+  <div class="navbar">
+    <div class="window-controls">
+      <button class="wc" aria-label="close"></button>
+      <button class="wc" aria-label="minimize"></button>
+      <button class="wc" aria-label="maximize"></button>
+    </div>
+
+    <div class="brand">
+      <span class="disc" aria-hidden="true"></span>
+      <span class="word">en<span class="dot">·</span></span>
+    </div>
+
+    <div class="div"></div>
+
+    <!-- spawn -->
+    <button class="nav-pill" title="kindle one (⌘ N)">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M7 2v10M2 7h10"/>
+      </svg>
+    </button>
+    <!-- refresh -->
+    <button class="nav-pill" title="refresh">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11.5 4.5A4.5 4.5 0 1 0 12 8"/>
+        <path d="M11.5 2v3h-3"/>
+      </svg>
+    </button>
+    <!-- alert style -->
+    <button class="nav-pill" title="alert style" aria-expanded="true">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="7" cy="7" r="2.5"/>
+        <circle cx="7" cy="7" r="5.5" opacity="0.45"/>
+      </svg>
+    </button>
+    <!-- texture -->
+    <button class="nav-pill" title="texture">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3">
+        <circle cx="3.5" cy="3.5" r="1.2"/>
+        <circle cx="10.5" cy="3.5" r="1.2"/>
+        <circle cx="3.5" cy="10.5" r="1.2"/>
+        <circle cx="10.5" cy="10.5" r="1.2"/>
+        <circle cx="7" cy="7" r="1.2"/>
+      </svg>
+    </button>
+    <!-- layout -->
+    <button class="nav-pill" title="layout">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="2" y="2" width="4" height="4" rx="0.5"/>
+        <rect x="8" y="2" width="4" height="4" rx="0.5"/>
+        <rect x="2" y="8" width="4" height="4" rx="0.5"/>
+        <rect x="8" y="8" width="4" height="4" rx="0.5"/>
+      </svg>
+    </button>
+    <!-- font size -->
+    <button class="nav-pill" title="font size">
+      <span class="glyph">Aa</span>
+    </button>
+    <!-- theme -->
+    <button class="nav-pill" title="theme" aria-expanded="true">
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="7" cy="7" r="5"/>
+        <path d="M7 2v10" />
+      </svg>
+    </button>
+
+    <!-- status -->
+    <div class="status">
+      <span><span class="dot ok"></span>2 working</span>
+      <span><span class="dot warn"></span>1 needs</span>
+      <span><span class="dot"></span>1 idle</span>
+    </div>
+  </div>
+
+  <!-- ─────────── DROP-BAR (theme picker, open) ─────────── -->
+  <div class="drop-bar" role="listbox" aria-label="theme picker">
+    <span class="label">theme</span>
+    <button class="swatch" style="background: linear-gradient(135deg, #14141c 50%, #d4b274 50%);" title="kanagawa"></button>
+    <button class="swatch" style="background: linear-gradient(135deg, #181f23 50%, #b8d290 50%);" title="everforest"></button>
+    <button class="swatch" style="background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%);" title="rose-pine"></button>
+    <button class="swatch" style="background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%);" title="hinoki"></button>
+    <button class="swatch" data-active="true" style="background: linear-gradient(135deg, #f1ead9 50%, #bc4a3c 50%);" title="hinomaru"></button>
+  </div>
+
+  <!-- ─────────── GRID ─────────── -->
+  <div class="grid">
+
+    <!-- working & active -->
+    <section class="tile working active">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">en</span>
+        <span class="path">~/work/en</span>
+        <span class="meta">04:21</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Wire the bay readouts to the live status feed and
+  make the wing flap rate map to working intensity.
+
+<span class="c">⏺ Reading the registry to see how status events flow.</span>
+
+<span class="t">⏺ Bash(rg "SessionStatus" src/ -n)</span>
+  <span class="r">⎿  src/state/registry.ts:18:  type SessionStatus = …
+     src/components/Tile.tsx:42:    status: SessionStatus
+     src/hooks/useSessions.ts:9:  return store.subscribe(…)</span>
+
+<span class="c">⏺ The components already accept a status prop, they just
+  aren't subscribing to the live store. Wiring that up.</span>
+
+<span class="t">⏺ Edit(src/components/Tile.tsx)</span>
+  <span class="r">⎿  Subscribed to useSessions(); mapped status → dot color
+     Working: 1.6s pulse · Needs: 0.9s pulse (vermillion)</span>
+
+<span class="c">⏺ Done. Each tile's dot now reflects the live session.</span>
+
+<span class="p">&gt;</span> <span class="cur"></span></pre>
+      </div>
+    </section>
+
+    <!-- working idle pose -->
+    <section class="tile working">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">paper-wire</span>
+        <span class="path">~/decks/r26/release</span>
+        <span class="meta">03:36</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="p">&gt;</span> Resume work on slide 33 — accent thread
+
+<span class="c">⏺ Reading the lab page to find the override.</span>
+
+<span class="t">⏺ Read(corporate26-cards.html)</span>
+  <span class="r">⎿  Removed 1 line
+     64    .slide .slide-title,
+     65    .slide .slide-subtitle,
+     66 -  .slide .card-heading,
+     67    .slide .card-body,</span>
+
+<span class="c">⏺ Cards heading still looks navy — checking for an
+  overriding selector.</span>
+
+<span class="t">⏺ Bash(rg "card-heading" assets/ -n)</span>
+  <span class="r">⎿  (no matches)</span>
+
+<span class="c">⏺ Done. Accent thread is in place across all 5.</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <!-- needs (alert) -->
+    <section class="tile needs">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">sdo-audit</span>
+        <span class="path">~/work/disco2demo/cals</span>
+        <span class="meta">prompt</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ All 4 reference-doc copies sync-verified via md5.
+
+One open question:
+
+Want me to retrofit Company C's existing artifacts to
+the new shape?</span>
+
+<span class="r">  1.  Yes, retrofit now
+       Re-fold Section 7 time-sinks into Section 6 pain
+       cards in 01-analysis.md.
+
+  2.  No, leave Company C as-is
+
+  3.  Type something.</span>
+
+<span class="t">⌃ Enter to select</span>  <span class="r">· ↑/↓ navigate · esc cancel</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+    <!-- idle -->
+    <section class="tile idle">
+      <header class="t-head">
+        <span class="dot"></span>
+        <span class="name">demo-prep</span>
+        <span class="path">~/sdo/spring/mythos</span>
+        <span class="meta">idle 4m</span>
+      </header>
+      <div class="t-body">
+<pre class="term"><span class="c">⏺ 8 tasks (7 done, 1 in progress, 0 open)
+
+  ▸ Offer to update Company C artifacts
+  ✓ Verify all 4 skills are in sync via md5
+  ✓ Edit craft-demo SKILL.md line 82
+  ✓ Edit pov-framework.md line 183
+  ✓ Sync reference files to map-solution
+   … +3 completed</span>
+
+<span class="r">austin@ltmh6va ~ % cd ~
+austin@ltmh6va ~ % ls
+Applications  Documents  Music
+claude-projects  Library  Pictures</span>
+
+<span class="p">&gt;</span> <span class="cur dim"></span></pre>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ─────────── FOOT ─────────── -->
+  <div class="foot">
+    <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+    <span class="group">send <kbd>⌘</kbd><kbd>↵</kbd></span>
+    <span class="group">kindle <kbd>⌘</kbd><kbd>N</kbd></span>
+    <span class="right">focus <b>en</b></span>
+  </div>
+
+  <!-- caption -->
+  <div class="caption">en · proposal · <b>hinomaru</b> · light · washi + shu-iro</div>
+
+</div>
+
+</body>
+</html>
