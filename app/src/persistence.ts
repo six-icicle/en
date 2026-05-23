@@ -8,7 +8,9 @@ export type Theme =
   | "rose-pine"
   | "rose-pine-soft"
   | "hinoki"
-  | "hinoki-soft";
+  | "hinoki-soft"
+  | "washi"
+  | "washi-kyokujitsu";
 export type Texture =
   | "none"
   | "grain"
@@ -33,7 +35,8 @@ export type AlertStyle =
   | "triple"
   | "vertical"
   | "sakura"
-  | "shuriken";
+  | "shuriken"
+  | "hinode";
 
 // Migrate prior IDs that were renamed.
 const ALERT_STYLE_LEGACY: Record<string, AlertStyle> = {
@@ -95,6 +98,8 @@ const THEMES = new Set<Theme>([
   "rose-pine-soft",
   "hinoki",
   "hinoki-soft",
+  "washi",
+  "washi-kyokujitsu",
 ]);
 const TEXTURES = new Set<Texture>([
   "none",
@@ -123,12 +128,62 @@ const ALERT_STYLES = new Set<AlertStyle>([
   "vertical",
   "sakura",
   "shuriken",
+  "hinode",
 ]);
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 const STORE_FILE = "settings.json";
 const KEY = "appearance";
+const SLOTS_KEY = "tileSlots";
+
+export type TileSlot = {
+  key: string;
+  name: string;
+  cwd: string;
+  path: string;
+};
+
+const SLOT_NAME_MAX = 256;
+const SLOT_PATH_MAX = 4096;
+
+function isValidSlot(raw: unknown): raw is TileSlot {
+  if (!raw || typeof raw !== "object") return false;
+  const r = raw as Record<string, unknown>;
+  return (
+    typeof r.key === "string" &&
+    typeof r.name === "string" &&
+    typeof r.cwd === "string" &&
+    typeof r.path === "string" &&
+    r.key.length > 0 &&
+    r.name.length > 0 &&
+    r.name.length <= SLOT_NAME_MAX &&
+    r.cwd.length > 0 &&
+    r.cwd.length <= SLOT_PATH_MAX &&
+    r.path.length <= SLOT_PATH_MAX
+  );
+}
+
+export async function loadTileSlots(): Promise<TileSlot[]> {
+  try {
+    const store = await getStore();
+    const raw = await store.get(SLOTS_KEY);
+    if (!Array.isArray(raw)) return [];
+    return raw.filter(isValidSlot).slice(0, 8);
+  } catch (e) {
+    console.warn("[en/persistence] failed to load tile slots:", e);
+    return [];
+  }
+}
+
+export async function saveTileSlots(slots: TileSlot[]): Promise<void> {
+  try {
+    const store = await getStore();
+    await store.set(SLOTS_KEY, slots);
+  } catch {
+    // Best-effort.
+  }
+}
 
 let storePromise: Promise<Store> | null = null;
 function getStore(): Promise<Store> {

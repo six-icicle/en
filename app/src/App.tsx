@@ -17,12 +17,15 @@ import GridResizeHandles from "./GridResizeHandles";
 import {
   APPEARANCE_DEFAULTS,
   loadAppearance,
+  loadTileSlots,
   saveAppearance,
+  saveTileSlots,
   type AlertStyle,
   type Appearance,
   type Layout,
   type Texture,
   type Theme,
+  type TileSlot,
 } from "./persistence";
 import "./App.css";
 type DisplayStatus = "working" | "needs" | "idle" | "stale";
@@ -30,6 +33,7 @@ type DisplayStatus = "working" | "needs" | "idle" | "stale";
 type TileDecl = SessionDecl & {
   meta: string;
   status: DisplayStatus;
+  sleeping?: boolean;
 };
 
 const THEMES: { id: Theme; title: string }[] = [
@@ -41,6 +45,8 @@ const THEMES: { id: Theme; title: string }[] = [
   { id: "rose-pine-soft", title: "Rose Pine Moon (soft)" },
   { id: "hinoki", title: "Hinoki" },
   { id: "hinoki-soft", title: "Hinoki (soft)" },
+  { id: "washi", title: "Washi Hinomaru" },
+  { id: "washi-kyokujitsu", title: "Washi Kyokujitsu" },
 ];
 
 const THEME_ACCENTS: Record<Theme, string> = {
@@ -52,6 +58,8 @@ const THEME_ACCENTS: Record<Theme, string> = {
   "rose-pine-soft": "#ea9a97",
   hinoki: "#d49a3a",
   "hinoki-soft": "#c89656",
+  washi: "#bc002d",
+  "washi-kyokujitsu": "#bc002d",
 };
 
 const THEME_BGS: Record<Theme, string> = {
@@ -63,6 +71,8 @@ const THEME_BGS: Record<Theme, string> = {
   "rose-pine-soft": "#312e4a",
   hinoki: "#1b1d20",
   "hinoki-soft": "#312d26",
+  washi: "#ebedf0",
+  "washi-kyokujitsu": "#ebedf0",
 };
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -122,6 +132,7 @@ const ALERT_STYLES: { id: AlertStyle; title: string; desc: string }[] = [
   { id: "vertical",  title: "Tatewari",      desc: "falling cut" },
   { id: "sakura",    title: "Sakura rain",   desc: "petals fall" },
   { id: "shuriken",  title: "Shuriken",      desc: "throw + stick" },
+  { id: "hinode",    title: "Hinode",        desc: "rising sun" },
 ];
 
 function defaultTracks(layout: Layout, count: number): { cols: number[]; rows: number[] } {
@@ -218,6 +229,15 @@ export default function App() {
     setTiles((prev) =>
       prev.map((t) => (t.key === key ? { ...t, name: trimmed } : t)),
     );
+  }, []);
+
+  const reviveTile = useCallback((key: string) => {
+    setTiles((prev) =>
+      prev.map((t) =>
+        t.key === key ? { ...t, sleeping: false, status: "working" } : t,
+      ),
+    );
+    setActiveId(key);
   }, []);
 
   const closeTile = useCallback(
@@ -442,10 +462,32 @@ export default function App() {
       setAlertStyle(a.alertStyle);
       setAppearanceLoaded(true);
     });
+    loadTileSlots().then((slots) => {
+      if (cancelled || slots.length === 0) return;
+      const restored: TileDecl[] = slots.map((s) => ({
+        key: s.key,
+        name: s.name,
+        cwd: s.cwd,
+        path: s.path,
+        meta: "",
+        status: "idle",
+        sleeping: true,
+      }));
+      setTiles(restored);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // Persist tile slots whenever the array changes (after initial load).
+  useEffect(() => {
+    if (!appearanceLoaded) return;
+    const slots: TileSlot[] = tiles
+      .filter((t) => !!t.cwd)
+      .map((t) => ({ key: t.key, name: t.name, cwd: t.cwd!, path: t.path }));
+    saveTileSlots(slots);
+  }, [appearanceLoaded, tiles]);
 
   useEffect(() => {
     if (!appearanceLoaded) return;
@@ -622,6 +664,9 @@ export default function App() {
   useEffect(() => {
     document.documentElement.style.setProperty("--fz", String(fz));
   }, [fz]);
+  useEffect(() => {
+    document.documentElement.style.setProperty("--tfz", String(tfz));
+  }, [tfz]);
   useEffect(() => {
     document.documentElement.style.setProperty("--tex-amt", String(texAmt));
   }, [texAmt]);
@@ -960,6 +1005,13 @@ export default function App() {
             </g>
           </svg>
           en
+          {(theme === "washi" || theme === "washi-kyokujitsu") && (
+            <span
+              className="brand-hinomaru"
+              aria-hidden="true"
+              title={theme === "washi-kyokujitsu" ? "Kyokujitsu" : "Hinomaru"}
+            />
+          )}
         </div>
         <div className="status">
           <button
@@ -1421,6 +1473,7 @@ export default function App() {
             data-session-key={s.key}
             data-dragging={dragKey === s.key ? "true" : undefined}
             data-swap-target={isSwapTarget ? "true" : undefined}
+            data-sleeping={s.sleeping ? "true" : undefined}
             className={`tile ${s.status} ${activeId === s.key ? "active" : ""}`}
             onClick={() => {
               if (dragHappenedRef.current) {
@@ -1516,22 +1569,29 @@ export default function App() {
                 </svg>
               </button>
             </header>
-            {s.status === "needs" && <AlertExtras style={alertStyle} />}
+            {s.status === "needs" && !s.sleeping && <AlertExtras style={alertStyle} />}
             <div className="t-body">
-              <TerminalView
-                decl={{
-                  key: s.key,
-                  name: s.name,
-                  path: s.path,
-                  cwd: s.cwd,
-                  cmd: s.cmd,
-                }}
-                theme={theme}
-                fontScale={tfz}
-                accent={accent ?? undefined}
-                bg={bg ?? undefined}
-                active={activeId === s.key}
-              />
+              {s.sleeping ? (
+                <SleepingTileBody
+                  cwd={s.cwd ?? ""}
+                  onRevive={() => reviveTile(s.key)}
+                />
+              ) : (
+                <TerminalView
+                  decl={{
+                    key: s.key,
+                    name: s.name,
+                    path: s.path,
+                    cwd: s.cwd,
+                    cmd: s.cmd,
+                  }}
+                  theme={theme}
+                  fontScale={tfz}
+                  accent={accent ?? undefined}
+                  bg={bg ?? undefined}
+                  active={activeId === s.key}
+                />
+              )}
             </div>
           </section>
           );
@@ -1747,6 +1807,16 @@ function AlertExtras({ style }: { style: AlertStyle }) {
       </div>
     );
   }
+  if (style === "hinode") {
+    return (
+      <div className="alert-extras" aria-hidden="true">
+        <div className="hinode-stage">
+          <div className="hinode-disc" />
+          <div className="hinode-horizon" />
+        </div>
+      </div>
+    );
+  }
   // pulse / heartbeat / breath: no DOM extras — pure border animation
   return null;
 }
@@ -1804,6 +1874,16 @@ function AlertGlyph({ id }: { id: AlertStyle }) {
         <circle r="1.1" fill="var(--bg)" />
       </svg>
     );
+    case "hinode": return (
+      // Rising-sun glyph: half-disc above a horizon line, three short rays.
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round">
+        <path d="M3 11 a5 5 0 0 1 10 0" fill="currentColor" stroke="none" />
+        <line x1="1.5" y1="11.5" x2="14.5" y2="11.5" />
+        <line x1="8" y1="2.5" x2="8" y2="4" />
+        <line x1="3.5" y1="4" x2="4.5" y2="5.5" />
+        <line x1="12.5" y1="4" x2="11.5" y2="5.5" />
+      </svg>
+    );
   }
 }
 
@@ -1825,6 +1905,36 @@ function SkullGlyph() {
       <circle cx="6" cy="7" r="0.9" fill="currentColor" stroke="none" />
       <circle cx="10" cy="7" r="0.9" fill="currentColor" stroke="none" />
     </svg>
+  );
+}
+
+function SleepingTileBody({
+  cwd,
+  onRevive,
+}: {
+  cwd: string;
+  onRevive: () => void;
+}) {
+  // Display path: replace home prefix with ~, ellipsis-truncate the middle
+  // for readability. The full path lives in the title attr for exact recall.
+  const display = cwd.replace(/^\/Users\/[^/]+/, "~");
+  return (
+    <div className="sleeping-body">
+      <button
+        type="button"
+        className="sleeping-revive"
+        onClick={(ev) => {
+          ev.stopPropagation();
+          onRevive();
+        }}
+        title={`Revive session in ${cwd}`}
+      >
+        click to revive
+      </button>
+      <div className="sleeping-cwd" title={cwd}>
+        {display}
+      </div>
+    </div>
   );
 }
 

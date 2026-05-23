@@ -192,6 +192,84 @@
   --sheen: rgba(214,208,191,0.020);
 }
 
+/* Washi Hinomaru — shironuri (白塗り). en's first LIGHT theme.
+   Cream washi bg, sumi ink (warm near-black), shu-iro vermillion accent.
+   Lifted recipe inverts: bg pulled DOWN from white into warm cream, tile
+   sits LIGHTER than bg (paper-on-paper lit from above). Sheen + vignette
+   use brown chroma not black so shadows stay warm. Palette tuned to
+   shironuri values — softer ink, less drastic chroma than first pass. */
+[data-theme="washi"],
+[data-theme="washi-kyokujitsu"] {
+  --bg:        #ebedf0;
+  --tile:      #f1f3f6;
+  --tile-2:    #f8fafc;
+  --line:      rgba(0, 0, 0, 0.10);
+  --line-2:    rgba(0, 0, 0, 0.16);
+  --ink:       #0f0c0a;
+  --ink-2:     #524a44;
+  --ink-3:     #6e6a66;
+  --ink-4:     #b0adaa;
+  --accent:    #bc002d;
+  --accent-glow: rgba(188, 0, 45, 0.22);
+  --ok:        #2a78c8;
+  --warn:      #94004f;
+  --grain-opacity: 0.06;
+  --grain-blend: multiply;
+  --vignette: rgba(0, 0, 0, 0.08);
+  --sheen: rgba(255, 255, 255, 0.55);
+}
+
+/* Washi Kyokujitsu — the war flag variant. Same shironuri palette as
+   Washi Hinomaru, but the body bg gains a 16-ray rising-sun pattern
+   radiating from a central disc. Crisp not cartoony — rays at low alpha
+   so they're texture not graphic. The disc is implied at the rays'
+   convergence point (rendered as the accent bg of the active tile or
+   alert state). */
+/* Wikimedia Commons: War_flag_of_the_Imperial_Japanese_Army.svg
+   Public domain. Stored as a CSS data URI so it renders instantly with
+   no fetch. Used in 3 places (body bg, theme picker dot, brand mark). */
+:root {
+  --kyokujitsu-svg: url("data:image/svg+xml;utf8,%3Csvg width=%22900%22 height=%22600%22 version=%221.0%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect width=%22900%22 height=%22600%22 fill=%22%23fff%22/%3E%3Cg fill=%22%23be0026%22%3E%3Ccircle cx=%22442%22 cy=%22300%22 r=%22153%22/%3E%3Cpath d=%22m0 0h130l218 185-20.2 21.1z%22/%3E%3Cpath d=%22m230 0h75l94.1 156-27 11.6z%22/%3E%3Cpath d=%22m405 0h70l-18.6 151-29.2-.0352z%22/%3E%3Cpath d=%22m575 0h75l-138 168-27.1-11.4z%22/%3E%3Cpath d=%22m750 0h130l-324 206-20.3-21z%22/%3E%3Cpath d=%22m405 600h70l-18.6-151-29.1-.082z%22/%3E%3Cpath d=%22m230 600h74.9l94.1-156-27-11.5z%22/%3E%3Cpath d=%22m0 600h130l218-185-21.2-20.4z%22/%3E%3Cpath d=%22m575 600h75l-139-168-26.8 11.6z%22/%3E%3Cpath d=%22m750 600h130l-324-206-20.1 21.2z%22/%3E%3Cpath d=%22m900 95v75l-316 86.9-10.9-27.4z%22/%3E%3Cpath d=%22m900 265v70l-310-20.3.266-29.5z%22/%3E%3Cpath d=%22m900 430v75l-327-135 11.4-27.1z%22/%3E%3Cpath d=%22m0 95v75l300 87.1 11.4-27.1z%22/%3E%3Cpath d=%22m0 265v70l294-20.3-.0469-29.4z%22/%3E%3Cpath d=%22m0 430v75l311-135-11.4-27.1z%22/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Kyokujitsu flag as the actual app background — fixed-position layer
+   on <html> behind everything else. Uses ::before on html so it doesn't
+   collide with body::before (grain) and body::after (vignette).
+
+   Multiply blend means the SVG's white field disappears into the cream
+   bg; only the red rays + disc come through as a soft watermark. The
+   flag reads as the page's "skin," visible in the gap between tiles +
+   around the chrome edges. */
+[data-theme="washi-kyokujitsu"]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: var(--kyokujitsu-svg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.32;
+  mix-blend-mode: multiply;
+}
+/* For the html::before flag layer to be visible, body needs to be
+   transparent (its default --bg cream would otherwise paint over). */
+[data-theme="washi-kyokujitsu"] body {
+  background: transparent;
+}
+/* The "app canvas" bg color goes onto <html> instead so brightness
+   filter still has a backdrop, then the flag layers on top via mix-blend. */
+html[data-theme="washi-kyokujitsu"] {
+  background: var(--bg);
+}
+/* Make the tile-grid gap transparent in kyokujitsu so the flag SVG
+   shows between tiles. Tiles themselves stay fully opaque so terminal
+   output remains crisp on cream. */
+[data-theme="washi-kyokujitsu"] .grid {
+  background: transparent;
+}
+
 /* ───────────────────── BASE ───────────────────── */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -469,6 +547,27 @@ body::after {
   filter: brightness(var(--app-brightness, 1));
 }
 
+/* ─── Chrome non-selectable ───
+   Disable text/icon selection on every chrome surface — navbar, foot bar,
+   popovers, modals. Selection should only work inside terminals (where
+   xterm needs it for copy) and the rename input (which needs it natively).
+   Keeps drag from accidentally highlighting labels mid-gesture. */
+.titlebar,
+.foot,
+.alert-style-popover,
+.modal-overlay,
+.sleeping-revive,
+.sleeping-cwd {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.xterm-host,
+.xterm-host *,
+.t-head .name-edit {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 /* ─── Global focus ring for keyboard nav.
    Outline (not box-shadow) so it doesn't override per-component
    shadows; offset gives breathing room around rounded buttons. */
@@ -545,6 +644,158 @@ input:focus-visible {
   color: var(--accent);
   flex: none;
   transition: color var(--dur-fast);
+}
+/* Hide the torii brand-mark when a washi theme is active — the hinomaru
+   disc replaces it as the brand glyph (per the mockups). */
+[data-theme="washi"] .brand-mark,
+[data-theme="washi-kyokujitsu"] .brand-mark { display: none; }
+
+/* ─── Light-theme overrides for washi family ───
+   The chrome's frosted-pill recipe uses rgba(255,255,255,...) tints tuned
+   for dark bgs — they go invisible on light bg. Re-tint to neutral cool. */
+[data-theme="washi"] .spawn-btn,
+[data-theme="washi"] .reset-sizes-btn,
+[data-theme="washi"] .alert-style-trigger,
+[data-theme="washi-kyokujitsu"] .spawn-btn,
+[data-theme="washi-kyokujitsu"] .reset-sizes-btn,
+[data-theme="washi-kyokujitsu"] .alert-style-trigger {
+  border-color: var(--line);
+  border-top-color: var(--line-2);
+  background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+}
+[data-theme="washi"] .spawn-btn:hover:not(:disabled),
+[data-theme="washi"] .reset-sizes-btn:hover,
+[data-theme="washi"] .alert-style-trigger:hover,
+[data-theme="washi-kyokujitsu"] .spawn-btn:hover:not(:disabled),
+[data-theme="washi-kyokujitsu"] .reset-sizes-btn:hover,
+[data-theme="washi-kyokujitsu"] .alert-style-trigger:hover {
+  background: linear-gradient(180deg, #ffffff 0%, var(--tile-2) 100%);
+  border-color: var(--line-2);
+}
+
+/* ─── Washi comprehensive light-theme polish ───
+   Popover/grid/modal surfaces tuned for the new cool-neutral lifted recipe
+   where --tile-2 is the LIGHTEST step. */
+
+/* Popover frame: --tile-2 (lightest) so it reads as "lifted card" above
+   the navbar gradient (which sits on --bg). */
+[data-theme="washi"] .alert-style-popover,
+[data-theme="washi-kyokujitsu"] .alert-style-popover {
+  background: var(--tile-2);
+  border-color: var(--line-2);
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(188, 0, 45, 0.18);
+}
+
+/* Option rows: hover sits on --tile (one step down from the popover bg
+   so hover registers); active gets full accent treatment. */
+[data-theme="washi"] .alert-style-option:hover,
+[data-theme="washi-kyokujitsu"] .alert-style-option:hover {
+  background: var(--tile);
+  border-color: var(--line-2);
+}
+[data-theme="washi"] .alert-style-option[data-active="true"],
+[data-theme="washi-kyokujitsu"] .alert-style-option[data-active="true"] {
+  background: color-mix(in oklch, var(--tile), var(--accent) 8%);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Theme-section + texture/themes row dividers — use --line-2 directly. */
+[data-theme="washi"] .theme-section,
+[data-theme="washi-kyokujitsu"] .theme-section,
+[data-theme="washi"] .textures,
+[data-theme="washi-kyokujitsu"] .textures,
+[data-theme="washi"] .themes,
+[data-theme="washi-kyokujitsu"] .themes {
+  border-color: var(--line-2);
+  border-left-color: var(--line-2);
+}
+
+/* Texture grid chips: bg drops to canvas (--bg, deeper than popover) so
+   each chip reads as a recessed swatch in the lifted popover. */
+[data-theme="washi"] .textures button,
+[data-theme="washi-kyokujitsu"] .textures button {
+  background-color: var(--bg);
+  border-color: var(--line-2);
+}
+[data-theme="washi"] .textures button:hover,
+[data-theme="washi-kyokujitsu"] .textures button:hover {
+  border-color: var(--accent);
+}
+
+/* Modals — overlay is ink-toned so the dimmed app behind reads dark; modal
+   card sits on --tile-2 (lightest) like the popover. */
+[data-theme="washi"] .modal-overlay,
+[data-theme="washi-kyokujitsu"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.35);
+}
+[data-theme="washi"] .modal,
+[data-theme="washi-kyokujitsu"] .modal {
+  background: var(--tile-2);
+  border-color: var(--line-2);
+}
+
+/* Foot bar + navbar gradient: ink-toned overlay (not white) so the seam
+   reads on light bg. */
+[data-theme="washi"] .foot,
+[data-theme="washi-kyokujitsu"] .foot {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0%, transparent 100%);
+  border-top-color: var(--line-2);
+}
+[data-theme="washi"] .titlebar,
+[data-theme="washi-kyokujitsu"] .titlebar {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, var(--bg) 100%);
+  border-bottom-color: var(--line-2);
+}
+
+/* Grid gap color: --line is too faint at 0.10 alpha for tile-on-tile
+   separation. Bump to --line-2 weight for visible dividers. */
+[data-theme="washi"] .grid,
+[data-theme="washi-kyokujitsu"] .grid {
+  background: var(--line-2);
+}
+
+/* Tile head: --tile-2 (lightest) → --tile, so the head LIFTS off the body. */
+[data-theme="washi"] .t-head,
+[data-theme="washi-kyokujitsu"] .t-head {
+  background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
+  border-bottom-color: var(--line);
+}
+[data-theme="washi"] .t-head::after,
+[data-theme="washi-kyokujitsu"] .t-head::after {
+  background: rgba(255, 255, 255, 0.7);
+}
+/* Hinomaru / Kyokujitsu flag mark — appears next to "en" wordmark only
+   when the washi (or washi-kyokujitsu) theme is active. The disc itself
+   is a red filled circle; for kyokujitsu the radiating rays render as a
+   conic-gradient backdrop sized larger than the disc, then masked so the
+   disc-bg edge stays crisp. */
+.brand-hinomaru {
+  width: calc(12px * var(--fz));
+  height: calc(12px * var(--fz));
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+}
+[data-theme="washi-kyokujitsu"] .brand-hinomaru {
+  /* Replace the plain disc with the actual kyokujitsu SVG flag. Native
+     3:2 aspect ratio (900x600) preserved so the rays look right. Sized
+     by height-relative-to-wordmark; the SVG's native white field reads
+     against the cream navbar without needing extra masking. */
+  width: calc(24px * var(--fz));
+  height: calc(16px * var(--fz));
+  background: transparent;
+  background-image: var(--kyokujitsu-svg);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0;
+  box-shadow: none;
 }
 .status {
   margin-left: auto;
@@ -689,25 +940,55 @@ input:focus-visible {
 .themes button {
   width: 16px; height: 16px;
   border-radius: 50%;
-  border: 1px solid var(--line-2);
+  border: none;
   cursor: pointer;
   padding: 0;
   position: relative;
-  transition: transform var(--dur-fast), border-color var(--dur-fast);
+  /* box-shadow ring instead of border to keep the gradient flush with the
+     dot edge — border on a 16x16 squeezes the gradient into a 14x14 inner
+     box and lets the seam bleed past where the cream side ought to start.
+     Resting ring uses --line-2 (the project's standard subtle-border tone),
+     matching the original behavior. */
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  transition: transform var(--dur-fast), box-shadow var(--dur-fast);
 }
-.themes button:hover { transform: scale(1.15); border-color: var(--ink-3); }
+.themes button:hover {
+  transform: scale(1.15);
+  box-shadow: inset 0 0 0 1px var(--ink-3);
+}
 .themes button[data-active="true"] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--accent), 0 0 8px var(--accent-glow);
+  /* Active dot uses the THIS-DOT's-own theme accent (via --dot-accent),
+     not the currently-active theme's accent. So selecting kanagawa shows
+     amber rings, washi shows red rings, etc. */
+  box-shadow:
+    inset 0 0 0 1px var(--dot-accent, var(--accent)),
+    0 0 0 2px var(--bg),
+    0 0 0 3px var(--dot-accent, var(--accent)),
+    0 0 8px var(--dot-glow, var(--accent-glow));
 }
-.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, #14141c 50%, #d4b274 50%); }
-.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, #2a2a37 50%, #c0a36e 50%); }
-.themes button[data-set="everforest"]      { background: linear-gradient(135deg, #181f23 50%, #b8d290 50%); }
-.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #343f44 50%, #a7c080 50%); }
-.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%); }
-.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, #2a273f 50%, #ea9a97 50%); }
-.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%); }
-.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, #2a2620 50%, #c89656 50%); }
+/* Per-theme picker dots: bg shows the theme's bg/accent split, and the
+   --dot-accent + --dot-glow vars feed all the box-shadow rules above so
+   each dot's ring tracks its OWN accent regardless of the active theme. */
+.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, #14141c 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
+.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, #2a2a37 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
+.themes button[data-set="everforest"]      { background: linear-gradient(135deg, #181f23 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
+.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #343f44 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
+.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
+.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, #2a273f 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
+.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
+.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, #2a2620 50%, #c89656 50%); --dot-accent: #c89656; --dot-glow: rgba(200,150,86,0.5); }
+.themes button[data-set="washi"]           { background: linear-gradient(135deg, #ebedf0 50%, #bc002d 50%); --dot-accent: #bc002d; --dot-glow: rgba(188,0,45,0.5); }
+.themes button[data-set="washi-kyokujitsu"] {
+  background-image: var(--kyokujitsu-svg);
+  background-size: cover;
+  /* SVG is 900x600 (3:2). The disc + rays are centered horizontally; we
+     render the dot as a circle clipped from the center-square crop so the
+     disc sits in the middle of the visible circle. */
+  background-position: center;
+  background-repeat: no-repeat;
+  --dot-accent: #bc002d;
+  --dot-glow: rgba(188,0,45,0.5);
+}
 
 .accent {
   margin-left: calc(14px * var(--fz));
@@ -854,12 +1135,15 @@ input:focus-visible {
   width: calc(14px * var(--fz));
   height: calc(14px * var(--fz));
   border-radius: 50%;
-  border: 1px solid var(--line-2);
+  /* box-shadow ring instead of border to keep the gradient flush with the
+     dot edge — border-box squeezes the bg and lets the gradient seam bleed. */
+  box-shadow: inset 0 0 0 1px var(--accent);
   display: inline-block;
+  transition: box-shadow var(--dur-fast);
 }
 .alert-style-trigger.icon-only:hover .theme-trigger-dot,
 .alert-style-trigger.icon-only[aria-expanded="true"] .theme-trigger-dot {
-  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 .alert-style-popover {
   position: absolute;
@@ -1375,11 +1659,14 @@ input:focus-visible {
 .t-head {
   display: flex;
   align-items: center;
-  gap: calc(10px * var(--fz));
-  padding: 0 calc(18px * var(--fz));
+  /* Tile-head scales with TERMINAL font size (--tfz), not app chrome size
+     (--fz). Reads as "header for the xterm content underneath," and bumping
+     app font size leaves the tile chrome alone. */
+  gap: calc(10px * var(--tfz, 1));
+  padding: 0 calc(18px * var(--tfz, 1));
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
-  font-size: calc(14px * var(--fz));
+  font-size: calc(14px * var(--tfz, 1));
   background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
   position: relative;
   cursor: grab;
@@ -1883,6 +2170,59 @@ html[data-alert-style="shuriken"] .tile.needs {
   100%     { opacity: 0; }
 }
 
+/* HINODE — rising sun. A red-disc rises from below the tile, peaks
+   centered, then settles partly visible above the horizon line. The
+   horizon hairline glows in accent. Loops every 3.2s — slow, deliberate.
+   The flag motif as a STATE, not a logo (per ui-ux-pro-max's idea). */
+html[data-alert-style="hinode"] .tile.needs {
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 78%),
+    inset 0 0 24px -12px var(--accent-glow);
+}
+.alert-extras .hinode-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+.alert-extras .hinode-disc {
+  position: absolute;
+  left: 50%;
+  bottom: 30%;
+  width: 60%;
+  aspect-ratio: 1;
+  max-width: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, var(--accent) 55%, color-mix(in oklch, var(--accent), transparent 30%) 80%, transparent 100%);
+  transform: translate(-50%, 100%);
+  opacity: 0;
+  animation: alert-hinode-rise 3.2s ease-in-out infinite;
+  filter: blur(0.4px);
+}
+.alert-extras .hinode-horizon {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 30%;
+  height: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  opacity: 0;
+  animation: alert-hinode-horizon 3.2s ease-in-out infinite;
+}
+@keyframes alert-hinode-rise {
+  0%   { transform: translate(-50%, 100%); opacity: 0; }
+  35%  { transform: translate(-50%, 50%);  opacity: 0.9; }
+  60%  { transform: translate(-50%, 35%);  opacity: 1; }
+  85%  { transform: translate(-50%, 50%);  opacity: 0.7; }
+  100% { transform: translate(-50%, 100%); opacity: 0; }
+}
+@keyframes alert-hinode-horizon {
+  0%, 100% { opacity: 0; }
+  30%, 80% { opacity: 0.65; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .status .dot.warn,
   .tile.needs .t-head .dot { animation: none; }
@@ -1915,7 +2255,7 @@ html[data-alert-style="shuriken"] .tile.needs {
 .t-head .meta { flex: none; }
 .t-head .name-edit {
   font-family: var(--mono);
-  font-size: calc(14px * var(--fz));
+  font-size: calc(14px * var(--tfz, 1));
   background: transparent;
   border: none;
   outline: none;
@@ -1930,8 +2270,8 @@ html[data-alert-style="shuriken"] .tile.needs {
   min-width: 60px;
   width: auto;
 }
-.t-head .path { color: var(--ink-2); font-size: calc(14px * var(--fz)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
-.t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--fz)); letter-spacing: 0.04em; }
+.t-head .path { color: var(--ink-2); font-size: calc(14px * var(--tfz, 1)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--tfz, 1)); letter-spacing: 0.04em; }
 
 .t-close {
   width: 18px;
@@ -2277,6 +2617,54 @@ html[data-alert-style="shuriken"] .tile.needs {
 .foot .group { display: flex; align-items: center; gap: 6px; }
 .foot .right { margin-left: auto; color: var(--accent); }
 .foot .right b { color: var(--accent); font-weight: 500; }
+
+/* ─── Sleeping tile (Phase B-lite restore) ───
+   A tile that was persisted from a prior session but not yet woken up.
+   Header chrome stays present for orientation; body shows a revive CTA.
+   Dimmed overall so live tiles read as the foreground at a glance. */
+.tile[data-sleeping="true"] { filter: brightness(0.78); }
+.tile[data-sleeping="true"] .t-head .dot { background: var(--ink-4); box-shadow: none; animation: none; }
+.tile[data-sleeping="true"] .t-head .name { color: var(--ink-2); font-style: italic; }
+
+.sleeping-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(10px * var(--fz));
+  padding: calc(16px * var(--fz));
+  background: var(--tile);
+}
+.sleeping-revive {
+  font-family: var(--mono);
+  font-size: calc(13px * var(--fz));
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--line-2);
+  padding: calc(8px * var(--fz)) calc(14px * var(--fz));
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.sleeping-revive:hover,
+.sleeping-revive:focus-visible {
+  background: var(--tile-2);
+  border-color: var(--accent);
+}
+.sleeping-cwd {
+  font-family: var(--mono);
+  font-size: calc(11px * var(--fz));
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 calc(8px * var(--fz));
+  text-align: center;
+}
 
 /* ─── Tile drag-to-reorder ───
    The dragged tile dims in place + becomes inert so the cursor can pick

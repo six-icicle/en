@@ -182,6 +182,58 @@ const THEMES: Record<Theme, ITheme> = {
     brightCyan: "#b1d6cc",
     brightWhite: "#ede5d2",
   },
+  // Washi Hinomaru / shironuri — en's first LIGHT terminal palette.
+  // Foreground is the accent red, not sumi — user-typed text reads in
+  // shu-iro per the user's directive ("submitted message should be red").
+  // ANSI colors retuned for WCAG-readable contrast on light bg.
+  washi: {
+    background: "#f1f3f6",
+    foreground: "#bc002d",
+    cursor: "#bc002d",
+    cursorAccent: "#ebedf0",
+    selectionBackground: "#c8d0db",
+    black: "#1a1614",
+    red: "#bc002d",
+    green: "#4a7d3a",
+    yellow: "#a06820",
+    blue: "#7291c0",
+    magenta: "#7d2d5a",
+    cyan: "#2d6a6a",
+    white: "#3a3026",
+    brightBlack: "#8a7f76",
+    brightRed: "#d8233f",
+    brightGreen: "#5a8d4a",
+    brightYellow: "#b87830",
+    brightBlue: "#87a5ce",
+    brightMagenta: "#8d3d6a",
+    brightCyan: "#3d7a7a",
+    brightWhite: "#fbf6eb",
+  },
+  // Same xterm palette as washi — the kyokujitsu rays render behind the
+  // tiles via [data-theme] CSS, not inside the terminal canvas.
+  "washi-kyokujitsu": {
+    background: "#f1f3f6",
+    foreground: "#bc002d",
+    cursor: "#bc002d",
+    cursorAccent: "#ebedf0",
+    selectionBackground: "#c8d0db",
+    black: "#1a1614",
+    red: "#bc002d",
+    green: "#4a7d3a",
+    yellow: "#a06820",
+    blue: "#7291c0",
+    magenta: "#7d2d5a",
+    cyan: "#2d6a6a",
+    white: "#3a3026",
+    brightBlack: "#8a7f76",
+    brightRed: "#d8233f",
+    brightGreen: "#5a8d4a",
+    brightYellow: "#b87830",
+    brightBlue: "#87a5ce",
+    brightMagenta: "#8d3d6a",
+    brightCyan: "#3d7a7a",
+    brightWhite: "#fbf6eb",
+  },
 };
 
 export default function TerminalView({
