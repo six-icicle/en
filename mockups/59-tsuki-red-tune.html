@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>en — Tsuki red intensity tune</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #0a0d12;
+    color: #c8cdd6;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 40px 56px 80px;
+  }
+
+  .pageheader {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 6px;
+  }
+  .wm {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 26px; letter-spacing: 0.04em;
+    color: #c84258;
+  }
+  .pt {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; color: #8a909c; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ps {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #565b66; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 36px;
+    max-width: 760px; line-height: 1.6;
+  }
+
+  /* ─── Reference (current Tsuki) ─── */
+  .reference {
+    margin-bottom: 48px;
+    padding: 18px 22px;
+    background: rgba(174, 66, 88, 0.06);
+    border: 1px solid rgba(174, 66, 88, 0.18);
+    border-radius: 10px;
+  }
+  .reference .label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: #8a909c; letter-spacing: 0.16em;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .reference .label .name {
+    color: #c8cdd6; margin-left: 10px;
+    text-transform: none; letter-spacing: 0.02em;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 13px; font-weight: 500;
+  }
+  .reference .label .gloss {
+    color: #6a7080; margin-left: 6px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .reference .accent-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .reference .accent-chip {
+    width: 60px; height: 28px;
+    border-radius: 6px;
+    background: #ae4258;
+    border: 1px solid rgba(220, 230, 245, 0.08);
+  }
+  .reference .accent-meta {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #8a909c;
+    letter-spacing: 0.04em;
+  }
+  .reference .accent-meta b {
+    color: #c8cdd6; font-weight: 500;
+  }
+
+  /* ─── 3-up card grid ─── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 1100px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+
+  .card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--c-bg);
+    color: var(--c-ink);
+    border: 1px solid var(--c-line-2);
+    display: flex; flex-direction: column;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.32);
+  }
+  .card-meta {
+    padding: 22px 22px 18px;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .card-name {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .card-name .step {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 22px; color: var(--c-accent); letter-spacing: 0.04em;
+  }
+  .card-name .label {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 17px;
+    color: var(--c-ink); letter-spacing: 0.02em;
+  }
+  .card-name .hex {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: var(--c-accent);
+    letter-spacing: 0.04em;
+    margin-left: auto;
+  }
+  .card-tag {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px; color: var(--c-ink-2);
+    letter-spacing: 0.04em;
+    line-height: 1.55;
+  }
+
+  /* ─── Mini app preview ─── */
+  .mini {
+    background: var(--c-bg);
+    flex: none;
+    display: grid;
+    grid-template-rows: 40px 196px 24px;
+  }
+  .mini-bar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--c-bg), var(--c-ink-4) 22%) 0%,
+      var(--c-bg) 100%);
+    display: flex; align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .mini-brand {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .disc {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.20);
+    flex: none;
+  }
+  .mini-brand .word {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 14px;
+    color: var(--c-ink); letter-spacing: 0.04em;
+  }
+  .mini-pill {
+    width: 22px; height: 22px;
+    border-radius: 8px;
+    background: color-mix(in oklch, var(--c-bg), var(--c-ink-4) 18%);
+    border: 1px solid var(--c-line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--c-accent);
+  }
+  .mini-pill.spacer { margin-left: auto; }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1px;
+    background: var(--c-line);
+  }
+  .mini-tile {
+    background: var(--c-tile);
+    display: grid;
+    grid-template-rows: 22px 1fr;
+    overflow: hidden;
+    position: relative;
+  }
+  .mini-tile.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in oklch, var(--c-accent), transparent 50%);
+    pointer-events: none;
+    box-shadow: inset 0 0 16px color-mix(in oklch, var(--c-accent), transparent 80%);
+  }
+  .mini-tile.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--c-accent);
+    box-shadow: 0 0 8px var(--c-accent-glow);
+  }
+  .mini-head {
+    display: flex; align-items: center;
+    padding: 0 8px;
+    gap: 6px;
+    border-bottom: 1px solid var(--c-line);
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--c-tile), var(--c-ink-4) 14%) 0%,
+      var(--c-tile) 100%);
+  }
+  .mini-head .name {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: var(--c-ink-2);
+    letter-spacing: 0.02em;
+  }
+  .mini-tile.active .mini-head .name { color: var(--c-ink); }
+  .mini-head .x {
+    margin-left: auto;
+    color: var(--c-ink-3);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+  }
+  .mini-body {
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.55;
+    color: var(--c-ink);
+    overflow: hidden;
+  }
+  .mini-body .dim { color: var(--c-ink-2); }
+  .mini-body .accent { color: var(--c-accent); }
+  .mini-body .ok { color: var(--c-ok); }
+
+  .mini-tile.empty .mini-body {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--c-accent);
+    gap: 6px;
+  }
+  .mini-tile.empty .label2 {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+  .mini-tile.empty .cta {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500; font-size: 11px;
+    color: var(--c-accent);
+    border: 1px solid var(--c-line-2);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: color-mix(in oklch, var(--c-tile), var(--c-ink-4) 12%);
+  }
+
+  .mini-foot {
+    background: linear-gradient(0deg,
+      color-mix(in oklch, var(--c-bg), var(--c-ink-4) 22%) 0%,
+      var(--c-bg) 100%);
+    display: flex; align-items: center;
+    padding: 0 12px;
+    border-top: 1px solid var(--c-line);
+    gap: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+  .mini-foot .right {
+    margin-left: auto;
+    color: var(--c-ink-3);
+  }
+
+  /* ─── Accent comparison strip ─── */
+  .accent-strip {
+    background: var(--c-bg);
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--c-line);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .accent-strip .big {
+    width: 56px; height: 32px;
+    border-radius: 6px;
+    background: var(--c-accent);
+    box-shadow: 0 0 0 1px var(--c-line);
+  }
+  .accent-strip .glow {
+    width: 56px; height: 32px;
+    border-radius: 6px;
+    background: var(--c-accent-glow);
+    box-shadow: 0 0 0 1px var(--c-line);
+  }
+  .accent-strip .info {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: var(--c-ink-2);
+    letter-spacing: 0.06em;
+    line-height: 1.55;
+  }
+  .accent-strip .info b {
+    color: var(--c-ink); font-weight: 500;
+  }
+
+  /* ─── Variants — three red intensities ─── */
+  /* Shared cold tsuki bg/ink, only accent changes */
+
+  /* A. Subtle nudge — slightly more chroma */
+  .card.a {
+    --c-bg:        #11141a;
+    --c-tile:      #171b22;
+    --c-tile-2:    #1d2129;
+    --c-line:      rgba(220, 230, 245, 0.04);
+    --c-line-2:    rgba(220, 230, 245, 0.08);
+    --c-ink:       #c8cdd6;
+    --c-ink-2:     #8a909c;
+    --c-ink-3:     #565b66;
+    --c-ink-4:     #34373e;
+    --c-accent:    #be4258;
+    --c-accent-glow: rgba(190, 66, 88, 0.34);
+    --c-ok:        #6a8aa8;
+    --c-warn:      #a06880;
+  }
+
+  /* B. Mid bump — clearly more red */
+  .card.b {
+    --c-bg:        #11141a;
+    --c-tile:      #171b22;
+    --c-tile-2:    #1d2129;
+    --c-line:      rgba(220, 230, 245, 0.04);
+    --c-line-2:    rgba(220, 230, 245, 0.08);
+    --c-ink:       #c8cdd6;
+    --c-ink-2:     #8a909c;
+    --c-ink-3:     #565b66;
+    --c-ink-4:     #34373e;
+    --c-accent:    #c8425a;
+    --c-accent-glow: rgba(200, 66, 90, 0.36);
+    --c-ok:        #6a8aa8;
+    --c-warn:      #a06880;
+  }
+
+  /* C. Strongest — pronounced shu-iro red */
+  .card.c {
+    --c-bg:        #11141a;
+    --c-tile:      #171b22;
+    --c-tile-2:    #1d2129;
+    --c-line:      rgba(220, 230, 245, 0.04);
+    --c-line-2:    rgba(220, 230, 245, 0.08);
+    --c-ink:       #c8cdd6;
+    --c-ink-2:     #8a909c;
+    --c-ink-3:     #565b66;
+    --c-ink-4:     #34373e;
+    --c-accent:    #d4405a;
+    --c-accent-glow: rgba(212, 64, 90, 0.40);
+    --c-ok:        #6a8aa8;
+    --c-warn:      #a06880;
+  }
+
+  .notes {
+    margin-top: 48px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #565b66;
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+    max-width: 760px;
+  }
+  .notes b { color: #8a909c; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="pageheader">
+  <span class="wm">en</span>
+  <span class="pt">tsuki — red intensity tune</span>
+</div>
+<div class="ps">
+  All three keep Tsuki's cold slate bg/ink intact — only the accent (and its glow) shift.
+  Pick a step on the red-pronouncement axis. Each variant shows the accent + its glow chip
+  at the bottom for direct intensity comparison.
+</div>
+
+<div class="reference">
+  <div class="label">REFERENCE — current<span class="name">Tsuki</span><span class="gloss">月 · moon</span></div>
+  <div class="accent-row">
+    <div class="accent-chip"></div>
+    <div class="accent-meta"><b>#ae4258</b> · existing accent — pulled-back, almost burgundy</div>
+  </div>
+</div>
+
+<div class="cards">
+
+  <!-- A. Subtle nudge -->
+  <div class="card a">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="step">A</span>
+        <span class="label">subtle nudge</span>
+        <span class="hex">#be4258</span>
+      </div>
+      <div class="card-tag">
+        +5% chroma over the original. Still restrained — just a hair more red, less burgundy.
+        Smallest change visible without breaking the "quiet" character.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label2">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">tsuki · A</span>
+      </div>
+    </div>
+    <div class="accent-strip">
+      <div class="big"></div>
+      <div class="glow"></div>
+      <div class="info"><b>#be4258</b> · accent<br><b>34%</b> · glow alpha</div>
+    </div>
+  </div>
+
+  <!-- B. Mid bump -->
+  <div class="card b">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="step">B</span>
+        <span class="label">mid bump</span>
+        <span class="hex">#c8425a</span>
+      </div>
+      <div class="card-tag">
+        Clearly more red. Reads as confident shu-iro vermillion against the slate, but still
+        cold-sympathetic. Probably the sweet spot for "more pronounced without burning."
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label2">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">tsuki · B</span>
+      </div>
+    </div>
+    <div class="accent-strip">
+      <div class="big"></div>
+      <div class="glow"></div>
+      <div class="info"><b>#c8425a</b> · accent<br><b>36%</b> · glow alpha</div>
+    </div>
+  </div>
+
+  <!-- C. Strongest -->
+  <div class="card c">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="step">C</span>
+        <span class="label">pronounced</span>
+        <span class="hex">#d4405a</span>
+      </div>
+      <div class="card-tag">
+        Most pronounced. Red sits assertively against the slate — closest to the light-theme
+        hinomaru in saturation, just dialed back enough not to burn on dark.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label2">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">tsuki · C</span>
+      </div>
+    </div>
+    <div class="accent-strip">
+      <div class="big"></div>
+      <div class="glow"></div>
+      <div class="info"><b>#d4405a</b> · accent<br><b>40%</b> · glow alpha</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <b>What's changing.</b> Only the <code style="color:#8a909c;">--accent</code> token and its
+  glow alpha. bg, tile, ink, ink-2, ok, warn all stay locked at Tsuki's cold-slate values, so
+  the whole "quiet, near-neutral, faintly cold" character is preserved across all three —
+  the red is the only variable.
+  <br><br>
+  Recommend <b>B (#c8425a)</b> as the default pick — it's the most "pronounced without
+  burning." A is barely-there; C might fight the restraint a bit on long sessions.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>en — Palette Atlas (all themes)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #0f0d12;
+    color: #d8d4e4;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 40px 56px 80px;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --display: 'Outfit', system-ui, sans-serif;
+  }
+
+  /* ─── Header ─── */
+  .pageheader {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 6px;
+  }
+  .wm {
+    font-family: var(--display);
+    font-weight: 600; font-size: 26px; letter-spacing: 0.04em;
+    color: #ea9a97;
+  }
+  .pt {
+    font-family: var(--mono);
+    font-size: 13px; color: #8a85a4; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ps {
+    font-family: var(--mono);
+    font-size: 11px; color: #5e5a78; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 36px;
+    max-width: 760px; line-height: 1.6;
+  }
+
+  /* ─── Section heading ─── */
+  .h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 14px;
+    color: #b8b0d0;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin: 36px 0 16px;
+    border-bottom: 1px solid rgba(220, 215, 240, 0.10);
+    padding-bottom: 8px;
+  }
+
+  /* ─── Token reference legend ─── */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 24px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 1100px) {
+    .legend { grid-template-columns: 1fr 1fr; }
+  }
+  .legend-cell {
+    background: rgba(220, 215, 240, 0.025);
+    border: 1px solid rgba(220, 215, 240, 0.06);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .legend-cell .tok {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #b8b0d0;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+  .legend-cell .tok .swatch {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    vertical-align: -3px;
+    margin-right: 8px;
+    box-shadow: 0 0 0 1px rgba(220, 215, 240, 0.10);
+  }
+  .legend-cell ul {
+    margin: 4px 0 0;
+    padding-left: 20px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: #8a85a4;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+  }
+  .legend-cell ul li {
+    margin: 2px 0;
+  }
+
+  /* Color examples in the legend swatches — pulled from rose-pine-soft as the
+     visual reference theme since it's the canonical app default. */
+  .sw-bg        { background: #2a273f; }
+  .sw-tile      { background: #312e4a; }
+  .sw-tile-2    { background: #383454; }
+  .sw-line      { background: #44415a; }
+  .sw-line-2    { background: #524d70; }
+  .sw-ink       { background: #e0def4; }
+  .sw-ink-2     { background: #908caa; }
+  .sw-ink-3     { background: #6e6a86; }
+  .sw-ink-4     { background: #4a4660; }
+  .sw-accent    { background: #ea9a97; }
+  .sw-glow      { background: rgba(234,154,151,0.35); }
+  .sw-ok        { background: #9ccfd8; }
+  .sw-warn      { background: #c44040; }
+
+  /* ─── Matrix table ─── */
+  .matrix-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(220, 215, 240, 0.10);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    background: rgba(220, 215, 240, 0.02);
+    font-family: var(--mono);
+  }
+  th, td {
+    padding: 0;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(220, 215, 240, 0.06);
+    border-right: 1px solid rgba(220, 215, 240, 0.04);
+  }
+  th:last-child, td:last-child { border-right: none; }
+  tr:last-child td { border-bottom: none; }
+
+  /* Theme name column */
+  th.theme-h, td.theme-cell {
+    width: 200px;
+    min-width: 200px;
+    padding: 14px 16px;
+    border-right: 1px solid rgba(220, 215, 240, 0.10);
+  }
+  th.theme-h {
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    color: #6e6a86;
+    text-transform: uppercase;
+    background: rgba(220, 215, 240, 0.04);
+  }
+  td.theme-cell {
+    background: rgba(220, 215, 240, 0.025);
+  }
+  td.theme-cell .name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--row-accent, #b8b0d0);
+    letter-spacing: 0.02em;
+  }
+  td.theme-cell .id {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: #6e6a86;
+    letter-spacing: 0.06em;
+    margin-top: 3px;
+  }
+
+  /* Token columns */
+  th.tok-h {
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: #6e6a86;
+    text-transform: uppercase;
+    background: rgba(220, 215, 240, 0.04);
+    min-width: 64px;
+  }
+
+  td.tok-cell {
+    padding: 8px;
+    text-align: center;
+    width: 64px;
+    min-width: 64px;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Checkered backdrop for transparency-revealing swatches (line, glow). */
+  td.tok-cell.alpha {
+    background:
+      linear-gradient(45deg, #1a1825 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1825 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1825 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1825 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+    background-color: #2a273f;
+  }
+
+  .swatch-box {
+    width: 100%;
+    height: 36px;
+    border-radius: 5px;
+    box-shadow: 0 0 0 1px rgba(220, 215, 240, 0.08), 0 1px 0 rgba(0,0,0,0.2);
+  }
+  .hex {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: #908caa;
+    letter-spacing: 0.02em;
+    word-break: break-all;
+    line-height: 1.3;
+  }
+  .hex.alpha { font-size: 8.5px; color: #6e6a86; }
+
+  /* ─── Per-theme accent ─── (rendered inline via style) ─── */
+
+  /* ─── Footer notes ─── */
+  .notes {
+    margin-top: 36px;
+    font-family: var(--mono);
+    font-size: 11px; color: #5e5a78;
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+    max-width: 900px;
+  }
+  .notes b { color: #8a85a4; font-weight: 500; }
+  .notes code {
+    color: #b8b0d0;
+    background: rgba(220, 215, 240, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 10.5px;
+  }
+
+  /* ─── Light-theme row treatment (washi) — tile cell needs cream backdrop
+     so the white-ish swatches don't disappear into the dark page bg ─── */
+  tr.light-row td.tok-cell {
+    background: #1a1825; /* keep dark for consistency, swatch box has its own shadow */
+  }
+</style>
+</head>
+<body>
+
+<div class="pageheader">
+  <span class="wm">en</span>
+  <span class="pt">palette atlas — all themes, all tokens</span>
+</div>
+<div class="ps">
+  Every active theme's full palette in one matrix. Read horizontally for one theme's full
+  story, vertically to compare a single token across themes. The legend up top maps each
+  token to what it actually paints in the UI.
+</div>
+
+<div class="h2">Token reference — what each one paints</div>
+
+<div class="legend">
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-bg"></span>--bg</div>
+    <ul>
+      <li>Page background canvas</li>
+      <li>Navbar + foot bar gradient base</li>
+      <li>Empty-state fallback surface</li>
+      <li>Modal-confirm text on hover</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-tile"></span>--tile</div>
+    <ul>
+      <li>Terminal tile background (xterm host)</li>
+      <li>Alert-style popover surface</li>
+      <li>Reset modal + option rows</li>
+      <li>Sleeping-tile body</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-tile-2"></span>--tile-2</div>
+    <ul>
+      <li>Lifted tile-head gradient peak</li>
+      <li>Popover + modal card surface</li>
+      <li>Alert option hover state</li>
+      <li>Texture chip background</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-line"></span>--line</div>
+    <ul>
+      <li>Tile-head bottom divider</li>
+      <li>Navbar + foot-bar seam</li>
+      <li>Grid 1px separator (between tiles)</li>
+      <li>Theme-section borders</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-line-2"></span>--line-2</div>
+    <ul>
+      <li>Navbar gradient baseline</li>
+      <li>Heavier popover option borders</li>
+      <li>Theme-picker dot inset ring</li>
+      <li>Texture button outlines</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-ink"></span>--ink</div>
+    <ul>
+      <li>Primary text in tiles</li>
+      <li>Modal body text</li>
+      <li>Tile name (active)</li>
+      <li>Empty-state header text</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-ink-2"></span>--ink-2</div>
+    <ul>
+      <li>Secondary text (tile path)</li>
+      <li>Popover option labels</li>
+      <li>Sleeping-tile italic name</li>
+      <li>Modal body description</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-ink-3"></span>--ink-3</div>
+    <ul>
+      <li>Muted labels (THEME / LAYOUT)</li>
+      <li>Window-control resting color</li>
+      <li>Tile-head metadata</li>
+      <li>Sleeping-tile cwd path</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-ink-4"></span>--ink-4</div>
+    <ul>
+      <li>Status dot resting color</li>
+      <li>Tile-head idle / stale state</li>
+      <li>Used as gradient mix-in for surfaces</li>
+      <li>Quiet contrast reference</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-accent"></span>--accent</div>
+    <ul>
+      <li>Brand wordmark "en" text</li>
+      <li>Active tile inset ring + top hairline</li>
+      <li>All alert animations (sakura, hotaru…)</li>
+      <li>Empty-state CTA, foot-bar primary</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-glow"></span>--accent-glow</div>
+    <ul>
+      <li>Active tile ambient halo</li>
+      <li>Pulse / breath alert bloom</li>
+      <li>Hotaru laser-dot shadow</li>
+      <li>Empty-state CTA hover background</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-ok"></span>--ok</div>
+    <ul>
+      <li>Working tile-head dot (green-ish)</li>
+      <li>Status indicator + halo</li>
+      <li>Info / success accents</li>
+    </ul>
+  </div>
+  <div class="legend-cell">
+    <div class="tok"><span class="swatch sw-warn"></span>--warn</div>
+    <ul>
+      <li>Destructive modal-confirm button</li>
+      <li>"End N sessions?" hover fill</li>
+      <li>Status warning dot + pulse</li>
+    </ul>
+  </div>
+</div>
+
+<div class="h2">Palette matrix — 10 themes × 13 tokens</div>
+
+<div class="matrix-wrap">
+<table>
+<thead>
+  <tr>
+    <th class="theme-h">Theme</th>
+    <th class="tok-h">BG</th>
+    <th class="tok-h">TILE</th>
+    <th class="tok-h">TILE-2</th>
+    <th class="tok-h">LINE</th>
+    <th class="tok-h">LINE-2</th>
+    <th class="tok-h">INK</th>
+    <th class="tok-h">INK-2</th>
+    <th class="tok-h">INK-3</th>
+    <th class="tok-h">INK-4</th>
+    <th class="tok-h">ACCENT</th>
+    <th class="tok-h">GLOW</th>
+    <th class="tok-h">OK</th>
+    <th class="tok-h">WARN</th>
+  </tr>
+</thead>
+<tbody>
+
+  <!-- ─── Kanagawa ─── -->
+  <tr style="--row-accent:#d4b274;">
+    <td class="theme-cell">
+      <div class="name">Kanagawa Sumi</div>
+      <div class="id">kanagawa</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#14141c;"></div><span class="hex">#14141c</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#1a1a23;"></div><span class="hex">#1a1a23</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#20202c;"></div><span class="hex">#20202c</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a2c40;"></div><span class="hex">#2a2c40</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#383a55;"></div><span class="hex">#383a55</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#ece6c4;"></div><span class="hex">#ece6c4</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#b8b094;"></div><span class="hex">#b8b094</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#82806f;"></div><span class="hex">#82806f</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#5a5a72;"></div><span class="hex">#5a5a72</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d4b274;"></div><span class="hex">#d4b274</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(212,178,116,0.42);"></div><span class="hex alpha">rgba(.42)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#87a87b;"></div><span class="hex">#87a87b</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d44848;"></div><span class="hex">#d44848</span></td>
+  </tr>
+
+  <!-- ─── Kanagawa-soft ─── -->
+  <tr style="--row-accent:#c0a36e;">
+    <td class="theme-cell">
+      <div class="name">Kanagawa Sumi <span style="opacity:.55;">(soft)</span></div>
+      <div class="id">kanagawa-soft</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a2a37;"></div><span class="hex">#2a2a37</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2f2f3d;"></div><span class="hex">#2f2f3d</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#353544;"></div><span class="hex">#353544</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#3a3b53;"></div><span class="hex">#3a3b53</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#45465e;"></div><span class="hex">#45465e</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#dcd7ba;"></div><span class="hex">#dcd7ba</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#a6a08a;"></div><span class="hex">#a6a08a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#727169;"></div><span class="hex">#727169</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#54546d;"></div><span class="hex">#54546d</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#c0a36e;"></div><span class="hex">#c0a36e</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(192,163,110,0.32);"></div><span class="hex alpha">rgba(.32)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#76946a;"></div><span class="hex">#76946a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d44848;"></div><span class="hex">#d44848</span></td>
+  </tr>
+
+  <!-- ─── Everforest ─── -->
+  <tr style="--row-accent:#b8d290;">
+    <td class="theme-cell">
+      <div class="name">Everforest Dusk</div>
+      <div class="id">everforest</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#181f23;"></div><span class="hex">#181f23</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#222a30;"></div><span class="hex">#222a30</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a343a;"></div><span class="hex">#2a343a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#344047;"></div><span class="hex">#344047</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#475158;"></div><span class="hex">#475158</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#e1d6b5;"></div><span class="hex">#e1d6b5</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#aab9ad;"></div><span class="hex">#aab9ad</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#8c948a;"></div><span class="hex">#8c948a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#606b66;"></div><span class="hex">#606b66</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#b8d290;"></div><span class="hex">#b8d290</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(184,210,144,0.42);"></div><span class="hex alpha">rgba(.42)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#92d3a3;"></div><span class="hex">#92d3a3</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#f08e90;"></div><span class="hex">#f08e90</span></td>
+  </tr>
+
+  <!-- ─── Everforest-soft ─── -->
+  <tr style="--row-accent:#a7c080;">
+    <td class="theme-cell">
+      <div class="name">Everforest Dusk <span style="opacity:.55;">(soft)</span></div>
+      <div class="id">everforest-soft</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a3539;"></div><span class="hex">#2a3539</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#303c40;"></div><span class="hex">#303c40</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#364046;"></div><span class="hex">#364046</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#45504f;"></div><span class="hex">#45504f</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#525c5a;"></div><span class="hex">#525c5a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d3c6aa;"></div><span class="hex">#d3c6aa</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#8d9a90;"></div><span class="hex">#8d9a90</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#707a72;"></div><span class="hex">#707a72</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#4e5854;"></div><span class="hex">#4e5854</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#a7c080;"></div><span class="hex">#a7c080</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(167,192,128,0.32);"></div><span class="hex alpha">rgba(.32)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#83c092;"></div><span class="hex">#83c092</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d4666e;"></div><span class="hex">#d4666e</span></td>
+  </tr>
+
+  <!-- ─── Rose Pine ─── -->
+  <tr style="--row-accent:#f4a8a5;">
+    <td class="theme-cell">
+      <div class="name">Rose Pine Moon</div>
+      <div class="id">rose-pine</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#1a1828;"></div><span class="hex">#1a1828</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#211f33;"></div><span class="hex">#211f33</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#29263e;"></div><span class="hex">#29263e</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#322e4d;"></div><span class="hex">#322e4d</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#3f3a5a;"></div><span class="hex">#3f3a5a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#ecebff;"></div><span class="hex">#ecebff</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#a39ec4;"></div><span class="hex">#a39ec4</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#7e7a98;"></div><span class="hex">#7e7a98</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#555274;"></div><span class="hex">#555274</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#f4a8a5;"></div><span class="hex">#f4a8a5</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(244,168,165,0.42);"></div><span class="hex alpha">rgba(.42)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#aadce4;"></div><span class="hex">#aadce4</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#f47fa1;"></div><span class="hex">#f47fa1</span></td>
+  </tr>
+
+  <!-- ─── Rose Pine-soft (default) ─── -->
+  <tr style="--row-accent:#ea9a97;">
+    <td class="theme-cell">
+      <div class="name">Rose Pine Moon <span style="opacity:.55;">(soft) ★</span></div>
+      <div class="id">rose-pine-soft · default</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a273f;"></div><span class="hex">#2a273f</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#312e4a;"></div><span class="hex">#312e4a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#383454;"></div><span class="hex">#383454</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#44415a;"></div><span class="hex">#44415a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#524d70;"></div><span class="hex">#524d70</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#e0def4;"></div><span class="hex">#e0def4</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#908caa;"></div><span class="hex">#908caa</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#6e6a86;"></div><span class="hex">#6e6a86</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#4a4660;"></div><span class="hex">#4a4660</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#ea9a97;"></div><span class="hex">#ea9a97</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(234,154,151,0.35);"></div><span class="hex alpha">rgba(.35)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#9ccfd8;"></div><span class="hex">#9ccfd8</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#eb6f92;"></div><span class="hex">#eb6f92</span></td>
+  </tr>
+
+  <!-- ─── Hinoki ─── -->
+  <tr style="--row-accent:#d49a3a;">
+    <td class="theme-cell">
+      <div class="name">Hinoki</div>
+      <div class="id">hinoki</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#15171a;"></div><span class="hex">#15171a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#1b1d20;"></div><span class="hex">#1b1d20</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#21232a;"></div><span class="hex">#21232a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#292d35;"></div><span class="hex">#292d35</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#353a44;"></div><span class="hex">#353a44</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#e3dccb;"></div><span class="hex">#e3dccb</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#aaa294;"></div><span class="hex">#aaa294</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#6e6a5e;"></div><span class="hex">#6e6a5e</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#423f38;"></div><span class="hex">#423f38</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d49a3a;"></div><span class="hex">#d49a3a</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(212,154,58,0.38);"></div><span class="hex alpha">rgba(.38)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#88c99c;"></div><span class="hex">#88c99c</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#e07050;"></div><span class="hex">#e07050</span></td>
+  </tr>
+
+  <!-- ─── Hinoki-soft ─── -->
+  <tr style="--row-accent:#c89656;">
+    <td class="theme-cell">
+      <div class="name">Hinoki <span style="opacity:.55;">(soft)</span></div>
+      <div class="id">hinoki-soft</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a2620;"></div><span class="hex">#2a2620</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#312d26;"></div><span class="hex">#312d26</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#38332b;"></div><span class="hex">#38332b</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#403a32;"></div><span class="hex">#403a32</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#4a443b;"></div><span class="hex">#4a443b</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d6d0bf;"></div><span class="hex">#d6d0bf</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#9a9282;"></div><span class="hex">#9a9282</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#6a6458;"></div><span class="hex">#6a6458</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#4a4438;"></div><span class="hex">#4a4438</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#c89656;"></div><span class="hex">#c89656</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(200,150,86,0.32);"></div><span class="hex alpha">rgba(.32)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#88c99c;"></div><span class="hex">#88c99c</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#d97050;"></div><span class="hex">#d97050</span></td>
+  </tr>
+
+  <!-- ─── Washi (light) ─── -->
+  <tr class="light-row" style="--row-accent:#bc002d;">
+    <td class="theme-cell">
+      <div class="name">Washi Hinomaru ☀</div>
+      <div class="id">washi · LIGHT</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#ebedf0;"></div><span class="hex">#ebedf0</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#f1f3f6;"></div><span class="hex">#f1f3f6</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#f8fafc;"></div><span class="hex">#f8fafc</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(0,0,0,0.10);"></div><span class="hex alpha">rgba(0,0,0,.10)</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(0,0,0,0.16);"></div><span class="hex alpha">rgba(0,0,0,.16)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#0f0c0a;"></div><span class="hex">#0f0c0a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#524a44;"></div><span class="hex">#524a44</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#6e6a66;"></div><span class="hex">#6e6a66</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#b0adaa;"></div><span class="hex">#b0adaa</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#bc002d;"></div><span class="hex">#bc002d</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(188,0,45,0.22);"></div><span class="hex alpha">rgba(.22)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#2a78c8;"></div><span class="hex">#2a78c8</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#c44040;"></div><span class="hex">#c44040</span></td>
+  </tr>
+
+  <!-- ─── Washi Tsuki (NEW) ─── -->
+  <tr style="--row-accent:#be4258;">
+    <td class="theme-cell">
+      <div class="name">Washi Tsuki <span style="opacity:.55;">— new</span></div>
+      <div class="id">washi-tsuki · cold dark</div>
+    </td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#11141a;"></div><span class="hex">#11141a</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#171b22;"></div><span class="hex">#171b22</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#1d2129;"></div><span class="hex">#1d2129</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(220,230,245,0.04);"></div><span class="hex alpha">rgba(.04)</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(220,230,245,0.08);"></div><span class="hex alpha">rgba(.08)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#c8cdd6;"></div><span class="hex">#c8cdd6</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#8a909c;"></div><span class="hex">#8a909c</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#565b66;"></div><span class="hex">#565b66</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#34373e;"></div><span class="hex">#34373e</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#be4258;"></div><span class="hex">#be4258</span></td>
+    <td class="tok-cell alpha"><div class="swatch-box" style="background:rgba(190,66,88,0.34);"></div><span class="hex alpha">rgba(.34)</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#6a8aa8;"></div><span class="hex">#6a8aa8</span></td>
+    <td class="tok-cell"><div class="swatch-box" style="background:#c44040;"></div><span class="hex">#c44040</span></td>
+  </tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="notes">
+  <b>Reading the matrix.</b> Surfaces (BG / TILE / TILE-2) get progressively lighter on dark themes,
+  progressively darker on the one light theme (washi). Ink hierarchy (INK → INK-4) shifts from primary
+  text to nearly invisible. Accent is the brand axis; OK is the "all good" indicator
+  (working tile dot, status); WARN is the destructive intent (modal-confirm hover fills with this).
+  <br><br>
+  <b>The 11th theme</b> — <code>washi-kyokujitsu</code> shares Washi Hinomaru's palette exactly; it differs only
+  in the kyokujitsu rays SVG rendered behind the chrome and the brand-mark glyph. It's the hidden
+  easter-egg theme, surfaced only by renaming a tile to <code>war</code>, <code>wartime</code>,
+  <code>kyokujitsu</code>, <code>asahi</code>, <code>hinode</code>, etc.
+  <br><br>
+  <b>Light vs dark cells.</b> Transparency-bearing tokens (LINE / LINE-2 / GLOW) sit on a checkered
+  backdrop so the alpha channel is visible. Solid tokens render straight.
+  <br><br>
+  <b>Recent palette audit fixes (2026-05-23)</b>:
+  <br>· <code>kanagawa-soft</code> warn <code>#c34043</code> → <code>#d44848</code> (was failing the 3.0 UI floor at 2.78:1).
+  <br>· <code>everforest-soft</code> bg/tile/tile-2 pulled down ~10 luminance points to match rose-pine-soft's lift depth — fixed the "washed-out haze" feel.
+  <br>· <code>everforest-soft</code> ink-2 widened (<code>#9da9a0</code> → <code>#8d9a90</code>) to sharpen the primary→secondary text gap.
+  <br>· <code>everforest-soft</code> warn <code>#e67e80</code> → <code>#d4666e</code> (now AA-passing, less pinkish).
+  <br>· <code>washi-tsuki</code> warn <code>#a06880</code> (muddy pink) → <code>#c44040</code> (oxblood); <code>washi</code> warn <code>#94004f</code> → <code>#c44040</code> for family consistency.
+</div>
+
+</body>
+</html>

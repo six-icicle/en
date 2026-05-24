@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>en — Washi Hinomaru dark/low-contrast siblings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@600&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: #0f0d0c;
+    color: #d8d2c4;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500;
+    padding: 40px 56px 80px;
+  }
+
+  /* ─── Page header ─── */
+  .pageheader {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 6px;
+  }
+  .wm {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 26px; letter-spacing: 0.04em;
+    color: #c8455d;
+  }
+  .pt {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; color: #aa9e8a; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ps {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #6e6356; letter-spacing: 0.08em;
+    text-transform: uppercase; margin-bottom: 36px;
+    max-width: 760px; line-height: 1.6;
+  }
+
+  /* ─── Reference (the existing LIGHT Washi Hinomaru) ─── */
+  .reference {
+    margin-bottom: 56px;
+    padding: 18px 22px;
+    background: rgba(188, 0, 45, 0.06);
+    border: 1px solid rgba(188, 0, 45, 0.18);
+    border-radius: 10px;
+  }
+  .reference .label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: #aa9e8a; letter-spacing: 0.16em;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .reference .label .name {
+    color: #ebedf0; margin-left: 10px;
+    text-transform: none; letter-spacing: 0.02em;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 13px; font-weight: 500;
+  }
+  .reference .swatches {
+    display: flex; gap: 0; align-items: stretch;
+    height: 36px; border-radius: 6px; overflow: hidden;
+  }
+  .reference .sw {
+    flex: 1;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 4px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px; letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ─── 2x2 card grid ─── */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+
+  .card {
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--c-bg);
+    color: var(--c-ink);
+    border: 1px solid var(--c-line-2);
+    display: flex; flex-direction: column;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.28);
+  }
+  .card-meta {
+    padding: 22px 24px 18px;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .card-name {
+    display: flex; align-items: baseline; gap: 14px;
+    margin-bottom: 6px;
+  }
+  .card-name .kanji {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 22px; color: var(--c-accent); letter-spacing: 0.04em;
+  }
+  .card-name .romaji {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 18px;
+    color: var(--c-ink); letter-spacing: 0.02em;
+  }
+  .card-name .gloss {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: var(--c-ink-3);
+    letter-spacing: 0.10em; text-transform: uppercase;
+    margin-left: auto;
+  }
+  .card-tag {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: var(--c-ink-2);
+    letter-spacing: 0.04em;
+    line-height: 1.55;
+  }
+
+  /* ─── Mini app preview inside each card ─── */
+  .mini {
+    background: var(--c-bg);
+    flex: none;
+    display: grid;
+    grid-template-rows: 40px 196px 24px;
+  }
+  .mini-bar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--c-bg), var(--c-ink-4) 22%) 0%,
+      var(--c-bg) 100%);
+    display: flex; align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .mini-brand {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .disc {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    box-shadow: 0 0 0 0.5px rgba(0,0,0,0.20);
+    flex: none;
+  }
+  .mini-brand .word {
+    font-family: 'Outfit', system-ui, sans-serif;
+    font-weight: 600; font-size: 14px;
+    color: var(--c-ink); letter-spacing: 0.04em;
+  }
+  .mini-pill {
+    width: 22px; height: 22px;
+    border-radius: 8px;
+    background: color-mix(in oklch, var(--c-bg), var(--c-ink-4) 18%);
+    border: 1px solid var(--c-line);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--c-accent);
+  }
+  .mini-pill.spacer { margin-left: auto; }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1px;
+    background: var(--c-line);
+  }
+  .mini-tile {
+    background: var(--c-tile);
+    display: grid;
+    grid-template-rows: 22px 1fr;
+    overflow: hidden;
+    position: relative;
+  }
+  .mini-tile.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in oklch, var(--c-accent), transparent 50%);
+    pointer-events: none;
+    box-shadow: inset 0 0 16px color-mix(in oklch, var(--c-accent), transparent 80%);
+  }
+  .mini-tile.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--c-accent);
+    box-shadow: 0 0 8px var(--c-accent-glow);
+  }
+  .mini-head {
+    display: flex; align-items: center;
+    padding: 0 8px;
+    gap: 6px;
+    border-bottom: 1px solid var(--c-line);
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--c-tile), var(--c-ink-4) 14%) 0%,
+      var(--c-tile) 100%);
+  }
+  .mini-head .name {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; color: var(--c-ink-2);
+    letter-spacing: 0.02em;
+  }
+  .mini-tile.active .mini-head .name { color: var(--c-ink); }
+  .mini-head .x {
+    margin-left: auto;
+    color: var(--c-ink-3);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+  }
+
+  .mini-body {
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.55;
+    color: var(--c-ink);
+    overflow: hidden;
+  }
+  .mini-body .dim { color: var(--c-ink-2); }
+  .mini-body .accent { color: var(--c-accent); }
+  .mini-body .ok { color: var(--c-ok); }
+
+  .mini-tile.empty .mini-body {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: var(--c-accent);
+    gap: 6px;
+  }
+  .mini-tile.empty .label {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+  .mini-tile.empty .cta {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 500; font-size: 11px;
+    color: var(--c-accent);
+    border: 1px solid var(--c-line-2);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: color-mix(in oklch, var(--c-tile), var(--c-ink-4) 12%);
+  }
+
+  .mini-foot {
+    background: linear-gradient(0deg,
+      color-mix(in oklch, var(--c-bg), var(--c-ink-4) 22%) 0%,
+      var(--c-bg) 100%);
+    display: flex; align-items: center;
+    padding: 0 14px;
+    border-top: 1px solid var(--c-line);
+    gap: 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 9px; letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+  }
+  .mini-foot .right {
+    margin-left: auto;
+    color: var(--c-ink-3);
+  }
+
+  /* ─── Palette swatch strip below mini app ─── */
+  .palette {
+    background: var(--c-bg);
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--c-line);
+  }
+  .palette-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+  .palette-row .sw {
+    border-radius: 5px;
+    height: 32px;
+    border: 1px solid var(--c-line);
+    position: relative;
+  }
+  .palette-row .sw .tag {
+    position: absolute;
+    bottom: -16px; left: 0;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 8.5px; color: var(--c-ink-3);
+    letter-spacing: 0.06em;
+  }
+  .palette-row .sw .hex {
+    position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 8px; color: var(--c-ink-2);
+    letter-spacing: 0.04em;
+    opacity: 0;
+  }
+  .palette-row .sw:hover .hex { opacity: 1; }
+  .palette-tags {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 8px; color: var(--c-ink-3);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+  .palette-tags span {
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ─── Card variants — each scopes its own palette ─── */
+  .card.sumi-yoru {
+    --c-bg:        #1a1714;
+    --c-tile:      #221e1a;
+    --c-tile-2:    #2a2520;
+    --c-line:      rgba(255, 240, 220, 0.05);
+    --c-line-2:    rgba(255, 240, 220, 0.10);
+    --c-ink:       #e6dcca;
+    --c-ink-2:     #aa9e8a;
+    --c-ink-3:     #6e6356;
+    --c-ink-4:     #4a4338;
+    --c-accent:    #c8455d;
+    --c-accent-glow: rgba(200, 69, 93, 0.32);
+    --c-ok:        #7a9bc0;
+    --c-warn:      #b06a82;
+  }
+  .card.akari {
+    --c-bg:        #1c1612;
+    --c-tile:      #231d18;
+    --c-tile-2:    #2b241e;
+    --c-line:      rgba(255, 220, 180, 0.06);
+    --c-line-2:    rgba(255, 220, 180, 0.10);
+    --c-ink:       #e8d8be;
+    --c-ink-2:     #a89682;
+    --c-ink-3:     #6e6052;
+    --c-ink-4:     #4a4036;
+    --c-accent:    #d8704a;
+    --c-accent-glow: rgba(216, 112, 74, 0.30);
+    --c-ok:        #88a098;
+    --c-warn:      #c08854;
+  }
+  .card.beni-yoru {
+    --c-bg:        #1a1620;
+    --c-tile:      #211c28;
+    --c-tile-2:    #28232f;
+    --c-line:      rgba(220, 210, 235, 0.06);
+    --c-line-2:    rgba(220, 210, 235, 0.10);
+    --c-ink:       #ddd5e0;
+    --c-ink-2:     #998fa6;
+    --c-ink-3:     #6a6276;
+    --c-ink-4:     #423c4a;
+    --c-accent:    #c8506e;
+    --c-accent-glow: rgba(200, 80, 110, 0.32);
+    --c-ok:        #88a5c0;
+    --c-warn:      #c08858;
+  }
+  .card.yamizumi {
+    --c-bg:        #14110e;
+    --c-tile:      #1a1714;
+    --c-tile-2:    #1f1c19;
+    --c-line:      rgba(255, 245, 230, 0.04);
+    --c-line-2:    rgba(255, 245, 230, 0.08);
+    --c-ink:       #d4c4a8;
+    --c-ink-2:     #968870;
+    --c-ink-3:     #5e5546;
+    --c-ink-4:     #3a3428;
+    --c-accent:    #b04050;
+    --c-accent-glow: rgba(176, 64, 80, 0.28);
+    --c-ok:        #688aa0;
+    --c-warn:      #a06a48;
+  }
+
+  /* ─── Footer notes ─── */
+  .notes {
+    margin-top: 56px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: #6e6356;
+    letter-spacing: 0.05em;
+    line-height: 1.7;
+    max-width: 760px;
+  }
+  .notes b { color: #aa9e8a; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="pageheader">
+  <span class="wm">en</span>
+  <span class="pt">washi hinomaru — dark + low-contrast siblings</span>
+</div>
+<div class="ps">
+  Four candidate dark counterparts to the existing light washi theme. Each holds the hinomaru
+  red as the brand axis but pulls it down into a quiet, low-contrast world. Pick a direction
+  (or a hybrid). Hover any swatch for hex.
+</div>
+
+<div class="reference">
+  <div class="label">REFERENCE — current LIGHT theme<span class="name">Washi Hinomaru</span></div>
+  <div class="swatches">
+    <div class="sw" style="background:#ebedf0; color:#0f0c0a;">bg</div>
+    <div class="sw" style="background:#f1f3f6; color:#0f0c0a;">tile</div>
+    <div class="sw" style="background:#f8fafc; color:#0f0c0a;">tile-2</div>
+    <div class="sw" style="background:#0f0c0a; color:#ebedf0;">ink</div>
+    <div class="sw" style="background:#524a44; color:#ebedf0;">ink-2</div>
+    <div class="sw" style="background:#bc002d; color:#ebedf0;">accent</div>
+    <div class="sw" style="background:#2a78c8; color:#ebedf0;">ok</div>
+    <div class="sw" style="background:#94004f; color:#ebedf0;">warn</div>
+  </div>
+</div>
+
+<div class="cards">
+
+  <!-- ─── 1. Sumi Yoru ─── -->
+  <div class="card sumi-yoru">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="kanji">墨夜</span>
+        <span class="romaji">Sumi Yoru</span>
+        <span class="gloss">ink night</span>
+      </div>
+      <div class="card-tag">
+        Classic dark-mode hinomaru. Warm-neutral sumi bg, paper-cream ink, restrained shu accent
+        pulled back from #bc002d so it doesn't burn on dark. The safe inverse — most direct
+        sibling to the light theme.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">washi hinomaru — sumi yoru</span>
+      </div>
+    </div>
+    <div class="palette">
+      <div class="palette-row">
+        <div class="sw" style="background:#1a1714;"><span class="hex" style="color:#e6dcca;">#1a1714</span></div>
+        <div class="sw" style="background:#221e1a;"><span class="hex" style="color:#e6dcca;">#221e1a</span></div>
+        <div class="sw" style="background:#2a2520;"><span class="hex" style="color:#e6dcca;">#2a2520</span></div>
+        <div class="sw" style="background:#e6dcca;"><span class="hex" style="color:#1a1714;">#e6dcca</span></div>
+        <div class="sw" style="background:#aa9e8a;"><span class="hex" style="color:#1a1714;">#aa9e8a</span></div>
+        <div class="sw" style="background:#c8455d;"><span class="hex" style="color:#1a1714;">#c8455d</span></div>
+        <div class="sw" style="background:#7a9bc0;"><span class="hex" style="color:#1a1714;">#7a9bc0</span></div>
+        <div class="sw" style="background:#b06a82;"><span class="hex" style="color:#1a1714;">#b06a82</span></div>
+      </div>
+      <div class="palette-tags">
+        <span>BG</span><span>TILE</span><span>TILE-2</span><span>INK</span><span>INK-2</span><span>ACCENT</span><span>OK</span><span>WARN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 2. Akari ─── -->
+  <div class="card akari">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="kanji">灯り</span>
+        <span class="romaji">Akari</span>
+        <span class="gloss">lantern light</span>
+      </div>
+      <div class="card-tag">
+        Warmest variant. Terracotta-shifted accent (dusk red, not blood red), softer ink-bg
+        contrast. Reads as "paper lantern at evening" — the lowest-contrast option here.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">washi hinomaru — akari</span>
+      </div>
+    </div>
+    <div class="palette">
+      <div class="palette-row">
+        <div class="sw" style="background:#1c1612;"><span class="hex" style="color:#e8d8be;">#1c1612</span></div>
+        <div class="sw" style="background:#231d18;"><span class="hex" style="color:#e8d8be;">#231d18</span></div>
+        <div class="sw" style="background:#2b241e;"><span class="hex" style="color:#e8d8be;">#2b241e</span></div>
+        <div class="sw" style="background:#e8d8be;"><span class="hex" style="color:#1c1612;">#e8d8be</span></div>
+        <div class="sw" style="background:#a89682;"><span class="hex" style="color:#1c1612;">#a89682</span></div>
+        <div class="sw" style="background:#d8704a;"><span class="hex" style="color:#1c1612;">#d8704a</span></div>
+        <div class="sw" style="background:#88a098;"><span class="hex" style="color:#1c1612;">#88a098</span></div>
+        <div class="sw" style="background:#c08854;"><span class="hex" style="color:#1c1612;">#c08854</span></div>
+      </div>
+      <div class="palette-tags">
+        <span>BG</span><span>TILE</span><span>TILE-2</span><span>INK</span><span>INK-2</span><span>ACCENT</span><span>OK</span><span>WARN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 3. Beni Yoru ─── -->
+  <div class="card beni-yoru">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="kanji">紅夜</span>
+        <span class="romaji">Beni Yoru</span>
+        <span class="gloss">crimson night</span>
+      </div>
+      <div class="card-tag">
+        Rose-pine cousin. Faint purple bg undertone cushions a plum-shifted accent — red still
+        reads as red, but it sits in a cooler, more mysterious world. Closest in feel to the
+        existing rose-pine-soft default.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">washi hinomaru — beni yoru</span>
+      </div>
+    </div>
+    <div class="palette">
+      <div class="palette-row">
+        <div class="sw" style="background:#1a1620;"><span class="hex" style="color:#ddd5e0;">#1a1620</span></div>
+        <div class="sw" style="background:#211c28;"><span class="hex" style="color:#ddd5e0;">#211c28</span></div>
+        <div class="sw" style="background:#28232f;"><span class="hex" style="color:#ddd5e0;">#28232f</span></div>
+        <div class="sw" style="background:#ddd5e0;"><span class="hex" style="color:#1a1620;">#ddd5e0</span></div>
+        <div class="sw" style="background:#998fa6;"><span class="hex" style="color:#1a1620;">#998fa6</span></div>
+        <div class="sw" style="background:#c8506e;"><span class="hex" style="color:#1a1620;">#c8506e</span></div>
+        <div class="sw" style="background:#88a5c0;"><span class="hex" style="color:#1a1620;">#88a5c0</span></div>
+        <div class="sw" style="background:#c08858;"><span class="hex" style="color:#1a1620;">#c08858</span></div>
+      </div>
+      <div class="palette-tags">
+        <span>BG</span><span>TILE</span><span>TILE-2</span><span>INK</span><span>INK-2</span><span>ACCENT</span><span>OK</span><span>WARN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 4. Yamizumi ─── -->
+  <div class="card yamizumi">
+    <div class="card-meta">
+      <div class="card-name">
+        <span class="kanji">闇墨</span>
+        <span class="romaji">Yamizumi</span>
+        <span class="gloss">darkness ink</span>
+      </div>
+      <div class="card-tag">
+        Most austere. Near-monochrome warm-charcoal, oxblood accent at maximum restraint. Reads
+        as "candle on tatami" — ink, paper, and a single quiet red. The "less is more" pick.
+      </div>
+    </div>
+    <div class="mini">
+      <div class="mini-bar">
+        <div class="mini-brand">
+          <span class="disc"></span>
+          <span class="word">en</span>
+        </div>
+        <div class="mini-pill">+</div>
+        <div class="mini-pill">↻</div>
+        <div class="mini-pill spacer">A</div>
+        <div class="mini-pill">☼</div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-tile active">
+          <div class="mini-head"><span class="name">en</span><span class="x">×</span></div>
+          <div class="mini-body">
+<span class="accent">❯</span> claude<br>
+<span class="dim">  Welcome to Claude Code</span><br>
+<span class="dim">  Type your message...</span><br>
+<span class="ok">✓</span> ready
+          </div>
+        </div>
+        <div class="mini-tile empty">
+          <div class="mini-head"><span class="name">no sessions</span></div>
+          <div class="mini-body">
+            <span class="label">no sessions</span>
+            <span class="cta">kindle one  ⌘ N</span>
+          </div>
+        </div>
+      </div>
+      <div class="mini-foot">
+        <span>⌘N spawn</span>
+        <span>⌘W close</span>
+        <span class="right">washi hinomaru — yamizumi</span>
+      </div>
+    </div>
+    <div class="palette">
+      <div class="palette-row">
+        <div class="sw" style="background:#14110e;"><span class="hex" style="color:#d4c4a8;">#14110e</span></div>
+        <div class="sw" style="background:#1a1714;"><span class="hex" style="color:#d4c4a8;">#1a1714</span></div>
+        <div class="sw" style="background:#1f1c19;"><span class="hex" style="color:#d4c4a8;">#1f1c19</span></div>
+        <div class="sw" style="background:#d4c4a8;"><span class="hex" style="color:#14110e;">#d4c4a8</span></div>
+        <div class="sw" style="background:#968870;"><span class="hex" style="color:#14110e;">#968870</span></div>
+        <div class="sw" style="background:#b04050;"><span class="hex" style="color:#14110e;">#b04050</span></div>
+        <div class="sw" style="background:#688aa0;"><span class="hex" style="color:#14110e;">#688aa0</span></div>
+        <div class="sw" style="background:#a06a48;"><span class="hex" style="color:#14110e;">#a06a48</span></div>
+      </div>
+      <div class="palette-tags">
+        <span>BG</span><span>TILE</span><span>TILE-2</span><span>INK</span><span>INK-2</span><span>ACCENT</span><span>OK</span><span>WARN</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <b>How to read these.</b> Each card simulates the actual app shell — navbar with hinomaru
+  brand mark, an active tile with a faux claude welcome, an empty stub, and a foot bar — using
+  only that variant's palette tokens. The token strip below maps to en's existing
+  <code style="color:#aa9e8a;">--bg / --tile / --tile-2 / --ink / --ink-2 / --accent / --ok / --warn</code>
+  contract, so picking a winner is one find/replace away from a working theme.
+  <br><br>
+  <b>Two axes to consider.</b> Temperature (warm → cool: <i>akari → sumi-yoru → yamizumi → beni-yoru</i>)
+  and accent restraint (most → least muted: <i>yamizumi → akari → sumi-yoru → beni-yoru</i>).
+  Sumi Yoru is the safest default; Yamizumi is the most "tea-ceremony"; Akari leans warm/cozy;
+  Beni Yoru is closest to the current rose-pine-soft default in feel.
+</div>
+
+</body>
+</html>
