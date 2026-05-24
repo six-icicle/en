@@ -47,6 +47,7 @@ const THEMES: { id: Theme; title: string }[] = [
   { id: "hinoki-soft", title: "Hinoki (soft)" },
   { id: "washi", title: "Washi Hinomaru" },
   { id: "washi-kyokujitsu", title: "Washi Kyokujitsu" },
+  { id: "washi-tsuki", title: "Washi Tsuki" },
 ];
 
 const THEME_ACCENTS: Record<Theme, string> = {
@@ -60,19 +61,21 @@ const THEME_ACCENTS: Record<Theme, string> = {
   "hinoki-soft": "#c89656",
   washi: "#bc002d",
   "washi-kyokujitsu": "#bc002d",
+  "washi-tsuki": "#be4258",
 };
 
 const THEME_BGS: Record<Theme, string> = {
   kanagawa: "#1a1a23",
   "kanagawa-soft": "#2f2f3d",
   everforest: "#222a30",
-  "everforest-soft": "#3a464c",
+  "everforest-soft": "#303c40",
   "rose-pine": "#211f33",
   "rose-pine-soft": "#312e4a",
   hinoki: "#1b1d20",
   "hinoki-soft": "#312d26",
   washi: "#ebedf0",
   "washi-kyokujitsu": "#ebedf0",
+  "washi-tsuki": "#11141a",
 };
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -134,6 +137,33 @@ const ALERT_STYLES: { id: AlertStyle; title: string; desc: string }[] = [
   { id: "shuriken",  title: "Shuriken",      desc: "throw + stick" },
   { id: "hinode",    title: "Hinode",        desc: "rising sun" },
 ];
+
+/* ─── Easter egg: kyokujitsu (war flag) theme is hidden from the picker
+   and only auto-applies when a tile is renamed to one of these phrases.
+   Match is case-insensitive + whitespace-trimmed. The user can change the
+   theme back via the picker; the title can stay as-is. To re-trigger,
+   they must re-name the tile (rename to something else, then back, OR
+   rename one of these phrases on a different tile). */
+const KYOKUJITSU_TRIGGERS = new Set([
+  "war",
+  "wartime",
+  "at war",
+  "war mode",
+  "time for war",
+  "warpath",
+  "this means war",
+  "this is war",
+  "declare war",
+  "declaring war",
+  "i declare war",
+  "kyokujitsu",
+  "rising sun",
+  "asahi",
+  "hinode",
+]);
+function isKyokujitsuTrigger(name: string): boolean {
+  return KYOKUJITSU_TRIGGERS.has(name.trim().toLowerCase());
+}
 
 function defaultTracks(layout: Layout, count: number): { cols: number[]; rows: number[] } {
   if (count <= 0) return { cols: [1], rows: [1] };
@@ -229,6 +259,7 @@ export default function App() {
     setTiles((prev) =>
       prev.map((t) => (t.key === key ? { ...t, name: trimmed } : t)),
     );
+    if (isKyokujitsuTrigger(trimmed)) setTheme("washi-kyokujitsu");
   }, []);
 
   const reviveTile = useCallback((key: string) => {
@@ -1005,11 +1036,19 @@ export default function App() {
             </g>
           </svg>
           en
-          {(theme === "washi" || theme === "washi-kyokujitsu") && (
+          {(theme === "washi" ||
+            theme === "washi-kyokujitsu" ||
+            theme === "washi-tsuki") && (
             <span
               className="brand-hinomaru"
               aria-hidden="true"
-              title={theme === "washi-kyokujitsu" ? "Kyokujitsu" : "Hinomaru"}
+              title={
+                theme === "washi-kyokujitsu"
+                  ? "Kyokujitsu"
+                  : theme === "washi-tsuki"
+                  ? "Tsuki"
+                  : "Hinomaru"
+              }
             />
           )}
         </div>
@@ -1127,7 +1166,14 @@ export default function App() {
               <div className="theme-section">
                 <div className="theme-section-label">Theme</div>
                 <div className="themes inline-themes">
-                  {THEMES.map((t) => (
+                  {THEMES.filter(
+                    (t) =>
+                      // Kyokujitsu is a hidden easter-egg theme; surfaced
+                      // only via the rename trigger. If it's already the
+                      // active theme (user triggered + hasn't switched
+                      // away), keep it visible so it shows as selected.
+                      t.id !== "washi-kyokujitsu" || theme === "washi-kyokujitsu",
+                  ).map((t) => (
                     <button
                       key={t.id}
                       data-set={t.id}

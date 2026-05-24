@@ -113,10 +113,10 @@ const THEMES: Record<Theme, ITheme> = {
     ...EVERFOREST_ANSI,
   },
   "everforest-soft": {
-    background: "#3a464c",
+    background: "#303c40",
     foreground: "#d3c6aa",
     cursor: "#a7c080",
-    cursorAccent: "#343f44",
+    cursorAccent: "#2a3539",
     selectionBackground: "#475258",
     ...EVERFOREST_ANSI,
   },
@@ -233,6 +233,33 @@ const THEMES: Record<Theme, ITheme> = {
     brightMagenta: "#8d3d6a",
     brightCyan: "#3d7a7a",
     brightWhite: "#fbf6eb",
+  },
+  // Washi Tsuki — moonlight on slate. Dark sibling to the washi family.
+  // Cold-neutral bg + cool-grey ink, restrained shu accent. ANSI tuned to
+  // sit on slate without burning; selection picks the same blue as the
+  // light washi so claude's picker bg keeps a coherent identity.
+  "washi-tsuki": {
+    background: "#171b22",
+    foreground: "#c8cdd6",
+    cursor: "#be4258",
+    cursorAccent: "#11141a",
+    selectionBackground: "#2c3340",
+    black: "#171b22",
+    red: "#be4258",
+    green: "#7a9778",
+    yellow: "#c8a060",
+    blue: "#7291c0",
+    magenta: "#a47898",
+    cyan: "#7a9b9b",
+    white: "#c8cdd6",
+    brightBlack: "#565b66",
+    brightRed: "#d4566c",
+    brightGreen: "#8ca888",
+    brightYellow: "#dab070",
+    brightBlue: "#87a5ce",
+    brightMagenta: "#b388a8",
+    brightCyan: "#88abab",
+    brightWhite: "#dee3ec",
   },
 };
 

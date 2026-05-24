@@ -56,7 +56,7 @@
   --accent:    #c0a36e;
   --accent-glow: rgba(192,163,110,0.32);
   --ok:        #76946a;
-  --warn:      #c34043;
+  --warn:      #d44848;
   --grain-opacity: 0.05;
   --grain-blend: overlay;
   --vignette: rgba(0,0,0,0.14);
@@ -85,19 +85,19 @@
 /* Everforest lifted: forest-grey bg pulled UP, warm cream ink stays warm,
    sage accent restrained. */
 [data-theme="everforest-soft"] {
-  --bg:        #343f44;
-  --tile:      #3a464c;
-  --tile-2:    #404d54;
-  --line:      #4f585e;
-  --line-2:    #5a6469;
+  --bg:        #2a3539;
+  --tile:      #303c40;
+  --tile-2:    #364046;
+  --line:      #45504f;
+  --line-2:    #525c5a;
   --ink:       #d3c6aa;
-  --ink-2:     #9da9a0;
-  --ink-3:     #7a8478;
-  --ink-4:     #56635f;
+  --ink-2:     #8d9a90;
+  --ink-3:     #707a72;
+  --ink-4:     #4e5854;
   --accent:    #a7c080;
   --accent-glow: rgba(167,192,128,0.32);
   --ok:        #83c092;
-  --warn:      #e67e80;
+  --warn:      #d4666e;
   --grain-opacity: 0.04;
   --grain-blend: overlay;
   --vignette: rgba(0,0,0,0.10);
@@ -212,11 +212,36 @@
   --accent:    #bc002d;
   --accent-glow: rgba(188, 0, 45, 0.22);
   --ok:        #2a78c8;
-  --warn:      #94004f;
+  --warn:      #c44040;
   --grain-opacity: 0.06;
   --grain-blend: multiply;
   --vignette: rgba(0, 0, 0, 0.08);
   --sheen: rgba(255, 255, 255, 0.55);
+}
+
+/* Washi Tsuki — moonlight on slate. The dark/low-contrast sibling to the
+   shironuri washi family. Cold-neutral grey bg, paper-cream ink shifted
+   to cool-grey, restrained shu accent pulled back from full hinomaru red
+   so it doesn't burn against the slate. Same hinomaru disc brand mark as
+   the light variant. */
+[data-theme="washi-tsuki"] {
+  --bg:        #11141a;
+  --tile:      #171b22;
+  --tile-2:    #1d2129;
+  --line:      rgba(220, 230, 245, 0.04);
+  --line-2:    rgba(220, 230, 245, 0.08);
+  --ink:       #c8cdd6;
+  --ink-2:     #8a909c;
+  --ink-3:     #565b66;
+  --ink-4:     #34373e;
+  --accent:    #be4258;
+  --accent-glow: rgba(190, 66, 88, 0.34);
+  --ok:        #6a8aa8;
+  --warn:      #c44040;
+  --grain-opacity: 0.05;
+  --grain-blend: overlay;
+  --vignette: rgba(0, 0, 0, 0.20);
+  --sheen: rgba(220, 230, 245, 0.020);
 }
 
 /* Washi Kyokujitsu — the war flag variant. Same shironuri palette as
@@ -267,6 +292,12 @@ html[data-theme="washi-kyokujitsu"] {
    shows between tiles. Tiles themselves stay fully opaque so terminal
    output remains crisp on cream. */
 [data-theme="washi-kyokujitsu"] .grid {
+  background: transparent;
+}
+/* Empty-state panel (rendered when no sessions exist) defaults to opaque
+   --tile cream and would cover the flag. Make it transparent so the
+   kyokujitsu watermark fills the main window area when empty. */
+[data-theme="washi-kyokujitsu"] .empty-state {
   background: transparent;
 }
 
@@ -648,7 +679,8 @@ input:focus-visible {
 /* Hide the torii brand-mark when a washi theme is active — the hinomaru
    disc replaces it as the brand glyph (per the mockups). */
 [data-theme="washi"] .brand-mark,
-[data-theme="washi-kyokujitsu"] .brand-mark { display: none; }
+[data-theme="washi-kyokujitsu"] .brand-mark,
+[data-theme="washi-tsuki"] .brand-mark { display: none; }
 
 /* ─── Light-theme overrides for washi family ───
    The chrome's frosted-pill recipe uses rgba(255,255,255,...) tints tuned
@@ -783,19 +815,16 @@ input:focus-visible {
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08);
 }
 [data-theme="washi-kyokujitsu"] .brand-hinomaru {
-  /* Replace the plain disc with the actual kyokujitsu SVG flag. Native
-     3:2 aspect ratio (900x600) preserved so the rays look right. Sized
-     by height-relative-to-wordmark; the SVG's native white field reads
-     against the cream navbar without needing extra masking. */
-  width: calc(24px * var(--fz));
-  height: calc(16px * var(--fz));
+  /* Crop the kyokujitsu flag into the same circular form factor as the
+     hinomaru disc. `cover` scales the 3:2 SVG so its 600px height fills
+     the 12px circle, then the white-field edges clip away — the central
+     red disc reads at ~50% of the circle, surrounded by rays radiating
+     to the edge. Same size + location as the plain hinomaru variant. */
   background: transparent;
   background-image: var(--kyokujitsu-svg);
-  background-size: contain;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  border-radius: 0;
-  box-shadow: none;
 }
 .status {
   margin-left: auto;
@@ -928,6 +957,18 @@ input:focus-visible {
   align-items: center;
   gap: calc(8px * var(--fz));
 }
+/* Washi family (Hinomaru / Tsuki) is set apart from the abstract Japanese
+   palettes — the disc-mark + flag iconography is distinct from kanagawa /
+   everforest / rose-pine / hinoki, so we mark the boundary with a small
+   gap + faint hairline ahead of the first washi dot. The hairline is a
+   wrapping <span>-style pseudo on the picker container; here we just push
+   the first washi dot right and draw the divider as a sibling. */
+.themes button[data-set="washi"] {
+  /* Wider gap (~3× the inter-dot gap of 8px) sets the washi family apart
+     from the abstract Japanese palettes via proximity-grouping alone — no
+     hairline needed. The whitespace itself reads as "different family." */
+  margin-left: calc(24px * var(--fz));
+}
 .themes .label,
 .textures .label,
 .fz .label {
@@ -972,7 +1013,7 @@ input:focus-visible {
 .themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, #14141c 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
 .themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, #2a2a37 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
 .themes button[data-set="everforest"]      { background: linear-gradient(135deg, #181f23 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
-.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #343f44 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
+.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #2a3539 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
 .themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
 .themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, #2a273f 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
 .themes button[data-set="hinoki"]          { background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
@@ -989,6 +1030,7 @@ input:focus-visible {
   --dot-accent: #bc002d;
   --dot-glow: rgba(188,0,45,0.5);
 }
+.themes button[data-set="washi-tsuki"]      { background: linear-gradient(135deg, #11141a 50%, #be4258 50%); --dot-accent: #be4258; --dot-glow: rgba(190,66,88,0.5); }
 
 .accent {
   margin-left: calc(14px * var(--fz));

@@ -10,7 +10,8 @@ export type Theme =
   | "hinoki"
   | "hinoki-soft"
   | "washi"
-  | "washi-kyokujitsu";
+  | "washi-kyokujitsu"
+  | "washi-tsuki";
 export type Texture =
   | "none"
   | "grain"
@@ -100,6 +101,7 @@ const THEMES = new Set<Theme>([
   "hinoki-soft",
   "washi",
   "washi-kyokujitsu",
+  "washi-tsuki",
 ]);
 const TEXTURES = new Set<Texture>([
   "none",
