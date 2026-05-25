@@ -441,9 +441,9 @@ body::before {
 [data-texture="bokeh"] body::before {
   background-image:
     radial-gradient(circle at 12% 18%, var(--accent-glow), transparent 14%),
-    radial-gradient(circle at 78% 32%, rgba(196, 167, 231, 0.20), transparent 12%),
+    radial-gradient(circle at 78% 32%, color-mix(in oklch, var(--ink-2), transparent 80%), transparent 12%),
     radial-gradient(circle at 28% 72%, var(--accent-glow), transparent 18%),
-    radial-gradient(circle at 86% 84%, rgba(156, 207, 216, 0.16), transparent 14%),
+    radial-gradient(circle at 86% 84%, color-mix(in oklch, var(--ok), transparent 84%), transparent 14%),
     radial-gradient(circle at 52% 48%, var(--accent-glow), transparent 10%);
   background-size: 100% 100%;
   background-repeat: no-repeat;
@@ -628,7 +628,7 @@ input:focus-visible {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: calc(8px * var(--fz));
   margin-right: calc(6px * var(--fz));
 }
 .wc {
@@ -1640,16 +1640,6 @@ input:focus-visible {
 .grid[data-layout="grid"][data-count="6"] { grid-template-rows: 1fr 1fr 1fr; }
 .grid[data-layout="grid"][data-count="7"] { grid-template-rows: 1fr 1fr 1fr 1fr; }
 
-/* Wide — 3 columns, rows derived from count. */
-.grid[data-layout="wide"]                 { grid-template-columns: 1fr 1fr 1fr; }
-.grid[data-layout="wide"][data-count="1"] { grid-template-columns: 1fr;             grid-template-rows: 1fr; }
-.grid[data-layout="wide"][data-count="2"] { grid-template-columns: 1fr 1fr;         grid-template-rows: 1fr; }
-.grid[data-layout="wide"][data-count="3"] { grid-template-rows: 1fr; }
-.grid[data-layout="wide"][data-count="4"],
-.grid[data-layout="wide"][data-count="5"],
-.grid[data-layout="wide"][data-count="6"] { grid-template-rows: 1fr 1fr; }
-.grid[data-layout="wide"][data-count="7"] { grid-template-rows: 1fr 1fr 1fr; }
-
 /* Focus — the active tile takes the left half (full height); the rest tile
    cleanly into the right column(s). Sized so every count tiles with no
    empty cells. The active tile reshapes when you ⌘-arrow to a new tile. */
@@ -1675,7 +1665,7 @@ input:focus-visible {
   position: relative;
   background: var(--tile);
   display: grid;
-  grid-template-rows: 38px 1fr;
+  grid-template-rows: calc(38px * var(--tfz, 1)) 1fr;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
@@ -2300,12 +2290,11 @@ html[data-alert-style="hinode"] .tile.needs {
   font-size: calc(14px * var(--tfz, 1));
   background: transparent;
   border: none;
-  outline: none;
   color: var(--ink);
   font-weight: 500;
   letter-spacing: 0.02em;
-  padding: 1px 4px;
-  margin: 0 -4px;
+  padding: calc(1px * var(--tfz, 1)) calc(4px * var(--tfz, 1));
+  margin: 0 calc(-4px * var(--tfz, 1));
   border-radius: 2px;
   box-shadow: inset 0 0 0 1px var(--accent);
   caret-color: var(--accent);
@@ -2656,7 +2645,7 @@ html[data-alert-style="hinode"] .tile.needs {
   background: transparent;
   margin: 0 2px;
 }
-.foot .group { display: flex; align-items: center; gap: 6px; }
+.foot .group { display: flex; align-items: center; gap: calc(6px * var(--fz)); }
 .foot .right { margin-left: auto; color: var(--accent); }
 .foot .right b { color: var(--accent); font-weight: 500; }
 

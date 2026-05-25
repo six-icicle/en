@@ -369,7 +369,7 @@ export default function TerminalView({
       lastCols = cols;
       lastRows = rows;
       console.log(
-        `[mc/${decl.key}] ensure: container=${Math.round(rect.width)}x${Math.round(rect.height)} cols=${cols} rows=${rows} (settled in ${stabilityAttempts + 1} ticks)`,
+        `[en/${decl.key}] ensure: container=${Math.round(rect.width)}x${Math.round(rect.height)} cols=${cols} rows=${rows} (settled in ${stabilityAttempts + 1} ticks)`,
       );
       ensure(decl, cols, rows).catch(() => {});
     };
@@ -405,7 +405,7 @@ export default function TerminalView({
           const el = containerRef.current;
           const rect = el?.getBoundingClientRect();
           console.log(
-            `[mc/${decl.key}] refit: container=${rect ? Math.round(rect.width) : "?"}x${rect ? Math.round(rect.height) : "?"} cols=${term.cols} rows=${term.rows}`,
+            `[en/${decl.key}] refit: container=${rect ? Math.round(rect.width) : "?"}x${rect ? Math.round(rect.height) : "?"} cols=${term.cols} rows=${term.rows}`,
           );
           lastCols = term.cols;
           lastRows = term.rows;
