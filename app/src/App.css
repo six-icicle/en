@@ -2424,8 +2424,8 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--tfz, 1)); letter-spacing: 0.04em; }
 
 .t-close {
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--tfz, 1));
+  height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
   border: none;
   background: transparent;
@@ -2446,15 +2446,15 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile.active .t-close,
 .t-close:focus-visible { opacity: 1; }
 .t-close:hover { color: var(--accent); }
-.t-close svg { width: 13px; height: 13px; display: block; }
+.t-close svg { width: calc(13px * var(--tfz, 1)); height: calc(13px * var(--tfz, 1)); display: block; }
 
 /* Reveal-in-Finder icon. Mirrors .t-close's hover-reveal pattern but
    uses the chrome family palette (ink-3 → accent on hover) instead of
    the destructive warn-red. Sits to the LEFT of .t-close so the close
    stays at the trailing edge. */
 .t-reveal {
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--tfz, 1));
+  height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
   border: 1px solid transparent;
   background: transparent;
@@ -2472,7 +2472,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile.active .t-reveal,
 .t-reveal:focus-visible { opacity: 1; }
 .t-reveal:hover { color: var(--accent); }
-.t-reveal svg { width: 13px; height: 13px; display: block; }
+.t-reveal svg { width: calc(13px * var(--tfz, 1)); height: calc(13px * var(--tfz, 1)); display: block; }
 
 .t-body {
   padding: calc(8px * var(--fz)) calc(10px * var(--fz));
