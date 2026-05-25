@@ -1606,16 +1606,23 @@ export default function App() {
               setBg(null);
             },
             allAppearance: () => {
-              setTheme(APPEARANCE_DEFAULTS.theme);
-              setTexture(APPEARANCE_DEFAULTS.texture);
-              setLayout(APPEARANCE_DEFAULTS.layout);
-              setFz(APPEARANCE_DEFAULTS.fz);
-              setTfz(APPEARANCE_DEFAULTS.tfz);
-              setTexAmt(APPEARANCE_DEFAULTS.texAmt);
-              setBrightness(APPEARANCE_DEFAULTS.brightness);
-              setAccent(APPEARANCE_DEFAULTS.accent);
-              setBg(APPEARANCE_DEFAULTS.bg);
-              setAlertStyle(APPEARANCE_DEFAULTS.alertStyle);
+              // Dispatch table — Record<keyof Appearance, () => void> makes
+              // TS enforce parity. Adding a field to Appearance without a
+              // resetter here is a compile error. React 19 batches the
+              // sequential setter calls into a single tick → single persist.
+              const APPEARANCE_RESETTERS: Record<keyof Appearance, () => void> = {
+                theme: () => setTheme(APPEARANCE_DEFAULTS.theme),
+                texture: () => setTexture(APPEARANCE_DEFAULTS.texture),
+                layout: () => setLayout(APPEARANCE_DEFAULTS.layout),
+                fz: () => setFz(APPEARANCE_DEFAULTS.fz),
+                tfz: () => setTfz(APPEARANCE_DEFAULTS.tfz),
+                texAmt: () => setTexAmt(APPEARANCE_DEFAULTS.texAmt),
+                brightness: () => setBrightness(APPEARANCE_DEFAULTS.brightness),
+                accent: () => setAccent(APPEARANCE_DEFAULTS.accent),
+                bg: () => setBg(APPEARANCE_DEFAULTS.bg),
+                alertStyle: () => setAlertStyle(APPEARANCE_DEFAULTS.alertStyle),
+              };
+              for (const reset of Object.values(APPEARANCE_RESETTERS)) reset();
             },
           }}
         />
