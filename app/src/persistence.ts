@@ -173,7 +173,13 @@ function isValidSlot(raw: unknown): raw is TileSlot {
   );
 }
 
-export async function loadTileSlots(): Promise<TileSlot[]> {
+// Returns null on caught error (load failed — disk may still hold valid
+// slots that we just can't read this boot). Returns [] only when the
+// store has no slots key or it's not an array (true empty state). The
+// caller MUST distinguish: persisting [] over a failed load destroys
+// legitimate slots on next mutation. App.tsx gates its persist effect
+// on a `tileSlotsLoaded` flag set only when this resolves non-null.
+export async function loadTileSlots(): Promise<TileSlot[] | null> {
   try {
     const store = await getStore();
     const raw = await store.get(SLOTS_KEY);
@@ -196,7 +202,7 @@ export async function loadTileSlots(): Promise<TileSlot[]> {
     return deduped.slice(0, MAX_TILES);
   } catch (e) {
     console.warn("[en/persistence] failed to load tile slots:", e);
-    return [];
+    return null;
   }
 }
 

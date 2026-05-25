@@ -195,6 +195,11 @@ export default function App() {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const themeMenuRef = useRef<HTMLDivElement | null>(null);
   const [appearanceLoaded, setAppearanceLoaded] = useState(false);
+  // Parallel flag for tile slots — set true only on successful load
+  // (loadTileSlots returns null on caught error). Gating the persist
+  // effect on this prevents a transient FS hiccup from blanking
+  // legitimate slots on the next tile mutation.
+  const [tileSlotsLoaded, setTileSlotsLoaded] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   // Imperatively select the rename input's text once per edit-mode entry.
   // An inline `ref={(el) => el?.select()}` re-fires on every parent render
@@ -483,7 +488,12 @@ export default function App() {
       setAppearanceLoaded(true);
     });
     loadTileSlots().then((slots) => {
-      if (cancelled || slots.length === 0) return;
+      if (cancelled) return;
+      // null = load failed; leave tileSlotsLoaded false so the persist
+      // effect can't write [] over legitimate slots on disk.
+      if (slots === null) return;
+      setTileSlotsLoaded(true);
+      if (slots.length === 0) return;
       const restored: TileDecl[] = slots.map((s) => ({
         key: s.key,
         name: s.name,
@@ -501,13 +511,16 @@ export default function App() {
   }, []);
 
   // Persist tile slots whenever the array changes (after initial load).
+  // Gated on `tileSlotsLoaded` (not just `appearanceLoaded`) so a failed
+  // load — which leaves legitimate slots intact on disk — can't be
+  // overwritten by a stale in-memory [] when the user next mutates tiles.
   useEffect(() => {
-    if (!appearanceLoaded) return;
+    if (!appearanceLoaded || !tileSlotsLoaded) return;
     const slots: TileSlot[] = tiles
       .filter((t) => !!t.cwd)
       .map((t) => ({ key: t.key, name: t.name, cwd: t.cwd!, path: t.path }));
     saveTileSlots(slots);
-  }, [appearanceLoaded, tiles]);
+  }, [appearanceLoaded, tileSlotsLoaded, tiles]);
 
   useEffect(() => {
     if (!appearanceLoaded) return;
