@@ -32,9 +32,14 @@ pub fn quarantine_if_corrupt(app: &AppHandle) {
     if raw.trim().is_empty() {
         return;
     }
-    if serde_json::from_str::<Value>(&raw).is_ok() {
-        return;
-    }
+    // tauri-plugin-store always writes a top-level JSON object. Anything else
+    // (parse failure, top-level array, scalar, null) is treated as corrupt and
+    // quarantined so the plugin doesn't silently overwrite the user's file.
+    let reason = match serde_json::from_str::<Value>(&raw) {
+        Ok(v) if v.is_object() => return,
+        Ok(_) => "wrong-shape".to_string(),
+        Err(e) => format!("parse-error: {e}"),
+    };
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default();
@@ -42,11 +47,11 @@ pub fn quarantine_if_corrupt(app: &AppHandle) {
     let quarantine = dir.join(format!("settings.json.en-corrupted-{stamp}"));
     match std::fs::rename(&path, &quarantine) {
         Ok(()) => eprintln!(
-            "[en-appearance] WARN appearance store was corrupt; moved to {}",
+            "[en-appearance] WARN appearance store was corrupt ({reason}); moved to {}",
             quarantine.display()
         ),
         Err(e) => eprintln!(
-            "[en-appearance] WARN failed to quarantine corrupt store {}: {e}",
+            "[en-appearance] WARN failed to quarantine corrupt store {} ({reason}): {e}",
             path.display()
         ),
     }
