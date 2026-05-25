@@ -2047,6 +2047,12 @@ function ResetMenuModal({
     allAppearance: () => void;
   };
 }) {
+  const firstItemRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
+  useEffect(() => {
+    firstItemRef.current?.focus();
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -2099,9 +2105,10 @@ function ResetMenuModal({
           Reset…
         </div>
         <div className="reset-list">
-          {items.map((it) => (
+          {items.map((it, idx) => (
             <button
               key={it.label}
+              ref={idx === 0 ? firstItemRef : undefined}
               className="reset-item"
               onClick={() => {
                 it.run();
