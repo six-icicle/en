@@ -1043,6 +1043,16 @@ export default function App() {
                       aria-pressed={theme === t.id}
                       title={t.title}
                       onClick={() => setTheme(t.id)}
+                      // --dot-bg drives the bg-half of the picker-dot
+                      // gradient (see App.css `.themes button[data-set=…]`).
+                      // Set inline from THEME_BGS so the picker swatch can't
+                      // drift from the trigger-dot, which uses the same
+                      // source one level up.
+                      style={
+                        {
+                          ["--dot-bg" as string]: THEME_BGS[t.id],
+                        } as React.CSSProperties
+                      }
                     />
                   ))}
                 </div>

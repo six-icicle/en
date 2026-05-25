@@ -1140,18 +1140,20 @@ input:focus-visible {
     0 0 0 3px var(--dot-accent, var(--accent)),
     0 0 8px var(--dot-glow, var(--accent-glow));
 }
-/* Per-theme picker dots: bg shows the theme's bg/accent split, and the
+/* Per-theme picker dots: bg-half is driven by --dot-bg (set inline from
+   THEME_BGS in App.tsx, so the CSS hex can't drift from the JS source);
+   accent-half + ring use --dot-accent / --dot-glow declared here. The
    --dot-accent + --dot-glow vars feed all the box-shadow rules above so
    each dot's ring tracks its OWN accent regardless of the active theme. */
-.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, #14141c 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
-.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, #2a2a37 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
-.themes button[data-set="everforest"]      { background: linear-gradient(135deg, #181f23 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
-.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #2a3539 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
-.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
-.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, #2a273f 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
-.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
-.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, #2a2620 50%, #c89656 50%); --dot-accent: #c89656; --dot-glow: rgba(200,150,86,0.5); }
-.themes button[data-set="washi"]           { background: linear-gradient(135deg, #ebedf0 50%, #bc002d 50%); --dot-accent: #bc002d; --dot-glow: rgba(188,0,45,0.5); }
+.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, var(--dot-bg) 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
+.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, var(--dot-bg) 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
+.themes button[data-set="everforest"]      { background: linear-gradient(135deg, var(--dot-bg) 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
+.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, var(--dot-bg) 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
+.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, var(--dot-bg) 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
+.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, var(--dot-bg) 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
+.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, var(--dot-bg) 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
+.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, var(--dot-bg) 50%, #c89656 50%); --dot-accent: #c89656; --dot-glow: rgba(200,150,86,0.5); }
+.themes button[data-set="washi"]           { background: linear-gradient(135deg, var(--dot-bg) 50%, #bc002d 50%); --dot-accent: #bc002d; --dot-glow: rgba(188,0,45,0.5); }
 .themes button[data-set="washi-kyokujitsu"] {
   background-image: var(--kyokujitsu-svg);
   background-size: cover;
