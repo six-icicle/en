@@ -166,6 +166,7 @@ export async function saveTileSlots(slots: TileSlot[]): Promise<void> {
   try {
     const store = await getStore();
     await store.set(SLOTS_KEY, slots);
+    await store.save();
   } catch {
     // Best-effort.
   }
@@ -174,7 +175,15 @@ export async function saveTileSlots(slots: TileSlot[]): Promise<void> {
 let storePromise: Promise<Store> | null = null;
 function getStore(): Promise<Store> {
   if (!storePromise) {
-    storePromise = load(STORE_FILE, { autoSave: true, defaults: {} });
+    // If the load rejects (FS hiccup, plugin race during boot), null
+    // the cache so the next call retries instead of returning the same
+    // dead promise for the rest of the session.
+    storePromise = load(STORE_FILE, { autoSave: true, defaults: {} }).catch(
+      (err) => {
+        storePromise = null;
+        throw err;
+      },
+    );
   }
   return storePromise;
 }
@@ -248,6 +257,10 @@ export async function saveAppearance(next: Appearance): Promise<void> {
   try {
     const store = await getStore();
     await store.set(KEY, next);
+    // Force a flush — autoSave debouncing can drop the latest write
+    // when ⌘Q fires inside the debounce window. Appearance changes are
+    // rare enough that the extra disk traffic doesn't matter.
+    await store.save();
   } catch {
     // Best-effort: persistence is non-critical. If the store is unavailable,
     // the in-memory state still works for this session.
