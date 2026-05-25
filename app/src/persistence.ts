@@ -1,43 +1,62 @@
 import { load, type Store } from "@tauri-apps/plugin-store";
 
-export type Theme =
-  | "kanagawa"
-  | "kanagawa-soft"
-  | "everforest"
-  | "everforest-soft"
-  | "rose-pine"
-  | "rose-pine-soft"
-  | "hinoki"
-  | "hinoki-soft"
-  | "washi"
-  | "washi-kyokujitsu"
-  | "washi-tsuki";
-export type Texture =
-  | "none"
-  | "grain"
-  | "scanlines"
-  | "dots"
-  | "sakura"
-  | "seigaiha"
-  | "petals-fall"
-  | "shuriken-fall"
-  | "topography"
-  | "pluses"
-  | "yagasuri"
-  | "brush"
-  | "bokeh"
-  | "bamboo";
-export type Layout = "row" | "grid" | "focus";
-export type AlertStyle =
-  | "pulse"
-  | "heartbeat"
-  | "breath"
-  | "hotaru"
-  | "triple"
-  | "vertical"
-  | "sakura"
-  | "shuriken"
-  | "hinode";
+/* Catalogs — single source of truth per domain.
+   Each record's insertion order is the picker order in App.tsx.
+   The TS union, runtime validator Set, and picker array all derive
+   from these constants. To add or remove a variant: edit the record
+   here and only here. */
+export const THEME_META = {
+  kanagawa:           { title: "Kanagawa Sumi" },
+  "kanagawa-soft":    { title: "Kanagawa Sumi (soft)" },
+  everforest:         { title: "Everforest Dusk" },
+  "everforest-soft":  { title: "Everforest Dusk (soft)" },
+  "rose-pine":        { title: "Rose Pine Moon" },
+  "rose-pine-soft":   { title: "Rose Pine Moon (soft)" },
+  hinoki:             { title: "Hinoki" },
+  "hinoki-soft":      { title: "Hinoki (soft)" },
+  washi:              { title: "Washi Hinomaru" },
+  "washi-kyokujitsu": { title: "Washi Kyokujitsu" },
+  "washi-tsuki":      { title: "Washi Tsuki" },
+} as const;
+export type Theme = keyof typeof THEME_META;
+
+export const TEXTURE_META = {
+  none:            { title: "None" },
+  grain:           { title: "Grain" },
+  scanlines:       { title: "Scanlines" },
+  dots:            { title: "Dot grid" },
+  sakura:          { title: "Sakura" },
+  seigaiha:        { title: "Seigaiha (waves)" },
+  topography:      { title: "Topography" },
+  pluses:          { title: "Plus signs" },
+  yagasuri:        { title: "Yagasuri" },
+  brush:           { title: "Brush strokes" },
+  bokeh:           { title: "Bokeh" },
+  bamboo:          { title: "Bamboo forest" },
+  "petals-fall":   { title: "Sakura rain" },
+  "shuriken-fall": { title: "Shuriken rain" },
+} as const;
+export type Texture = keyof typeof TEXTURE_META;
+
+export const LAYOUT_META = {
+  row:   { title: "Row",   desc: "single row" },
+  grid:  { title: "Grid",  desc: "2 × 1–4" },
+  focus: { title: "Focus", desc: "active big" },
+} as const;
+export type Layout = keyof typeof LAYOUT_META;
+
+export const ALERT_STYLE_META = {
+  pulse:     { title: "Andon",      desc: "soft halo" },
+  heartbeat: { title: "Kodou",      desc: "lub-dub" },
+  breath:    { title: "Kokyu",      desc: "slow inhale" },
+  hotaru:    { title: "Hotaru",     desc: "racing firefly" },
+  triple:    { title: "Sandangiri", desc: "three cuts" },
+  vertical:  { title: "Tatewari",   desc: "falling cut" },
+  sakura:    { title: "Sakura rain", desc: "petals fall" },
+  shuriken:  { title: "Shuriken",   desc: "throw + stick" },
+  hinode:    { title: "Hinode",     desc: "rising sun" },
+} as const;
+export type AlertStyle = keyof typeof ALERT_STYLE_META;
 
 // Migrate prior IDs that were renamed.
 const ALERT_STYLE_LEGACY: Record<string, AlertStyle> = {
@@ -90,48 +109,13 @@ export const APPEARANCE_DEFAULTS: Appearance = {
   alertStyle: "pulse",
 };
 
-const THEMES = new Set<Theme>([
-  "kanagawa",
-  "kanagawa-soft",
-  "everforest",
-  "everforest-soft",
-  "rose-pine",
-  "rose-pine-soft",
-  "hinoki",
-  "hinoki-soft",
-  "washi",
-  "washi-kyokujitsu",
-  "washi-tsuki",
-]);
-const TEXTURES = new Set<Texture>([
-  "none",
-  "grain",
-  "scanlines",
-  "dots",
-  "sakura",
-  "seigaiha",
-  "petals-fall",
-  "shuriken-fall",
-  "topography",
-  "pluses",
-  "yagasuri",
-  "brush",
-  "bokeh",
-  "bamboo",
-]);
-const LAYOUTS = new Set<Layout>(["row", "grid", "focus"]);
+const THEMES = new Set<Theme>(Object.keys(THEME_META) as Theme[]);
+const TEXTURES = new Set<Texture>(Object.keys(TEXTURE_META) as Texture[]);
+const LAYOUTS = new Set<Layout>(Object.keys(LAYOUT_META) as Layout[]);
 const LAYOUT_LEGACY: Record<string, Layout> = { wide: "grid" };
-const ALERT_STYLES = new Set<AlertStyle>([
-  "pulse",
-  "heartbeat",
-  "breath",
-  "hotaru",
-  "triple",
-  "vertical",
-  "sakura",
-  "shuriken",
-  "hinode",
-]);
+const ALERT_STYLES = new Set<AlertStyle>(
+  Object.keys(ALERT_STYLE_META) as AlertStyle[],
+);
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 

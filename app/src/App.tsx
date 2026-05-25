@@ -12,15 +12,19 @@ import {
   Wind,
 } from "lucide-react";
 import TerminalView from "./Terminal";
-import { useSessions, type SessionDecl } from "./sessions";
+import { useSessions, type SessionDecl, type Status } from "./sessions";
 import GridResizeHandles from "./GridResizeHandles";
 import { usePopover } from "./usePopover";
 import {
+  ALERT_STYLE_META,
   APPEARANCE_DEFAULTS,
+  LAYOUT_META,
   loadAppearance,
   loadTileSlots,
   saveAppearance,
   saveTileSlots,
+  TEXTURE_META,
+  THEME_META,
   type AlertStyle,
   type Appearance,
   type Layout,
@@ -31,25 +35,25 @@ import {
 import "./App.css";
 type DisplayStatus = "working" | "needs" | "idle" | "stale";
 
+const STATUS_TO_DISPLAY: Record<Status, { status: DisplayStatus; meta: string | null }> = {
+  spawning: { status: "idle", meta: "kindling…" },
+  working: { status: "working", meta: null },
+  needs: { status: "needs", meta: null },
+  idle: { status: "idle", meta: null },
+  exited: { status: "stale", meta: "exited" },
+  failed: { status: "stale", meta: "failed" },
+};
+
 type TileDecl = SessionDecl & {
   meta: string;
   status: DisplayStatus;
   sleeping?: boolean;
 };
 
-const THEMES: { id: Theme; title: string }[] = [
-  { id: "kanagawa", title: "Kanagawa Sumi" },
-  { id: "kanagawa-soft", title: "Kanagawa Sumi (soft)" },
-  { id: "everforest", title: "Everforest Dusk" },
-  { id: "everforest-soft", title: "Everforest Dusk (soft)" },
-  { id: "rose-pine", title: "Rose Pine Moon" },
-  { id: "rose-pine-soft", title: "Rose Pine Moon (soft)" },
-  { id: "hinoki", title: "Hinoki" },
-  { id: "hinoki-soft", title: "Hinoki (soft)" },
-  { id: "washi", title: "Washi Hinomaru" },
-  { id: "washi-kyokujitsu", title: "Washi Kyokujitsu" },
-  { id: "washi-tsuki", title: "Washi Tsuki" },
-];
+const THEMES = (Object.keys(THEME_META) as Theme[]).map((id) => ({
+  id,
+  title: THEME_META[id].title,
+}));
 
 const THEME_ACCENTS: Record<Theme, string> = {
   kanagawa: "#d4b274",
@@ -102,42 +106,21 @@ function shiftLightness(hex: string, delta: number): string {
   );
 }
 
-const TEXTURES: { id: Texture; title: string }[] = [
-  { id: "none", title: "None" },
-  { id: "grain", title: "Grain" },
-  { id: "scanlines", title: "Scanlines" },
-  { id: "dots", title: "Dot grid" },
-  { id: "sakura", title: "Sakura" },
-  { id: "seigaiha", title: "Seigaiha (waves)" },
-  { id: "topography", title: "Topography" },
-  { id: "pluses", title: "Plus signs" },
-  { id: "yagasuri", title: "Yagasuri" },
-  { id: "brush", title: "Brush strokes" },
-  { id: "bokeh", title: "Bokeh" },
-  { id: "bamboo", title: "Bamboo forest" },
-  { id: "petals-fall", title: "Sakura rain" },
-  { id: "shuriken-fall", title: "Shuriken rain" },
-];
+const TEXTURES = (Object.keys(TEXTURE_META) as Texture[]).map((id) => ({
+  id,
+  title: TEXTURE_META[id].title,
+}));
 
 const MAX_TILES = 8;
 
-const LAYOUTS: { id: Layout; title: string; desc: string }[] = [
-  { id: "row",   title: "Row",   desc: "single row" },
-  { id: "grid",  title: "Grid",  desc: "2 × 1–4" },
-  { id: "focus", title: "Focus", desc: "active big" },
-];
+const LAYOUTS = (Object.keys(LAYOUT_META) as Layout[]).map((id) => ({
+  id,
+  ...LAYOUT_META[id],
+}));
 
-const ALERT_STYLES: { id: AlertStyle; title: string; desc: string }[] = [
-  { id: "pulse",     title: "Andon",         desc: "soft halo" },
-  { id: "heartbeat", title: "Kodou",         desc: "lub-dub" },
-  { id: "breath",    title: "Kokyu",         desc: "slow inhale" },
-  { id: "hotaru",    title: "Hotaru",        desc: "racing firefly" },
-  { id: "triple",    title: "Sandangiri",    desc: "three cuts" },
-  { id: "vertical",  title: "Tatewari",      desc: "falling cut" },
-  { id: "sakura",    title: "Sakura rain",   desc: "petals fall" },
-  { id: "shuriken",  title: "Shuriken",      desc: "throw + stick" },
-  { id: "hinode",    title: "Hinode",        desc: "rising sun" },
-];
+const ALERT_STYLES = (Object.keys(ALERT_STYLE_META) as AlertStyle[]).map(
+  (id) => ({ id, ...ALERT_STYLE_META[id] }),
+);
 
 /* ─── Easter egg: kyokujitsu (war flag) theme is hidden from the picker
    and only auto-applies when a tile is renamed to one of these phrases.
@@ -880,21 +863,13 @@ export default function App() {
   const statusByKey = new Map(list.map((s) => [s.key, s.status]));
   const tilesWithStatus = tiles.map((t) => {
     const s = statusByKey.get(t.key);
-    let status: DisplayStatus = t.status;
-    let meta = t.meta;
-    if (s === "spawning") {
-      status = "idle";
-      meta = "kindling…";
-    } else if (s === "exited") {
-      status = "stale";
-      meta = "exited";
-    } else if (s === "failed") {
-      status = "stale";
-      meta = "failed";
-    } else if (s === "working" || s === "needs" || s === "idle") {
-      status = s;
-    }
-    return { ...t, status, meta };
+    if (s === undefined) return t;
+    const mapped = STATUS_TO_DISPLAY[s];
+    return {
+      ...t,
+      status: mapped.status,
+      meta: mapped.meta ?? t.meta,
+    };
   });
 
   return (
