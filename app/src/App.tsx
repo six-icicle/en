@@ -391,8 +391,12 @@ export default function App() {
   );
 
   const tileRectsRef = useRef<Map<string, DOMRect>>(new Map());
-  const tilesOrderKey = tiles.map((t) => t.key).join(",");
-  useLayoutEffect(() => {
+  // Snapshot current tile rects, animate any survivor whose position changed
+  // from its previous snapshot, then store the fresh rects. Extracted to a
+  // callback so both the order-change effect and the layout/track-change
+  // effect (declared after `effectiveColFrs/Rs`) can reuse it without
+  // duplicating the FLIP logic.
+  const refreshFlipRects = useCallback(() => {
     const grid = gridRef.current;
     if (!grid) return;
     const prev = tileRectsRef.current;
@@ -423,7 +427,11 @@ export default function App() {
       }
     });
     tileRectsRef.current = next;
-  }, [tilesOrderKey]);
+  }, []);
+  const tilesOrderKey = tiles.map((t) => t.key).join(",");
+  useLayoutEffect(() => {
+    refreshFlipRects();
+  }, [tilesOrderKey, refreshFlipRects]);
 
   const tileCount = tiles.length;
   const defaults = useMemo(
@@ -450,6 +458,13 @@ export default function App() {
     colFrs.length === defaults.cols.length ? colFrs : defaults.cols;
   const effectiveRowFrs =
     rowFrs.length === defaults.rows.length ? rowFrs : defaults.rows;
+
+  // Refresh FLIP rect snapshot on layout/track changes too — without this,
+  // switching layouts or dragging a track-fr handle invalidates the cached
+  // rects and the next tile reorder animates from a stale origin.
+  useLayoutEffect(() => {
+    refreshFlipRects();
+  }, [layout, effectiveColFrs, effectiveRowFrs, refreshFlipRects]);
 
   useEffect(() => {
     let cancelled = false;
