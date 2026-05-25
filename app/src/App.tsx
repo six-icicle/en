@@ -653,6 +653,12 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Suppress hub shortcuts while any confirmation modal is mounted.
+      // ⌘N would otherwise pop the spawn dialog over a confirm modal,
+      // and ⌘W would stomp pendingClose's target. Each modal handles
+      // its own Esc/Enter via a sibling capture-phase listener, so
+      // cancel-to-dismiss still works.
+      if (pendingClose !== null || killAllOpen || resetMenuOpen) return;
       // Hub-level shortcuts (⌘N/⌘W/⌘+arrow/⌘+1..9) must run regardless
       // of focus target — xterm has its own hidden textarea that always
       // owns focus, and the tile rename input shouldn't trap ⌘W either.
@@ -743,7 +749,7 @@ export default function App() {
     window.addEventListener("keydown", onKey, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
-  }, [activeId, tiles, spawn, closeTile]);
+  }, [activeId, tiles, spawn, closeTile, pendingClose, killAllOpen, resetMenuOpen]);
 
   /* Drag-and-drop files/folders/screenshots into a tile.
      Routes to the tile under the cursor; falls back to the focused tile
