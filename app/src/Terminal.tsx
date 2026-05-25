@@ -4,6 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import { WebglAddon } from "@xterm/addon-webgl";
 import { useSessions, type SessionDecl } from "./sessions";
 import type { Theme } from "./persistence";
+import { THEME_ACCENTS, THEME_BGS } from "./themes";
 
 /* WebKit caps WebGL contexts at ~8 per page; xterm's WebGL renderer
    claims one per terminal. Cap ourselves at 6 in prod so HMR/devtools/
@@ -23,7 +24,7 @@ type Props = {
 };
 
 function themeFor(theme: Theme, accent?: string, bg?: string): ITheme {
-  const base = THEMES[theme];
+  const base = paletteFor(theme);
   if (!accent && !bg) return base;
   return {
     ...base,
@@ -87,59 +88,50 @@ const ROSE_PINE_ANSI = {
   brightWhite: "#e0def4",
 };
 
-const THEMES: Record<Theme, ITheme> = {
+// Per-theme xterm specifics (foreground / cursorAccent / selection /
+// ANSI). `background` and `cursor` are derived from THEME_BGS /
+// THEME_ACCENTS in `themes.ts` so the picker swatch and the live xterm
+// canvas can never drift.
+type XtermSpec = Omit<ITheme, "background" | "cursor">;
+const THEME_XTERM: Record<Theme, XtermSpec> = {
   kanagawa: {
-    background: "#1a1a23",
     foreground: "#ece6c4",
-    cursor: "#d4b274",
     cursorAccent: "#14141c",
     selectionBackground: "#2d4f67",
     ...KANAGAWA_ANSI,
   },
   "kanagawa-soft": {
-    background: "#2f2f3d",
     foreground: "#dcd7ba",
-    cursor: "#c0a36e",
     cursorAccent: "#2a2a37",
     selectionBackground: "#2d4f67",
     ...KANAGAWA_ANSI,
   },
   everforest: {
-    background: "#222a30",
     foreground: "#e1d6b5",
-    cursor: "#b8d290",
     cursorAccent: "#181f23",
     selectionBackground: "#475258",
     ...EVERFOREST_ANSI,
   },
   "everforest-soft": {
-    background: "#303c40",
     foreground: "#d3c6aa",
-    cursor: "#a7c080",
     cursorAccent: "#2a3539",
     selectionBackground: "#475258",
     ...EVERFOREST_ANSI,
   },
   "rose-pine": {
-    background: "#211f33",
     foreground: "#ecebff",
-    cursor: "#f4a8a5",
     cursorAccent: "#1a1828",
     selectionBackground: "#44415a",
     ...ROSE_PINE_ANSI,
   },
   "rose-pine-soft": {
-    background: "#312e4a",
     foreground: "#e0def4",
-    cursor: "#ea9a97",
     cursorAccent: "#2a273f",
     selectionBackground: "#44415a",
     ...ROSE_PINE_ANSI,
   },
   hinoki: {
-    background: "#1b1d20",
     foreground: "#e3dccb",
-    cursor: "#d49a3a",
     cursorAccent: "#15171a",
     selectionBackground: "#2a3038",
     black: "#1b1d20",
@@ -160,9 +152,7 @@ const THEMES: Record<Theme, ITheme> = {
     brightWhite: "#f5eede",
   },
   "hinoki-soft": {
-    background: "#312d26",
     foreground: "#d6d0bf",
-    cursor: "#c89656",
     cursorAccent: "#2a2620",
     selectionBackground: "#3a342a",
     black: "#312d26",
@@ -187,9 +177,7 @@ const THEMES: Record<Theme, ITheme> = {
   // shu-iro per the user's directive ("submitted message should be red").
   // ANSI colors retuned for WCAG-readable contrast on light bg.
   washi: {
-    background: "#f1f3f6",
     foreground: "#bc002d",
-    cursor: "#bc002d",
     cursorAccent: "#ebedf0",
     selectionBackground: "#c8d0db",
     black: "#1a1614",
@@ -212,9 +200,7 @@ const THEMES: Record<Theme, ITheme> = {
   // Same xterm palette as washi — the kyokujitsu rays render behind the
   // tiles via [data-theme] CSS, not inside the terminal canvas.
   "washi-kyokujitsu": {
-    background: "#f1f3f6",
     foreground: "#bc002d",
-    cursor: "#bc002d",
     cursorAccent: "#ebedf0",
     selectionBackground: "#c8d0db",
     black: "#1a1614",
@@ -239,9 +225,7 @@ const THEMES: Record<Theme, ITheme> = {
   // sit on slate without burning; selection picks the same blue as the
   // light washi so claude's picker bg keeps a coherent identity.
   "washi-tsuki": {
-    background: "#171b22",
     foreground: "#c8cdd6",
-    cursor: "#be4258",
     cursorAccent: "#11141a",
     selectionBackground: "#2c3340",
     black: "#171b22",
@@ -262,6 +246,14 @@ const THEMES: Record<Theme, ITheme> = {
     brightWhite: "#dee3ec",
   },
 };
+
+function paletteFor(theme: Theme): ITheme {
+  return {
+    background: THEME_BGS[theme],
+    cursor: THEME_ACCENTS[theme],
+    ...THEME_XTERM[theme],
+  };
+}
 
 export default function TerminalView({
   decl,

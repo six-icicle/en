@@ -32,6 +32,7 @@ import {
   type Theme,
   type TileSlot,
 } from "./persistence";
+import { THEME_ACCENTS, THEME_BGS } from "./themes";
 import "./App.css";
 type DisplayStatus = "working" | "needs" | "idle" | "stale";
 
@@ -54,34 +55,6 @@ const THEMES = (Object.keys(THEME_META) as Theme[]).map((id) => ({
   id,
   title: THEME_META[id].title,
 }));
-
-const THEME_ACCENTS: Record<Theme, string> = {
-  kanagawa: "#d4b274",
-  "kanagawa-soft": "#c0a36e",
-  everforest: "#b8d290",
-  "everforest-soft": "#a7c080",
-  "rose-pine": "#f4a8a5",
-  "rose-pine-soft": "#ea9a97",
-  hinoki: "#d49a3a",
-  "hinoki-soft": "#c89656",
-  washi: "#bc002d",
-  "washi-kyokujitsu": "#bc002d",
-  "washi-tsuki": "#be4258",
-};
-
-const THEME_BGS: Record<Theme, string> = {
-  kanagawa: "#1a1a23",
-  "kanagawa-soft": "#2f2f3d",
-  everforest: "#222a30",
-  "everforest-soft": "#303c40",
-  "rose-pine": "#211f33",
-  "rose-pine-soft": "#312e4a",
-  hinoki: "#1b1d20",
-  "hinoki-soft": "#312d26",
-  washi: "#ebedf0",
-  "washi-kyokujitsu": "#ebedf0",
-  "washi-tsuki": "#11141a",
-};
 
 function hexToRgba(hex: string, alpha: number): string {
   const c = hex.replace("#", "");

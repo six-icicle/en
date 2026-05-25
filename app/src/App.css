@@ -14,7 +14,13 @@
         1  terminal scanlines · top sheen · .app grid root
    ────────────────────────────────────────────────────── */
 
-/* ───────────────────── THEMES ───────────────────── */
+/* ───────────────────── THEMES ─────────────────────
+   The painted palette lives here. The JS-side mirror for picker
+   swatches + xterm canvas bg/cursor is `app/src/themes.ts` —
+   THEME_BGS and THEME_ACCENTS must match the `--tile` and `--accent`
+   declared below for each theme. (See state-invariants:F6 for why we
+   care: pre-2026-05-22, kanagawa's swatch and bg drifted apart and
+   nobody noticed for weeks.) */
 
 /* Each theme has two variants:
    - default = high-contrast (deeper bg, brighter ink, saturated accent)
