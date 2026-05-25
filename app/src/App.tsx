@@ -14,6 +14,7 @@ import {
 import TerminalView from "./Terminal";
 import { useSessions, type SessionDecl } from "./sessions";
 import GridResizeHandles from "./GridResizeHandles";
+import { usePopover } from "./usePopover";
 import {
   APPEARANCE_DEFAULTS,
   loadAppearance,
@@ -553,131 +554,13 @@ export default function App() {
     document.documentElement.dataset.alertStyle = alertStyle;
   }, [alertStyle]);
 
-  useEffect(() => {
-    if (!alertMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!alertMenuRef.current) return;
-      if (!alertMenuRef.current.contains(e.target as Node)) {
-        setAlertMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setAlertMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [alertMenuOpen]);
-
-  useEffect(() => {
-    if (!layoutMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!layoutMenuRef.current) return;
-      if (!layoutMenuRef.current.contains(e.target as Node)) {
-        setLayoutMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLayoutMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [layoutMenuOpen]);
-
-  useEffect(() => {
-    if (!themeMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!themeMenuRef.current) return;
-      if (!themeMenuRef.current.contains(e.target as Node)) {
-        setThemeMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setThemeMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [themeMenuOpen]);
-
-  useEffect(() => {
-    if (!fzMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!fzMenuRef.current) return;
-      if (!fzMenuRef.current.contains(e.target as Node)) setFzMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFzMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [fzMenuOpen]);
-
-  useEffect(() => {
-    if (!batchMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!batchMenuRef.current) return;
-      if (!batchMenuRef.current.contains(e.target as Node)) setBatchMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setBatchMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [batchMenuOpen]);
-
-  useEffect(() => {
-    if (!tfzMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!tfzMenuRef.current) return;
-      if (!tfzMenuRef.current.contains(e.target as Node)) setTfzMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setTfzMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [tfzMenuOpen]);
-
-  useEffect(() => {
-    if (!brightnessMenuOpen) return;
-    const onPointer = (e: MouseEvent) => {
-      if (!brightnessMenuRef.current) return;
-      if (!brightnessMenuRef.current.contains(e.target as Node))
-        setBrightnessMenuOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setBrightnessMenuOpen(false);
-    };
-    window.addEventListener("mousedown", onPointer);
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("mousedown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [brightnessMenuOpen]);
+  usePopover(alertMenuOpen, alertMenuRef, setAlertMenuOpen);
+  usePopover(layoutMenuOpen, layoutMenuRef, setLayoutMenuOpen);
+  usePopover(themeMenuOpen, themeMenuRef, setThemeMenuOpen);
+  usePopover(fzMenuOpen, fzMenuRef, setFzMenuOpen);
+  usePopover(batchMenuOpen, batchMenuRef, setBatchMenuOpen);
+  usePopover(tfzMenuOpen, tfzMenuRef, setTfzMenuOpen);
+  usePopover(brightnessMenuOpen, brightnessMenuRef, setBrightnessMenuOpen);
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -1999,9 +1882,11 @@ function ConfirmKillAllModal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onCancel();
       } else if (e.key === "Enter") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onConfirm();
       }
     };
@@ -2090,9 +1975,11 @@ function ConfirmCloseModal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onCancel();
       } else if (e.key === "Enter") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onConfirm();
       }
     };
@@ -2146,6 +2033,7 @@ function ResetMenuModal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopImmediatePropagation();
         onClose();
       }
     };
