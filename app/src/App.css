@@ -1784,7 +1784,7 @@ input:focus-visible {
 .grid[data-layout="focus"][data-count="3"] { grid-template-columns: 2fr 1fr;     grid-template-rows: 1fr 1fr; }
 .grid[data-layout="focus"][data-count="4"] { grid-template-columns: 2fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 .grid[data-layout="focus"][data-count="5"] { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.grid[data-layout="focus"][data-count="6"] { grid-template-columns: 1fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
+.grid[data-layout="focus"][data-count="6"] { grid-template-columns: 2fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 .grid[data-layout="focus"][data-count="7"] { grid-template-columns: 2fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 
 .grid[data-layout="focus"] .tile.active {
