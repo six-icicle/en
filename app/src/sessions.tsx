@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -43,8 +43,7 @@ type Buffer = {
   size: number;
 };
 
-type Ctx = {
-  list: Session[];
+type Methods = {
   ensure(decl: SessionDecl, initialCols?: number, initialRows?: number): Promise<Session>;
   kill(key: string): Promise<void>;
   sendInput(key: string, data: string): Promise<void>;
@@ -59,7 +58,15 @@ type Ctx = {
   ackStatus(key: string): void;
 };
 
-const SessionsContext = createContext<Ctx | null>(null);
+type Ctx = Methods & { list: Session[] };
+
+// Two contexts so consumers that only call methods (Terminal,
+// GridResizeHandles) don't re-render every time `list` changes (which
+// happens on every status flip of any session). MethodsContext value
+// is stable for the lifetime of the provider; ListContext value
+// changes per `setTick`.
+const SessionsMethodsContext = createContext<Methods | null>(null);
+const SessionsListContext = createContext<Session[]>([]);
 
 function decodeBase64(b64: string): Uint8Array {
   const bin = atob(b64);
@@ -320,26 +327,50 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  // Methods identity is stable for the lifetime of the provider — every
+  // useCallback above has [] deps, so each ref is permanent. Wrapping
+  // them once in useMemo gives consumers a stable object too.
+  const methods = useMemo<Methods>(
+    () => ({
+      ensure,
+      kill,
+      sendInput,
+      resize,
+      pauseResize,
+      resumeResize,
+      subscribe,
+      ackStatus,
+    }),
+    [ensure, kill, sendInput, resize, pauseResize, resumeResize, subscribe, ackStatus],
+  );
+
   const list = Array.from(sessionsRef.current.values());
 
-  const ctx: Ctx = {
-    list,
-    ensure,
-    kill,
-    sendInput,
-    resize,
-    pauseResize,
-    resumeResize,
-    subscribe,
-    ackStatus,
-  };
   return (
-    <SessionsContext.Provider value={ctx}>{children}</SessionsContext.Provider>
+    <SessionsMethodsContext.Provider value={methods}>
+      <SessionsListContext.Provider value={list}>
+        {children}
+      </SessionsListContext.Provider>
+    </SessionsMethodsContext.Provider>
   );
 }
 
-export function useSessions(): Ctx {
-  const ctx = useContext(SessionsContext);
-  if (!ctx) throw new Error("useSessions must be used within <SessionsProvider>");
+export function useSessionsMethods(): Methods {
+  const ctx = useContext(SessionsMethodsContext);
+  if (!ctx)
+    throw new Error("useSessionsMethods must be used within <SessionsProvider>");
   return ctx;
+}
+
+export function useSessionsList(): Session[] {
+  return useContext(SessionsListContext);
+}
+
+// Convenience for consumers that need both. Components that only call
+// methods (Terminal, GridResizeHandles) should use useSessionsMethods()
+// directly so list changes don't re-render them.
+export function useSessions(): Ctx {
+  const methods = useSessionsMethods();
+  const list = useSessionsList();
+  return useMemo(() => ({ ...methods, list }), [methods, list]);
 }

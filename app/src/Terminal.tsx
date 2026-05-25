@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Terminal as Xterm, type ITheme } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebglAddon } from "@xterm/addon-webgl";
-import { useSessions, type SessionDecl } from "./sessions";
+import { useSessionsMethods, type SessionDecl } from "./sessions";
 import type { Theme } from "./persistence";
 import { THEME_ACCENTS, THEME_BGS } from "./themes";
 
@@ -267,7 +267,7 @@ export default function TerminalView({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const termRef = useRef<Xterm | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
-  const { ensure, sendInput, resize, subscribe } = useSessions();
+  const { ensure, sendInput, resize, subscribe } = useSessionsMethods();
 
   useEffect(() => {
     if (!containerRef.current) return;

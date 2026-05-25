@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ReactElement, RefObject } from "react";
-import { useSessions } from "./sessions";
+import { useSessionsMethods } from "./sessions";
 import type { Layout } from "./persistence";
 
 const HANDLE_THICKNESS = 6;
@@ -60,7 +60,7 @@ export default function GridResizeHandles({
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
   const rafIdRef = useRef(0);
-  const { pauseResize, resumeResize } = useSessions();
+  const { pauseResize, resumeResize } = useSessionsMethods();
 
   // Re-measure when layout/count/fr arrays change. During drag we suppress
   // measurement so the React-driven track values don't fight the live DOM
