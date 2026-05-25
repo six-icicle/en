@@ -9,6 +9,8 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
 use tiny_http::{Header, Method, Response, Server, StatusCode};
 
+use crate::events::TILE_STATUS_EVENT_PREFIX;
+
 const HOOK_MARKER: &str = "# en-managed";
 
 // Single source of truth for the Claude lifecycle events en cares about
@@ -75,7 +77,7 @@ fn serve(server: Server, app: AppHandle) {
         };
 
         if let Some(status) = status_for(&payload.event) {
-            let event_name = format!("tile-status:{}", payload.session_id);
+            let event_name = format!("{TILE_STATUS_EVENT_PREFIX}{}", payload.session_id);
             let _ = app.emit(
                 &event_name,
                 TileStatusEvent {

@@ -9,6 +9,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
 
+use crate::events::{PTY_EVENT_PREFIX, PTY_EXIT_EVENT_PREFIX};
 use crate::hooks::HookConfig;
 
 pub struct PtySession {
@@ -108,8 +109,8 @@ pub fn spawn_session(
     thread::spawn(move || {
         let mut reader = reader;
         let mut buf = [0u8; 8192];
-        let data_event = format!("pty:{}", id_for_thread);
-        let exit_event = format!("pty-exit:{}", id_for_thread);
+        let data_event = format!("{PTY_EVENT_PREFIX}{id_for_thread}");
+        let exit_event = format!("{PTY_EXIT_EVENT_PREFIX}{id_for_thread}");
         loop {
             match reader.read(&mut buf) {
                 Ok(0) => break,
