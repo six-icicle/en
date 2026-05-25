@@ -1908,9 +1908,12 @@ function ConfirmKillAllModal({
         className="modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-kill-all"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Extinguish all sessions</div>
+        <div className="modal-title" id="modal-title-kill-all">
+          Extinguish all sessions
+        </div>
         <div className="modal-body">
           End <b>{count}</b> session{count === 1 ? "" : "s"}? Any in-progress
           work will be lost.
@@ -2005,9 +2008,12 @@ function ConfirmCloseModal({
         className="modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-confirm-close"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Close session</div>
+        <div className="modal-title" id="modal-title-confirm-close">
+          Close session
+        </div>
         <div className="modal-body">
           End <b>{name}</b>? Any in-progress work in this terminal will be lost.
         </div>
@@ -2086,9 +2092,12 @@ function ResetMenuModal({
         className="modal reset-modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-reset"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Reset…</div>
+        <div className="modal-title" id="modal-title-reset">
+          Reset…
+        </div>
         <div className="reset-list">
           {items.map((it) => (
             <button
