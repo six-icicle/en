@@ -2872,12 +2872,12 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile-drag-ghost-head {
   display: flex;
   align-items: center;
-  gap: calc(10px * var(--fz));
-  padding: 0 calc(18px * var(--fz));
-  height: calc(38px * var(--fz));
+  gap: calc(10px * var(--tfz, 1));
+  padding: 0 calc(18px * var(--tfz, 1));
+  height: calc(38px * var(--tfz, 1));
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
-  font-size: calc(14px * var(--fz));
+  font-size: calc(14px * var(--tfz, 1));
   background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
   color: var(--ink);
 }
