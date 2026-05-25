@@ -130,8 +130,12 @@ export type TileSlot = {
   path: string;
 };
 
-const SLOT_NAME_MAX = 256;
+export const SLOT_NAME_MAX = 256;
 const SLOT_PATH_MAX = 4096;
+// Hub capacity. Single source of truth — App.tsx imports this for the
+// spawn/disabled checks, and `loadTileSlots` caps restored slots by it
+// so a stale settings.json with N>cap tiles can't silently leak past.
+export const MAX_TILES = 8;
 
 function isValidSlot(raw: unknown): raw is TileSlot {
   if (!raw || typeof raw !== "object") return false;
@@ -170,7 +174,7 @@ export async function loadTileSlots(): Promise<TileSlot[]> {
         valid.length - deduped.length,
       );
     }
-    return deduped.slice(0, 8);
+    return deduped.slice(0, MAX_TILES);
   } catch (e) {
     console.warn("[en/persistence] failed to load tile slots:", e);
     return [];

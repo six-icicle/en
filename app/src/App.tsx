@@ -21,6 +21,7 @@ import {
   LAYOUT_META,
   loadAppearance,
   loadTileSlots,
+  MAX_TILES,
   saveAppearance,
   saveTileSlots,
   TEXTURE_META,
@@ -83,8 +84,6 @@ const TEXTURES = (Object.keys(TEXTURE_META) as Texture[]).map((id) => ({
   id,
   title: TEXTURE_META[id].title,
 }));
-
-const MAX_TILES = 8;
 
 const LAYOUTS = (Object.keys(LAYOUT_META) as Layout[]).map((id) => ({
   id,
