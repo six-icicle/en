@@ -1428,10 +1428,24 @@ export default function App() {
               ) : (
                 <span
                   className="name"
-                  title="Double-click to rename"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Rename ${s.name}`}
+                  title="Double-click or press Enter to rename"
                   onDoubleClick={(ev) => {
                     ev.stopPropagation();
                     setEditingKey(s.key);
+                  }}
+                  onKeyDown={(ev) => {
+                    // Enter and F2 are the conventional rename keys across
+                    // web (Enter) and desktop file managers (F2). Pointer
+                    // drag is gated on pointerdown→pointermove, so keyboard
+                    // activation can't accidentally start a tile drag.
+                    if (ev.key === "Enter" || ev.key === "F2") {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      setEditingKey(s.key);
+                    }
                   }}
                 >
                   {s.name}
