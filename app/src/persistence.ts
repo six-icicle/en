@@ -155,7 +155,22 @@ export async function loadTileSlots(): Promise<TileSlot[]> {
     const store = await getStore();
     const raw = await store.get(SLOTS_KEY);
     if (!Array.isArray(raw)) return [];
-    return raw.filter(isValidSlot).slice(0, 8);
+    // Dedupe by key after per-element validation. A duplicate-key state
+    // would otherwise survive load and produce a "ghost tile that types
+    // into another tile's PTY" — same quarantine-bypass class as the
+    // appearance corruption path. Map insertion order means the last
+    // occurrence per key wins (treat as the more recently-written copy).
+    const valid = raw.filter(isValidSlot);
+    const deduped = Array.from(
+      new Map(valid.map((s) => [s.key, s])).values(),
+    );
+    if (deduped.length < valid.length) {
+      console.warn(
+        "[en/persistence] dropped duplicate tile-slot keys on load:",
+        valid.length - deduped.length,
+      );
+    }
+    return deduped.slice(0, 8);
   } catch (e) {
     console.warn("[en/persistence] failed to load tile slots:", e);
     return [];
