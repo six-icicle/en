@@ -101,6 +101,7 @@ const ALERT_STYLES = (Object.keys(ALERT_STYLE_META) as AlertStyle[]).map(
    theme back via the picker; the title can stay as-is. To re-trigger,
    they must re-name the tile (rename to something else, then back, OR
    rename one of these phrases on a different tile). */
+const KYOKUJITSU_THEME = "washi-kyokujitsu" as const;
 const KYOKUJITSU_TRIGGERS = new Set([
   "war",
   "wartime",
@@ -220,7 +221,7 @@ export default function App() {
     setTiles((prev) =>
       prev.map((t) => (t.key === key ? { ...t, name: trimmed } : t)),
     );
-    if (isKyokujitsuTrigger(trimmed)) setTheme("washi-kyokujitsu");
+    if (isKyokujitsuTrigger(trimmed)) setTheme(KYOKUJITSU_THEME);
   }, []);
 
   // Pre-select the existing name on edit-mode entry so a fresh keystroke
@@ -899,13 +900,13 @@ export default function App() {
           </svg>
           en
           {(theme === "washi" ||
-            theme === "washi-kyokujitsu" ||
+            theme === KYOKUJITSU_THEME ||
             theme === "washi-tsuki") && (
             <span
               className="brand-hinomaru"
               aria-hidden="true"
               title={
-                theme === "washi-kyokujitsu"
+                theme === KYOKUJITSU_THEME
                   ? "Kyokujitsu"
                   : theme === "washi-tsuki"
                   ? "Tsuki"
@@ -1034,7 +1035,7 @@ export default function App() {
                       // only via the rename trigger. If it's already the
                       // active theme (user triggered + hasn't switched
                       // away), keep it visible so it shows as selected.
-                      t.id !== "washi-kyokujitsu" || theme === "washi-kyokujitsu",
+                      t.id !== KYOKUJITSU_THEME || theme === KYOKUJITSU_THEME,
                   ).map((t) => (
                     <button
                       key={t.id}
