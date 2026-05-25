@@ -205,8 +205,9 @@ export async function saveTileSlots(slots: TileSlot[]): Promise<void> {
     const store = await getStore();
     await store.set(SLOTS_KEY, slots);
     await store.save();
-  } catch {
-    // Best-effort.
+  } catch (e) {
+    // Best-effort: log so the failure is at least visible in devtools.
+    console.warn("[en/persistence] failed to save tile slots:", e);
   }
 }
 
@@ -299,8 +300,10 @@ export async function saveAppearance(next: Appearance): Promise<void> {
     // when ⌘Q fires inside the debounce window. Appearance changes are
     // rare enough that the extra disk traffic doesn't matter.
     await store.save();
-  } catch {
+  } catch (e) {
     // Best-effort: persistence is non-critical. If the store is unavailable,
-    // the in-memory state still works for this session.
+    // the in-memory state still works for this session — log so the
+    // failure is at least visible in devtools.
+    console.warn("[en/persistence] failed to save appearance store:", e);
   }
 }
