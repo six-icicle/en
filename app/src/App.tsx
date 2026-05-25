@@ -1867,8 +1867,12 @@ function ConfirmKillAllModal({
   onConfirm: () => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
   useEffect(() => {
     confirmRef.current?.focus();
+  }, []);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -1960,8 +1964,12 @@ function ConfirmCloseModal({
   onConfirm: () => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
   useEffect(() => {
     confirmRef.current?.focus();
+  }, []);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
