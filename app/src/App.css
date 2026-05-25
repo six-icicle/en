@@ -2581,8 +2581,8 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   animation: modal-fade var(--dur-fast) ease-out;
 }
 .modal {
-  min-width: 380px;
-  max-width: 480px;
+  min-width: calc(380px * var(--fz));
+  max-width: min(96vw, calc(480px * var(--fz)));
   background: var(--tile);
   border: 1px solid var(--line-2);
   border-radius: 6px;
