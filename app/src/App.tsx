@@ -196,6 +196,10 @@ export default function App() {
   const themeMenuRef = useRef<HTMLDivElement | null>(null);
   const [appearanceLoaded, setAppearanceLoaded] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
+  // Imperatively select the rename input's text once per edit-mode entry.
+  // An inline `ref={(el) => el?.select()}` re-fires on every parent render
+  // and clobbers the user's caret mid-edit.
+  const editingInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingClose, setPendingClose] = useState<string | null>(null);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
   const [fzMenuOpen, setFzMenuOpen] = useState(false);
@@ -218,6 +222,13 @@ export default function App() {
     );
     if (isKyokujitsuTrigger(trimmed)) setTheme("washi-kyokujitsu");
   }, []);
+
+  // Pre-select the existing name on edit-mode entry so a fresh keystroke
+  // replaces it. Fires only when `editingKey` changes, never on every
+  // parent re-render (which would clobber the user's caret mid-edit).
+  useEffect(() => {
+    if (editingKey !== null) editingInputRef.current?.select();
+  }, [editingKey]);
 
   const reviveTile = useCallback((key: string) => {
     setTiles((prev) =>
@@ -1375,9 +1386,10 @@ export default function App() {
                   // but isValidSlot rejects it on next launch and the
                   // tile vanishes silently.
                   maxLength={256}
-                  // Pre-select the existing name so a fresh keystroke
-                  // replaces it instead of inserting next to the caret.
-                  ref={(el) => el?.select()}
+                  // Selection is set imperatively in a `useEffect` keyed
+                  // on `editingKey` (see App body) — an inline ref re-fires
+                  // on every parent render and clobbers the caret.
+                  ref={editingInputRef}
                   onClick={(ev) => ev.stopPropagation()}
                   onBlur={(ev) => {
                     renameTile(s.key, ev.currentTarget.value);
