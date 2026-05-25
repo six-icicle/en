@@ -1040,6 +1040,7 @@ export default function App() {
                       key={t.id}
                       data-set={t.id}
                       data-active={theme === t.id ? "true" : undefined}
+                      aria-pressed={theme === t.id}
                       title={t.title}
                       onClick={() => setTheme(t.id)}
                     />
@@ -1101,6 +1102,7 @@ export default function App() {
                       className="texture-chip"
                       data-tex={t.id}
                       data-active={texture === t.id ? "true" : undefined}
+                      aria-pressed={texture === t.id}
                       title={t.title}
                       onClick={() => setTexture(t.id)}
                     >
@@ -1129,6 +1131,7 @@ export default function App() {
                       className="texture-chip texture-chip-rain"
                       data-tex={t.id}
                       data-active={texture === t.id ? "true" : undefined}
+                      aria-pressed={texture === t.id}
                       title={t.title}
                       onClick={() => setTexture(t.id)}
                     >
