@@ -5,7 +5,7 @@
    Anything CSS-only (--ink, --line, --warn, --tile-2, etc.) lives in
    App.css. xterm-specific values (foreground, cursorAccent, ANSI) live
    in Terminal.tsx. Both still must visually match this file. */
-import type { Theme } from "./persistence";
+import { THEME_META, type Theme } from "./persistence";
 
 export const THEME_BGS: Record<Theme, string> = {
   kanagawa: "#1a1a23",
@@ -34,3 +34,14 @@ export const THEME_ACCENTS: Record<Theme, string> = {
   "washi-kyokujitsu": "#bc002d",
   "washi-tsuki": "#be4258",
 };
+
+/* Init-time invariant: every theme in THEME_META (the picker source of
+   truth) must have a matching bg + accent here. TS's Record<Theme, …>
+   already enforces this at compile time, but a future widening of the
+   key type — or a hand-edit that bypasses the type — would silently
+   degrade rendered tiles to xterm defaults. Throw loudly at module
+   load so the dev signal is unmissable. */
+for (const k of Object.keys(THEME_META) as Theme[]) {
+  if (!THEME_BGS[k]) throw new Error(`THEME_BGS missing entry for ${k}`);
+  if (!THEME_ACCENTS[k]) throw new Error(`THEME_ACCENTS missing entry for ${k}`);
+}
