@@ -1567,7 +1567,7 @@ input:focus-visible {
   border-top: 1px dashed var(--line);
 }
 .theme-amt-row button {
-  width: 22px; height: 20px;
+  width: calc(22px * var(--fz)); height: calc(20px * var(--fz));
   border-radius: 3px;
   border: 1px solid var(--line-2);
   background: transparent;
@@ -1585,7 +1585,7 @@ input:focus-visible {
   font-size: calc(11px * var(--fz));
   color: var(--ink-2);
   letter-spacing: 0.04em;
-  min-width: 36px;
+  min-width: calc(36px * var(--fz));
   text-align: center;
 }
 
