@@ -117,6 +117,25 @@ const ALERT_STYLES = new Set<AlertStyle>(
   Object.keys(ALERT_STYLE_META) as AlertStyle[],
 );
 
+/* Init-time invariant: every LEGACY map's RHS must point at a still-live
+   canonical ID. TS's `Record<string, Theme|Layout|AlertStyle>` enforces
+   this at compile time only against the union — renaming a canonical ID
+   in *_META without grepping the LEGACY maps would silently break
+   migration for users with stored settings under the old ID. Throw
+   loudly at module load so the dev signal is unmissable. */
+for (const v of Object.values(ALERT_STYLE_LEGACY)) {
+  if (!ALERT_STYLES.has(v))
+    throw new Error(`ALERT_STYLE_LEGACY maps to unknown alert style: ${v}`);
+}
+for (const v of Object.values(LAYOUT_LEGACY)) {
+  if (!LAYOUTS.has(v))
+    throw new Error(`LAYOUT_LEGACY maps to unknown layout: ${v}`);
+}
+for (const v of Object.values(THEME_LEGACY)) {
+  if (!THEMES.has(v))
+    throw new Error(`THEME_LEGACY maps to unknown theme: ${v}`);
+}
+
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 const STORE_FILE = "settings.json";
