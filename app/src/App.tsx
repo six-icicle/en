@@ -1370,6 +1370,11 @@ export default function App() {
                   className="name name-edit"
                   autoFocus
                   defaultValue={s.name}
+                  // Hard-cap matches SLOT_NAME_MAX in persistence.ts —
+                  // a longer name passes renameTile's trim-only check
+                  // but isValidSlot rejects it on next launch and the
+                  // tile vanishes silently.
+                  maxLength={256}
                   // Pre-select the existing name so a fresh keystroke
                   // replaces it instead of inserting next to the caret.
                   ref={(el) => el?.select()}
