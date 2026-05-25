@@ -1,4 +1,5 @@
 mod appearance;
+mod env;
 mod events;
 mod hooks;
 mod pty;

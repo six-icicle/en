@@ -9,6 +9,7 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
 use tiny_http::{Header, Method, Response, Server, StatusCode};
 
+use crate::env::{EN_HUB_HOOK_URL, EN_HUB_SESSION_ID, HOOK_URL_PATH};
 use crate::events::TILE_STATUS_EVENT_PREFIX;
 
 const HOOK_MARKER: &str = "# en-managed";
@@ -57,7 +58,7 @@ pub fn start(app: AppHandle) -> Result<HookConfig, String> {
 
 fn serve(server: Server, app: AppHandle) {
     for mut req in server.incoming_requests() {
-        if req.method() != &Method::Post || req.url() != "/hook" {
+        if req.method() != &Method::Post || req.url() != HOOK_URL_PATH {
             let _ = req.respond(Response::empty(StatusCode(404)));
             continue;
         }
@@ -235,6 +236,14 @@ pub fn install_hooks() -> Result<bool, String> {
 }
 
 fn hook_command_for(event: &str) -> String {
+    // The bash `$EN_HUB_SESSION_ID` / `$EN_HUB_HOOK_URL` tokens below are
+    // shell variable expansions — literal text in this Rust string. The
+    // debug_assert_eq! pair is the only compile-side link to the env
+    // constants in env.rs: rename a constant and dev builds fire here so
+    // the literal can be updated in lockstep. Release builds skip the
+    // assert; the bash tokens stay literal either way.
+    debug_assert_eq!(EN_HUB_SESSION_ID, "EN_HUB_SESSION_ID");
+    debug_assert_eq!(EN_HUB_HOOK_URL, "EN_HUB_HOOK_URL");
     format!(
         r#"{marker}
 if [ -n "$EN_HUB_SESSION_ID" ] && [ -n "$EN_HUB_HOOK_URL" ]; then curl --max-time 0.3 -fsS -X POST -H 'Content-Type: application/json' -d "{{\"session_id\":\"$EN_HUB_SESSION_ID\",\"event\":\"{event}\"}}" "$EN_HUB_HOOK_URL" >/dev/null 2>&1 & fi"#,

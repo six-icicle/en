@@ -9,6 +9,7 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
 use uuid::Uuid;
 
+use crate::env::{EN_HUB_HOOK_URL, EN_HUB_SESSION_ID, HOOK_URL_PATH};
 use crate::events::{PTY_EVENT_PREFIX, PTY_EXIT_EVENT_PREFIX};
 use crate::hooks::HookConfig;
 
@@ -78,10 +79,10 @@ pub fn spawn_session(
     // receiver. When unset (claude run outside en), the hook command no-ops.
     // (Removed CLAUDE_CODE_SIMPLE=1 — it suppressed the banner but also
     // disabled the hooks system entirely, breaking status detection.)
-    command.env("EN_HUB_SESSION_ID", &id);
+    command.env(EN_HUB_SESSION_ID, &id);
     command.env(
-        "EN_HUB_HOOK_URL",
-        format!("http://127.0.0.1:{}/hook", hooks.port),
+        EN_HUB_HOOK_URL,
+        format!("http://127.0.0.1:{}{HOOK_URL_PATH}", hooks.port),
     );
     let cwd_resolved = cwd
         .filter(|s| !s.is_empty())
