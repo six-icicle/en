@@ -1002,12 +1002,16 @@ input:focus-visible {
      box and lets the seam bleed past where the cream side ought to start.
      Resting ring uses --line-2 (the project's standard subtle-border tone),
      matching the original behavior. */
-  box-shadow: inset 0 0 0 1px var(--line-2);
+  /* Semi-transparent resting ring — opaque --line-2 on dark themes
+     reads as a hard outline at the gradient seam (creates a "chipped"
+     illusion at the rounded edge). Color-mix gives us the same subtle
+     hairline that washi-tsuki gets natively from its rgba --line-2. */
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--line-2), transparent 60%);
   transition: transform var(--dur-fast), box-shadow var(--dur-fast);
 }
 .themes button:hover {
   transform: scale(1.15);
-  box-shadow: inset 0 0 0 1px var(--ink-3);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--ink-3), transparent 40%);
 }
 .themes button[data-active="true"] {
   /* Active dot uses the THIS-DOT's-own theme accent (via --dot-accent),
