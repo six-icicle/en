@@ -10,11 +10,16 @@ use tauri::{AppHandle, Emitter};
 use tiny_http::{Header, Method, Response, Server, StatusCode};
 
 const HOOK_MARKER: &str = "# en-managed";
-const HOOK_EVENTS: &[&str] = &[
-    "UserPromptSubmit",
-    "Stop",
-    "Notification",
-    "SessionStart",
+
+// Single source of truth for the Claude lifecycle events en cares about
+// and the tile status each one drives. install_hooks installs every
+// event in this table; status_for reads from it. Adding a new event is
+// one row.
+const HOOKS: &[(&str, &str)] = &[
+    ("SessionStart",     "idle"),
+    ("UserPromptSubmit", "working"),
+    ("Stop",             "needs"),
+    ("Notification",     "needs"),
 ];
 
 #[derive(Clone)]
@@ -89,12 +94,10 @@ fn serve(server: Server, app: AppHandle) {
 }
 
 fn status_for(event: &str) -> Option<&'static str> {
-    match event {
-        "SessionStart" => Some("idle"),
-        "UserPromptSubmit" => Some("working"),
-        "Stop" | "Notification" => Some("needs"),
-        _ => None,
-    }
+    HOOKS
+        .iter()
+        .find(|(name, _)| *name == event)
+        .map(|(_, status)| *status)
 }
 
 pub fn install_hooks() -> Result<bool, String> {
@@ -162,7 +165,7 @@ pub fn install_hooks() -> Result<bool, String> {
     // release without duplicating), otherwise push a fresh entry. Foreign
     // entries are left untouched.
     let mut changed = false;
-    for event in HOOK_EVENTS {
+    for (event, _) in HOOKS {
         let want_cmd = hook_command_for(event);
         let arr = hooks_map
             .entry((*event).to_string())

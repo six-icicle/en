@@ -476,6 +476,12 @@ body::before {
   overflow: hidden;
   opacity: calc(0.65 * var(--tex-amt));
 }
+/* Both petals + shuriken layers always render so switching between them
+   doesn't restart staggered timers. Inactive layer is hidden via opacity
+   so its particles continue ticking off-screen. */
+.tex-fall-layer.tex-fall-inactive {
+  opacity: 0;
+}
 .tex-fall-particle {
   position: absolute;
   top: -24px;

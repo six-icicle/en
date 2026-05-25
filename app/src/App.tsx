@@ -636,20 +636,11 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Don't hijack keys while one of our own editable controls is focused
-      // (e.g. the tile name-edit input). xterm has its own hidden textarea
-      // that always has focus when a tile is active — we MUST still process
-      // hub-level shortcuts (⌘N, ⌘W, ⌘+arrow) over it, otherwise navigation
-      // never works.
-      const target = e.target as HTMLElement | null;
-      const inXterm = !!target?.closest(".xterm-host");
-      if (
-        target &&
-        !inXterm &&
-        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)
-      ) {
-        return;
-      }
+      // Hub-level shortcuts (⌘N/⌘W/⌘+arrow/⌘+1..9) must run regardless
+      // of focus target — xterm has its own hidden textarea that always
+      // owns focus, and the tile rename input shouldn't trap ⌘W either.
+      // We only filter on `meta && !alt && !ctrl` so plain typing in any
+      // input field falls through untouched.
       if (!e.metaKey || e.altKey || e.ctrlKey) return;
 
       // ⌘+N — spawn a new session.
@@ -848,7 +839,9 @@ export default function App() {
   return (
     <div className="app">
       {(texture === "petals-fall" || texture === "shuriken-fall") && (
-        <FallingTexture kind={texture === "petals-fall" ? "petals" : "shuriken"} />
+        <FallingTexture
+          activeKind={texture === "petals-fall" ? "petals" : "shuriken"}
+        />
       )}
       <div className="titlebar" data-tauri-drag-region>
         <WindowControls />
@@ -1572,6 +1565,15 @@ export default function App() {
   );
 }
 
+const Petal = () => (
+  <svg viewBox="-5 -8 10 14" width="11" height="15">
+    <path
+      d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 function AlertExtras({ style }: { style: AlertStyle }) {
   if (style === "hotaru") {
     return (
@@ -1600,14 +1602,6 @@ function AlertExtras({ style }: { style: AlertStyle }) {
   if (style === "sakura") {
     const drift = Array.from({ length: 6 });
     const pile = Array.from({ length: 36 });
-    const Petal = () => (
-      <svg viewBox="-5 -8 10 14" width="11" height="15">
-        <path
-          d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z"
-          fill="currentColor"
-        />
-      </svg>
-    );
     return (
       <div className="alert-extras" aria-hidden="true">
         <div className="petals">
@@ -2050,29 +2044,43 @@ function ResetMenuModal({
   );
 }
 
-function FallingTexture({ kind }: { kind: "petals" | "shuriken" }) {
-  const count = kind === "petals" ? 18 : 12;
+/* Both kinds always render so switching petals↔shuriken doesn't restart
+   the staggered-delay timers (which would produce a visible "wave" of
+   particles). The inactive layer is hidden via the `tex-fall-inactive`
+   class — particles continue animating off-screen, no DOM churn. */
+function FallingTexture({ activeKind }: { activeKind: "petals" | "shuriken" }) {
   return (
-    <div className={`tex-fall-layer tex-fall-${kind}`} aria-hidden="true">
-      {Array.from({ length: count }).map((_, i) => (
-        <span key={i} className="tex-fall-particle">
-          {kind === "petals" ? (
+    <>
+      <div
+        className={`tex-fall-layer tex-fall-petals${activeKind === "petals" ? "" : " tex-fall-inactive"}`}
+        aria-hidden="true"
+      >
+        {Array.from({ length: 18 }).map((_, i) => (
+          <span key={i} className="tex-fall-particle">
             <svg viewBox="-5 -8 10 14" width="11" height="15">
               <path
                 d="M0,-7 C2.5,-5 4,-2 4,0 C4,2.5 2,4.5 0,5 C-2,4.5 -4,2.5 -4,0 C-4,-2 -2.5,-5 0,-7 Z"
                 fill="currentColor"
               />
             </svg>
-          ) : (
+          </span>
+        ))}
+      </div>
+      <div
+        className={`tex-fall-layer tex-fall-shuriken${activeKind === "shuriken" ? "" : " tex-fall-inactive"}`}
+        aria-hidden="true"
+      >
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span key={i} className="tex-fall-particle">
             <svg viewBox="-8 -8 16 16" width="18" height="18">
               <g fill="currentColor">
                 <path d="M0,-7 L1.6,-1.6 L7,0 L1.6,1.6 L0,7 L-1.6,1.6 L-7,0 L-1.6,-1.6 Z" />
               </g>
               <circle r="1.2" fill="rgba(0,0,0,0.55)" />
             </svg>
-          )}
-        </span>
-      ))}
-    </div>
+          </span>
+        ))}
+      </div>
+    </>
   );
 }
