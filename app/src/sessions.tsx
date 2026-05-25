@@ -6,17 +6,16 @@ import {
   PTY_EVENT_PREFIX,
   PTY_EXIT_EVENT_PREFIX,
   TILE_STATUS_EVENT_PREFIX,
+  type WorkingStatus,
 } from "./events";
 
 export type Status =
   | "spawning"
-  | "working"
-  | "needs"
-  | "idle"
+  | WorkingStatus
   | "exited"
   | "failed";
 
-type TileStatusEvent = { status: "working" | "needs" | "idle"; event: string };
+type TileStatusEvent = { status: WorkingStatus; event: string };
 
 export type SessionDecl = {
   key: string;

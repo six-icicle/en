@@ -14,3 +14,11 @@
 export const PTY_EVENT_PREFIX = "pty:";
 export const PTY_EXIT_EVENT_PREFIX = "pty-exit:";
 export const TILE_STATUS_EVENT_PREFIX = "tile-status:";
+
+// The set of statuses the Rust `tile-status:<id>` channel can emit. The
+// Rust source of truth is the `HOOKS` table in `app/src-tauri/src/hooks.rs`
+// (currently `idle` / `working` / `needs`) — this list mirrors that table's
+// status column. Renaming or adding a status here requires updating the
+// Rust HOOKS table in the same commit.
+export const WORKING_STATUSES = ["working", "needs", "idle"] as const;
+export type WorkingStatus = (typeof WORKING_STATUSES)[number];
