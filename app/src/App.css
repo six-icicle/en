@@ -610,6 +610,17 @@ body::after {
   user-select: text;
   -webkit-user-select: text;
 }
+/* Mid-drag: suppress text selection app-wide. The handler in App.tsx
+   adds `.dragging-tile` to <body> on drag activation; this rule beats
+   `.xterm-host *` on specificity so xterm content can't be selected
+   mid-gesture. Removed on drag finish/cancel. */
+body.dragging-tile,
+body.dragging-tile *,
+body.dragging-tile .xterm-host,
+body.dragging-tile .xterm-host * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
 
 /* ─── Global focus ring for keyboard nav.
    Outline (not box-shadow) so it doesn't override per-component
@@ -1761,12 +1772,12 @@ input:focus-visible {
    .tile.needs > .alert-extras.
    ─────────────────────────────────────────────────────── */
 
+/* Alert animations are scoped to non-active tiles. The active tile is
+   already focused — animating it is redundant and visually noisy. */
+
 /* 1. PULSE — soft accent halo (default) */
 html[data-alert-style="pulse"] .tile.needs:not(.active) {
   animation: alert-pulse 2.2s ease-in-out infinite;
-}
-html[data-alert-style="pulse"] .tile.needs.active {
-  animation: alert-pulse-active 1.8s ease-in-out infinite;
 }
 @keyframes alert-pulse {
   0%, 100% {
@@ -1780,23 +1791,9 @@ html[data-alert-style="pulse"] .tile.needs.active {
       0 0 18px 1px var(--accent-glow);
   }
 }
-@keyframes alert-pulse-active {
-  0%, 100% {
-    box-shadow:
-      inset 0 0 0 1px var(--accent),
-      inset 0 0 24px -8px var(--accent-glow),
-      0 0 6px -1px var(--accent-glow);
-  }
-  50% {
-    box-shadow:
-      inset 0 0 0 1px var(--accent),
-      inset 0 0 30px -6px var(--accent-glow),
-      0 0 24px 2px var(--accent-glow);
-  }
-}
 
 /* 2. HEARTBEAT — slowed lub-dub halo */
-html[data-alert-style="heartbeat"] .tile.needs {
+html[data-alert-style="heartbeat"] .tile.needs:not(.active) {
   animation: alert-heartbeat 2.4s linear infinite;
 }
 @keyframes alert-heartbeat {
@@ -1827,7 +1824,7 @@ html[data-alert-style="heartbeat"] .tile.needs {
 }
 
 /* 2. BREATH — slow asymmetric inhale/exhale */
-html[data-alert-style="breath"] .tile.needs {
+html[data-alert-style="breath"] .tile.needs:not(.active) {
   animation: alert-breath 5s cubic-bezier(.45, 0, .55, 1) infinite;
 }
 @keyframes alert-breath {
@@ -1852,7 +1849,7 @@ html[data-alert-style="breath"] .tile.needs {
 }
 
 /* 4. HOTARU — single bright dot circumnavigates the tile */
-html[data-alert-style="hotaru"] .tile.needs {
+html[data-alert-style="hotaru"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 80%),
     inset 0 0 24px -16px var(--accent-glow);
@@ -1883,7 +1880,7 @@ html[data-alert-style="hotaru"] .tile.needs {
 /* TRIPLE SLASH — three slashes from different directions, each
    clip-path-revealed across the tile from one edge to the other.
    No final glow — slashes happen, silence follows. Cycle: 5s. */
-html[data-alert-style="triple"] .tile.needs {
+html[data-alert-style="triple"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 55%),
     inset 0 0 28px -10px var(--accent-glow);
@@ -1958,7 +1955,7 @@ html[data-alert-style="triple"] .tile.needs {
 /* 7. VERTICAL — bright bar falls from the very top edge of the tile
    (above the header) to the bottom; residual hairline glows briefly
    before fading. Cycle: 4s. */
-html[data-alert-style="vertical"] .tile.needs {
+html[data-alert-style="vertical"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 55%),
     inset 0 0 28px -10px var(--accent-glow);
@@ -2016,7 +2013,7 @@ html[data-alert-style="vertical"] .tile.needs {
 }
 
 /* 4. SAKURA — petals fall and pile up */
-html[data-alert-style="sakura"] .tile.needs {
+html[data-alert-style="sakura"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 70%),
     inset 0 0 36px -12px var(--accent-glow);
@@ -2128,7 +2125,7 @@ html[data-alert-style="sakura"] .tile.needs {
 /* SHURIKEN RAIN — throw + stick. Two waves of 4 shuriken fly in
    from off-tile, stick at full opacity for ~3s, smoke-fade, repeat
    with new positions. 9s cycle. */
-html[data-alert-style="shuriken"] .tile.needs {
+html[data-alert-style="shuriken"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 82%),
     inset 0 0 26px -14px var(--accent-glow);
@@ -2222,7 +2219,7 @@ html[data-alert-style="shuriken"] .tile.needs {
    centered, then settles partly visible above the horizon line. The
    horizon hairline glows in accent. Loops every 3.2s — slow, deliberate.
    The flag motif as a STATE, not a logo (per ui-ux-pro-max's idea). */
-html[data-alert-style="hinode"] .tile.needs {
+html[data-alert-style="hinode"] .tile.needs:not(.active) {
   box-shadow:
     inset 0 0 0 1px color-mix(in oklch, var(--accent), transparent 78%),
     inset 0 0 24px -12px var(--accent-glow);

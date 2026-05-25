@@ -208,7 +208,7 @@ export default function App() {
   const batchMenuRef = useRef<HTMLDivElement | null>(null);
   const [killAllOpen, setKillAllOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement | null>(null);
-  const { kill, list, sendInput, ackStatus } = useSessions();
+  const { kill, list, sendInput } = useSessions();
 
   const renameTile = useCallback((key: string, next: string) => {
     const trimmed = next.trim();
@@ -294,6 +294,11 @@ export default function App() {
             name,
           });
           document.body.style.cursor = "grabbing";
+          // Suppress text selection app-wide during drag. xterm-host's
+          // CSS rule `.xterm-host *` opts INTO user-select: text and
+          // wins via specificity over any body-level inline. Use a body
+          // class that's targeted with a stronger override.
+          document.body.classList.add("dragging-tile");
         } else {
           setGhostStyle((prev) =>
             prev
@@ -349,6 +354,7 @@ export default function App() {
         document.removeEventListener("pointerup", onUp);
         document.removeEventListener("pointercancel", onCancel);
         document.body.style.cursor = "";
+        document.body.classList.remove("dragging-tile");
         if (commit && activated && lastSwapKey && lastSwapKey !== tileKey) {
           setTiles((prev) => {
             const aIdx = prev.findIndex((t) => t.key === tileKey);
@@ -1351,7 +1357,6 @@ export default function App() {
                 return;
               }
               setActiveId(s.key);
-              ackStatus(s.key);
             }}
           >
             {dragOverKey === s.key && <div className="tile-drop-ring" aria-hidden="true" />}
@@ -1365,6 +1370,9 @@ export default function App() {
                   className="name name-edit"
                   autoFocus
                   defaultValue={s.name}
+                  // Pre-select the existing name so a fresh keystroke
+                  // replaces it instead of inserting next to the caret.
+                  ref={(el) => el?.select()}
                   onClick={(ev) => ev.stopPropagation()}
                   onBlur={(ev) => {
                     renameTile(s.key, ev.currentTarget.value);
@@ -1439,7 +1447,9 @@ export default function App() {
                 </svg>
               </button>
             </header>
-            {s.status === "needs" && !s.sleeping && <AlertExtras style={alertStyle} />}
+            {s.status === "needs" && !s.sleeping && activeId !== s.key && (
+              <AlertExtras style={alertStyle} />
+            )}
             <div className="t-body">
               {s.sleeping ? (
                 <SleepingTileBody
