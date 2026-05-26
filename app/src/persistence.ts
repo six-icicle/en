@@ -117,6 +117,25 @@ const ALERT_STYLES = new Set<AlertStyle>(
   Object.keys(ALERT_STYLE_META) as AlertStyle[],
 );
 
+/* Init-time invariant: every LEGACY map's RHS must point at a still-live
+   canonical ID. TS's `Record<string, Theme|Layout|AlertStyle>` enforces
+   this at compile time only against the union — renaming a canonical ID
+   in *_META without grepping the LEGACY maps would silently break
+   migration for users with stored settings under the old ID. Throw
+   loudly at module load so the dev signal is unmissable. */
+for (const v of Object.values(ALERT_STYLE_LEGACY)) {
+  if (!ALERT_STYLES.has(v))
+    throw new Error(`ALERT_STYLE_LEGACY maps to unknown alert style: ${v}`);
+}
+for (const v of Object.values(LAYOUT_LEGACY)) {
+  if (!LAYOUTS.has(v))
+    throw new Error(`LAYOUT_LEGACY maps to unknown layout: ${v}`);
+}
+for (const v of Object.values(THEME_LEGACY)) {
+  if (!THEMES.has(v))
+    throw new Error(`THEME_LEGACY maps to unknown theme: ${v}`);
+}
+
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
 const STORE_FILE = "settings.json";
@@ -130,8 +149,12 @@ export type TileSlot = {
   path: string;
 };
 
-const SLOT_NAME_MAX = 256;
+export const SLOT_NAME_MAX = 256;
 const SLOT_PATH_MAX = 4096;
+// Hub capacity. Single source of truth — App.tsx imports this for the
+// spawn/disabled checks, and `loadTileSlots` caps restored slots by it
+// so a stale settings.json with N>cap tiles can't silently leak past.
+export const MAX_TILES = 8;
 
 function isValidSlot(raw: unknown): raw is TileSlot {
   if (!raw || typeof raw !== "object") return false;
@@ -150,15 +173,36 @@ function isValidSlot(raw: unknown): raw is TileSlot {
   );
 }
 
-export async function loadTileSlots(): Promise<TileSlot[]> {
+// Returns null on caught error (load failed — disk may still hold valid
+// slots that we just can't read this boot). Returns [] only when the
+// store has no slots key or it's not an array (true empty state). The
+// caller MUST distinguish: persisting [] over a failed load destroys
+// legitimate slots on next mutation. App.tsx gates its persist effect
+// on a `tileSlotsLoaded` flag set only when this resolves non-null.
+export async function loadTileSlots(): Promise<TileSlot[] | null> {
   try {
     const store = await getStore();
     const raw = await store.get(SLOTS_KEY);
     if (!Array.isArray(raw)) return [];
-    return raw.filter(isValidSlot).slice(0, 8);
+    // Dedupe by key after per-element validation. A duplicate-key state
+    // would otherwise survive load and produce a "ghost tile that types
+    // into another tile's PTY" — same quarantine-bypass class as the
+    // appearance corruption path. Map insertion order means the last
+    // occurrence per key wins (treat as the more recently-written copy).
+    const valid = raw.filter(isValidSlot);
+    const deduped = Array.from(
+      new Map(valid.map((s) => [s.key, s])).values(),
+    );
+    if (deduped.length < valid.length) {
+      console.warn(
+        "[en/persistence] dropped duplicate tile-slot keys on load:",
+        valid.length - deduped.length,
+      );
+    }
+    return deduped.slice(0, MAX_TILES);
   } catch (e) {
     console.warn("[en/persistence] failed to load tile slots:", e);
-    return [];
+    return null;
   }
 }
 
@@ -167,8 +211,9 @@ export async function saveTileSlots(slots: TileSlot[]): Promise<void> {
     const store = await getStore();
     await store.set(SLOTS_KEY, slots);
     await store.save();
-  } catch {
-    // Best-effort.
+  } catch (e) {
+    // Best-effort: log so the failure is at least visible in devtools.
+    console.warn("[en/persistence] failed to save tile slots:", e);
   }
 }
 
@@ -261,8 +306,10 @@ export async function saveAppearance(next: Appearance): Promise<void> {
     // when ⌘Q fires inside the debounce window. Appearance changes are
     // rare enough that the extra disk traffic doesn't matter.
     await store.save();
-  } catch {
+  } catch (e) {
     // Best-effort: persistence is non-critical. If the store is unavailable,
-    // the in-memory state still works for this session.
+    // the in-memory state still works for this session — log so the
+    // failure is at least visible in devtools.
+    console.warn("[en/persistence] failed to save appearance store:", e);
   }
 }

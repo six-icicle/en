@@ -9,6 +9,9 @@ use serde_json::{json, Value};
 use tauri::{AppHandle, Emitter};
 use tiny_http::{Header, Method, Response, Server, StatusCode};
 
+use crate::env::{EN_HUB_HOOK_URL, EN_HUB_SESSION_ID, HOOK_URL_PATH};
+use crate::events::TILE_STATUS_EVENT_PREFIX;
+
 const HOOK_MARKER: &str = "# en-managed";
 
 // Single source of truth for the Claude lifecycle events en cares about
@@ -55,7 +58,7 @@ pub fn start(app: AppHandle) -> Result<HookConfig, String> {
 
 fn serve(server: Server, app: AppHandle) {
     for mut req in server.incoming_requests() {
-        if req.method() != &Method::Post || req.url() != "/hook" {
+        if req.method() != &Method::Post || req.url() != HOOK_URL_PATH {
             let _ = req.respond(Response::empty(StatusCode(404)));
             continue;
         }
@@ -75,7 +78,7 @@ fn serve(server: Server, app: AppHandle) {
         };
 
         if let Some(status) = status_for(&payload.event) {
-            let event_name = format!("tile-status:{}", payload.session_id);
+            let event_name = format!("{TILE_STATUS_EVENT_PREFIX}{}", payload.session_id);
             let _ = app.emit(
                 &event_name,
                 TileStatusEvent {
@@ -126,6 +129,17 @@ pub fn install_hooks() -> Result<bool, String> {
         .lock_exclusive()
         .map_err(|e| format!("lock {}: {e}", lock_path.display()))?;
     // lock_file dropped at function exit → unlocked automatically.
+
+    // Capture mtime right before the read so we can detect a foreign
+    // (non-en) writer who raced us between read and rename. fs2's
+    // advisory lock only blocks en-vs-en — Claude itself, an editor,
+    // another tool can mutate settings.json while we hold the lock and
+    // our merge would clobber their write. None means the file did not
+    // exist at observation time. SystemTime resolution is filesystem-
+    // dependent (often ms or coarser); a writer that finishes inside
+    // the same tick is undetectable, which is the standard mtime-check
+    // limitation we accept here.
+    let mtime_before_read = path.metadata().and_then(|m| m.modified()).ok();
 
     let existing = if path.exists() {
         std::fs::read_to_string(&path)
@@ -215,6 +229,106 @@ pub fn install_hooks() -> Result<bool, String> {
         return Ok(false);
     }
 
+    // Foreign-writer race detection (best-effort, single retry).
+    // If mtime changed since our pre-read snapshot, someone else wrote
+    // settings.json while we were merging — our `settings` is stale.
+    // Re-read, re-parse, re-upsert against the new contents, then check
+    // mtime once more before committing. If the file is still moving,
+    // give up and skip this install cycle (next boot will retry).
+    if path.metadata().and_then(|m| m.modified()).ok() != mtime_before_read {
+        eprintln!(
+            "[en-hooks] WARN settings.json mtime changed mid-merge; \
+             re-reading and re-merging against new contents"
+        );
+        let existing_retry = if path.exists() {
+            std::fs::read_to_string(&path)
+                .map_err(|e| format!("re-read {}: {e}", path.display()))?
+        } else {
+            "{}".to_string()
+        };
+        let mtime_before_retry = path.metadata().and_then(|m| m.modified()).ok();
+        let mut settings_retry: Value = if existing_retry.trim().is_empty() {
+            json!({})
+        } else {
+            serde_json::from_str(&existing_retry)
+                .map_err(|e| format!("re-parse settings.json: {e}"))?
+        };
+        if !settings_retry.is_object() {
+            return Err("settings.json is not a JSON object".into());
+        }
+        let Some(obj_retry) = settings_retry.as_object_mut() else {
+            return Err("settings.json is not a JSON object".into());
+        };
+        let hooks_root_retry = obj_retry
+            .entry("hooks".to_string())
+            .or_insert_with(|| json!({}));
+        if !hooks_root_retry.is_object() {
+            return Err("settings.hooks is not a JSON object".into());
+        }
+        let Some(hooks_map_retry) = hooks_root_retry.as_object_mut() else {
+            return Err("settings.hooks is not a JSON object".into());
+        };
+        // Mirror the per-event upsert from above, against fresh state.
+        let mut changed_retry = false;
+        for (event, _) in HOOKS {
+            let want_cmd = hook_command_for(event);
+            let arr = hooks_map_retry
+                .entry((*event).to_string())
+                .or_insert_with(|| json!([]));
+            let Some(vec) = arr.as_array_mut() else {
+                return Err(format!("settings.hooks.{event} is not a JSON array"));
+            };
+            let mut found = false;
+            for entry in vec.iter_mut() {
+                let Some(inner) = entry.get_mut("hooks").and_then(Value::as_array_mut) else {
+                    continue;
+                };
+                for h in inner.iter_mut() {
+                    let is_ours = h
+                        .get("command")
+                        .and_then(Value::as_str)
+                        .map(|c| c.starts_with(HOOK_MARKER))
+                        .unwrap_or(false);
+                    if is_ours {
+                        let cur = h.get("command").and_then(Value::as_str).unwrap_or("");
+                        if cur != want_cmd {
+                            if let Some(o) = h.as_object_mut() {
+                                o.insert("command".to_string(), Value::String(want_cmd.clone()));
+                                changed_retry = true;
+                            }
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if found {
+                    break;
+                }
+            }
+            if !found {
+                vec.push(json!({
+                    "hooks": [{
+                        "type": "command",
+                        "command": want_cmd,
+                    }]
+                }));
+                changed_retry = true;
+            }
+        }
+        // Second mtime check: bail if the file is still being raced.
+        if path.metadata().and_then(|m| m.modified()).ok() != mtime_before_retry {
+            eprintln!(
+                "[en-hooks] WARN settings.json still racing after retry; \
+                 skipping install this cycle (next boot will retry)"
+            );
+            return Ok(false);
+        }
+        if !changed_retry {
+            return Ok(false);
+        }
+        settings = settings_retry;
+    }
+
     if path.exists() {
         let backup = dir.join(format!("settings.json.en-backup-{stamp}"));
         std::fs::copy(&path, &backup)
@@ -233,6 +347,14 @@ pub fn install_hooks() -> Result<bool, String> {
 }
 
 fn hook_command_for(event: &str) -> String {
+    // The bash `$EN_HUB_SESSION_ID` / `$EN_HUB_HOOK_URL` tokens below are
+    // shell variable expansions — literal text in this Rust string. The
+    // debug_assert_eq! pair is the only compile-side link to the env
+    // constants in env.rs: rename a constant and dev builds fire here so
+    // the literal can be updated in lockstep. Release builds skip the
+    // assert; the bash tokens stay literal either way.
+    debug_assert_eq!(EN_HUB_SESSION_ID, "EN_HUB_SESSION_ID");
+    debug_assert_eq!(EN_HUB_HOOK_URL, "EN_HUB_HOOK_URL");
     format!(
         r#"{marker}
 if [ -n "$EN_HUB_SESSION_ID" ] && [ -n "$EN_HUB_HOOK_URL" ]; then curl --max-time 0.3 -fsS -X POST -H 'Content-Type: application/json' -d "{{\"session_id\":\"$EN_HUB_SESSION_ID\",\"event\":\"{event}\"}}" "$EN_HUB_HOOK_URL" >/dev/null 2>&1 & fi"#,

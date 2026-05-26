@@ -2,16 +2,20 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import {
+  PTY_EVENT_PREFIX,
+  PTY_EXIT_EVENT_PREFIX,
+  TILE_STATUS_EVENT_PREFIX,
+  type WorkingStatus,
+} from "./events";
 
 export type Status =
   | "spawning"
-  | "working"
-  | "needs"
-  | "idle"
+  | WorkingStatus
   | "exited"
   | "failed";
 
-type TileStatusEvent = { status: "working" | "needs" | "idle"; event: string };
+type TileStatusEvent = { status: WorkingStatus; event: string };
 
 export type SessionDecl = {
   key: string;
@@ -162,13 +166,13 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         throw e;
       }
 
-      const dataUnlisten = await listen<string>(`pty:${info.id}`, (ev) => {
+      const dataUnlisten = await listen<string>(`${PTY_EVENT_PREFIX}${info.id}`, (ev) => {
         const bytes = decodeBase64(ev.payload);
         appendToBuffer(decl.key, bytes);
         const sub = subsRef.current.get(decl.key);
         if (sub) for (const fn of sub.data) fn(bytes);
       });
-      const exitUnlisten = await listen(`pty-exit:${info.id}`, () => {
+      const exitUnlisten = await listen(`${PTY_EXIT_EVENT_PREFIX}${info.id}`, () => {
         const sub = subsRef.current.get(decl.key);
         if (sub) for (const fn of sub.exit) fn();
         const cur = sessionsRef.current.get(decl.key);
@@ -178,7 +182,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
         setTick((t) => t + 1);
       });
       const statusUnlisten = await listen<TileStatusEvent>(
-        `tile-status:${info.id}`,
+        `${TILE_STATUS_EVENT_PREFIX}${info.id}`,
         (ev) => {
           const cur = sessionsRef.current.get(decl.key);
           if (!cur || cur.status === "exited" || cur.status === "failed") {

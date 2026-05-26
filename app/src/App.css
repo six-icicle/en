@@ -1140,18 +1140,20 @@ input:focus-visible {
     0 0 0 3px var(--dot-accent, var(--accent)),
     0 0 8px var(--dot-glow, var(--accent-glow));
 }
-/* Per-theme picker dots: bg shows the theme's bg/accent split, and the
+/* Per-theme picker dots: bg-half is driven by --dot-bg (set inline from
+   THEME_BGS in App.tsx, so the CSS hex can't drift from the JS source);
+   accent-half + ring use --dot-accent / --dot-glow declared here. The
    --dot-accent + --dot-glow vars feed all the box-shadow rules above so
    each dot's ring tracks its OWN accent regardless of the active theme. */
-.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, #14141c 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
-.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, #2a2a37 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
-.themes button[data-set="everforest"]      { background: linear-gradient(135deg, #181f23 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
-.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, #2a3539 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
-.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, #1a1828 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
-.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, #2a273f 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
-.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, #15171a 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
-.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, #2a2620 50%, #c89656 50%); --dot-accent: #c89656; --dot-glow: rgba(200,150,86,0.5); }
-.themes button[data-set="washi"]           { background: linear-gradient(135deg, #ebedf0 50%, #bc002d 50%); --dot-accent: #bc002d; --dot-glow: rgba(188,0,45,0.5); }
+.themes button[data-set="kanagawa"]        { background: linear-gradient(135deg, var(--dot-bg) 50%, #d4b274 50%); --dot-accent: #d4b274; --dot-glow: rgba(212,178,116,0.5); }
+.themes button[data-set="kanagawa-soft"]   { background: linear-gradient(135deg, var(--dot-bg) 50%, #c0a36e 50%); --dot-accent: #c0a36e; --dot-glow: rgba(192,163,110,0.5); }
+.themes button[data-set="everforest"]      { background: linear-gradient(135deg, var(--dot-bg) 50%, #b8d290 50%); --dot-accent: #b8d290; --dot-glow: rgba(184,210,144,0.5); }
+.themes button[data-set="everforest-soft"] { background: linear-gradient(135deg, var(--dot-bg) 50%, #a7c080 50%); --dot-accent: #a7c080; --dot-glow: rgba(167,192,128,0.5); }
+.themes button[data-set="rose-pine"]       { background: linear-gradient(135deg, var(--dot-bg) 50%, #f4a8a5 50%); --dot-accent: #f4a8a5; --dot-glow: rgba(244,168,165,0.5); }
+.themes button[data-set="rose-pine-soft"]  { background: linear-gradient(135deg, var(--dot-bg) 50%, #ea9a97 50%); --dot-accent: #ea9a97; --dot-glow: rgba(234,154,151,0.5); }
+.themes button[data-set="hinoki"]          { background: linear-gradient(135deg, var(--dot-bg) 50%, #d49a3a 50%); --dot-accent: #d49a3a; --dot-glow: rgba(212,154,58,0.5); }
+.themes button[data-set="hinoki-soft"]     { background: linear-gradient(135deg, var(--dot-bg) 50%, #c89656 50%); --dot-accent: #c89656; --dot-glow: rgba(200,150,86,0.5); }
+.themes button[data-set="washi"]           { background: linear-gradient(135deg, var(--dot-bg) 50%, #bc002d 50%); --dot-accent: #bc002d; --dot-glow: rgba(188,0,45,0.5); }
 .themes button[data-set="washi-kyokujitsu"] {
   background-image: var(--kyokujitsu-svg);
   background-size: cover;
@@ -1567,7 +1569,7 @@ input:focus-visible {
   border-top: 1px dashed var(--line);
 }
 .theme-amt-row button {
-  width: 22px; height: 20px;
+  width: calc(22px * var(--fz)); height: calc(20px * var(--fz));
   border-radius: 3px;
   border: 1px solid var(--line-2);
   background: transparent;
@@ -1585,7 +1587,7 @@ input:focus-visible {
   font-size: calc(11px * var(--fz));
   color: var(--ink-2);
   letter-spacing: 0.04em;
-  min-width: 36px;
+  min-width: calc(36px * var(--fz));
   text-align: center;
 }
 
@@ -1782,7 +1784,7 @@ input:focus-visible {
 .grid[data-layout="focus"][data-count="3"] { grid-template-columns: 2fr 1fr;     grid-template-rows: 1fr 1fr; }
 .grid[data-layout="focus"][data-count="4"] { grid-template-columns: 2fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 .grid[data-layout="focus"][data-count="5"] { grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.grid[data-layout="focus"][data-count="6"] { grid-template-columns: 1fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
+.grid[data-layout="focus"][data-count="6"] { grid-template-columns: 2fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 .grid[data-layout="focus"][data-count="7"] { grid-template-columns: 2fr 1fr 1fr;     grid-template-rows: 1fr 1fr 1fr; }
 
 .grid[data-layout="focus"] .tile.active {
@@ -2424,8 +2426,8 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--tfz, 1)); letter-spacing: 0.04em; }
 
 .t-close {
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--tfz, 1));
+  height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
   border: none;
   background: transparent;
@@ -2446,15 +2448,15 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile.active .t-close,
 .t-close:focus-visible { opacity: 1; }
 .t-close:hover { color: var(--accent); }
-.t-close svg { width: 13px; height: 13px; display: block; }
+.t-close svg { width: calc(13px * var(--tfz, 1)); height: calc(13px * var(--tfz, 1)); display: block; }
 
 /* Reveal-in-Finder icon. Mirrors .t-close's hover-reveal pattern but
    uses the chrome family palette (ink-3 → accent on hover) instead of
    the destructive warn-red. Sits to the LEFT of .t-close so the close
    stays at the trailing edge. */
 .t-reveal {
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--tfz, 1));
+  height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
   border: 1px solid transparent;
   background: transparent;
@@ -2472,7 +2474,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile.active .t-reveal,
 .t-reveal:focus-visible { opacity: 1; }
 .t-reveal:hover { color: var(--accent); }
-.t-reveal svg { width: 13px; height: 13px; display: block; }
+.t-reveal svg { width: calc(13px * var(--tfz, 1)); height: calc(13px * var(--tfz, 1)); display: block; }
 
 .t-body {
   padding: calc(8px * var(--fz)) calc(10px * var(--fz));
@@ -2581,8 +2583,8 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   animation: modal-fade var(--dur-fast) ease-out;
 }
 .modal {
-  min-width: 380px;
-  max-width: 480px;
+  min-width: calc(380px * var(--fz));
+  max-width: min(96vw, calc(480px * var(--fz)));
   background: var(--tile);
   border: 1px solid var(--line-2);
   border-radius: 6px;
@@ -2684,6 +2686,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
 }
 .reset-item:hover,
+.reset-item:focus,
 .reset-item:focus-visible {
   border-color: var(--accent);
   color: var(--accent);
@@ -2701,6 +2704,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   text-align: right;
 }
 .reset-item:hover .reset-item-desc,
+.reset-item:focus .reset-item-desc,
 .reset-item:focus-visible .reset-item-desc {
   color: var(--ink-2);
 }
@@ -2872,12 +2876,12 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .tile-drag-ghost-head {
   display: flex;
   align-items: center;
-  gap: calc(10px * var(--fz));
-  padding: 0 calc(18px * var(--fz));
-  height: calc(38px * var(--fz));
+  gap: calc(10px * var(--tfz, 1));
+  padding: 0 calc(18px * var(--tfz, 1));
+  height: calc(38px * var(--tfz, 1));
   border-bottom: 1px solid var(--line);
   font-family: var(--mono);
-  font-size: calc(14px * var(--fz));
+  font-size: calc(14px * var(--tfz, 1));
   background: linear-gradient(180deg, var(--tile-2) 0%, var(--tile) 100%);
   color: var(--ink);
 }

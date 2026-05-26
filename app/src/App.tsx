@@ -21,6 +21,7 @@ import {
   LAYOUT_META,
   loadAppearance,
   loadTileSlots,
+  MAX_TILES,
   saveAppearance,
   saveTileSlots,
   TEXTURE_META,
@@ -84,8 +85,6 @@ const TEXTURES = (Object.keys(TEXTURE_META) as Texture[]).map((id) => ({
   title: TEXTURE_META[id].title,
 }));
 
-const MAX_TILES = 8;
-
 const LAYOUTS = (Object.keys(LAYOUT_META) as Layout[]).map((id) => ({
   id,
   ...LAYOUT_META[id],
@@ -101,6 +100,7 @@ const ALERT_STYLES = (Object.keys(ALERT_STYLE_META) as AlertStyle[]).map(
    theme back via the picker; the title can stay as-is. To re-trigger,
    they must re-name the tile (rename to something else, then back, OR
    rename one of these phrases on a different tile). */
+const KYOKUJITSU_THEME = "washi-kyokujitsu" as const;
 const KYOKUJITSU_TRIGGERS = new Set([
   "war",
   "wartime",
@@ -195,7 +195,16 @@ export default function App() {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const themeMenuRef = useRef<HTMLDivElement | null>(null);
   const [appearanceLoaded, setAppearanceLoaded] = useState(false);
+  // Parallel flag for tile slots — set true only on successful load
+  // (loadTileSlots returns null on caught error). Gating the persist
+  // effect on this prevents a transient FS hiccup from blanking
+  // legitimate slots on the next tile mutation.
+  const [tileSlotsLoaded, setTileSlotsLoaded] = useState(false);
   const [editingKey, setEditingKey] = useState<string | null>(null);
+  // Imperatively select the rename input's text once per edit-mode entry.
+  // An inline `ref={(el) => el?.select()}` re-fires on every parent render
+  // and clobbers the user's caret mid-edit.
+  const editingInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingClose, setPendingClose] = useState<string | null>(null);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
   const [fzMenuOpen, setFzMenuOpen] = useState(false);
@@ -216,8 +225,15 @@ export default function App() {
     setTiles((prev) =>
       prev.map((t) => (t.key === key ? { ...t, name: trimmed } : t)),
     );
-    if (isKyokujitsuTrigger(trimmed)) setTheme("washi-kyokujitsu");
+    if (isKyokujitsuTrigger(trimmed)) setTheme(KYOKUJITSU_THEME);
   }, []);
+
+  // Pre-select the existing name on edit-mode entry so a fresh keystroke
+  // replaces it. Fires only when `editingKey` changes, never on every
+  // parent re-render (which would clobber the user's caret mid-edit).
+  useEffect(() => {
+    if (editingKey !== null) editingInputRef.current?.select();
+  }, [editingKey]);
 
   const reviveTile = useCallback((key: string) => {
     setTiles((prev) =>
@@ -380,8 +396,12 @@ export default function App() {
   );
 
   const tileRectsRef = useRef<Map<string, DOMRect>>(new Map());
-  const tilesOrderKey = tiles.map((t) => t.key).join(",");
-  useLayoutEffect(() => {
+  // Snapshot current tile rects, animate any survivor whose position changed
+  // from its previous snapshot, then store the fresh rects. Extracted to a
+  // callback so both the order-change effect and the layout/track-change
+  // effect (declared after `effectiveColFrs/Rs`) can reuse it without
+  // duplicating the FLIP logic.
+  const refreshFlipRects = useCallback(() => {
     const grid = gridRef.current;
     if (!grid) return;
     const prev = tileRectsRef.current;
@@ -412,7 +432,11 @@ export default function App() {
       }
     });
     tileRectsRef.current = next;
-  }, [tilesOrderKey]);
+  }, []);
+  const tilesOrderKey = tiles.map((t) => t.key).join(",");
+  useLayoutEffect(() => {
+    refreshFlipRects();
+  }, [tilesOrderKey, refreshFlipRects]);
 
   const tileCount = tiles.length;
   const defaults = useMemo(
@@ -440,6 +464,13 @@ export default function App() {
   const effectiveRowFrs =
     rowFrs.length === defaults.rows.length ? rowFrs : defaults.rows;
 
+  // Refresh FLIP rect snapshot on layout/track changes too — without this,
+  // switching layouts or dragging a track-fr handle invalidates the cached
+  // rects and the next tile reorder animates from a stale origin.
+  useLayoutEffect(() => {
+    refreshFlipRects();
+  }, [layout, effectiveColFrs, effectiveRowFrs, refreshFlipRects]);
+
   useEffect(() => {
     let cancelled = false;
     loadAppearance().then((a) => {
@@ -457,7 +488,12 @@ export default function App() {
       setAppearanceLoaded(true);
     });
     loadTileSlots().then((slots) => {
-      if (cancelled || slots.length === 0) return;
+      if (cancelled) return;
+      // null = load failed; leave tileSlotsLoaded false so the persist
+      // effect can't write [] over legitimate slots on disk.
+      if (slots === null) return;
+      setTileSlotsLoaded(true);
+      if (slots.length === 0) return;
       const restored: TileDecl[] = slots.map((s) => ({
         key: s.key,
         name: s.name,
@@ -475,13 +511,16 @@ export default function App() {
   }, []);
 
   // Persist tile slots whenever the array changes (after initial load).
+  // Gated on `tileSlotsLoaded` (not just `appearanceLoaded`) so a failed
+  // load — which leaves legitimate slots intact on disk — can't be
+  // overwritten by a stale in-memory [] when the user next mutates tiles.
   useEffect(() => {
-    if (!appearanceLoaded) return;
+    if (!appearanceLoaded || !tileSlotsLoaded) return;
     const slots: TileSlot[] = tiles
       .filter((t) => !!t.cwd)
       .map((t) => ({ key: t.key, name: t.name, cwd: t.cwd!, path: t.path }));
     saveTileSlots(slots);
-  }, [appearanceLoaded, tiles]);
+  }, [appearanceLoaded, tileSlotsLoaded, tiles]);
 
   useEffect(() => {
     if (!appearanceLoaded) return;
@@ -642,6 +681,12 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Suppress hub shortcuts while any confirmation modal is mounted.
+      // ⌘N would otherwise pop the spawn dialog over a confirm modal,
+      // and ⌘W would stomp pendingClose's target. Each modal handles
+      // its own Esc/Enter via a sibling capture-phase listener, so
+      // cancel-to-dismiss still works.
+      if (pendingClose !== null || killAllOpen || resetMenuOpen) return;
       // Hub-level shortcuts (⌘N/⌘W/⌘+arrow/⌘+1..9) must run regardless
       // of focus target — xterm has its own hidden textarea that always
       // owns focus, and the tile rename input shouldn't trap ⌘W either.
@@ -732,7 +777,7 @@ export default function App() {
     window.addEventListener("keydown", onKey, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
-  }, [activeId, tiles, spawn, closeTile]);
+  }, [activeId, tiles, spawn, closeTile, pendingClose, killAllOpen, resetMenuOpen]);
 
   /* Drag-and-drop files/folders/screenshots into a tile.
      Routes to the tile under the cursor; falls back to the focused tile
@@ -867,13 +912,13 @@ export default function App() {
           </svg>
           en
           {(theme === "washi" ||
-            theme === "washi-kyokujitsu" ||
+            theme === KYOKUJITSU_THEME ||
             theme === "washi-tsuki") && (
             <span
               className="brand-hinomaru"
               aria-hidden="true"
               title={
-                theme === "washi-kyokujitsu"
+                theme === KYOKUJITSU_THEME
                   ? "Kyokujitsu"
                   : theme === "washi-tsuki"
                   ? "Tsuki"
@@ -1002,14 +1047,25 @@ export default function App() {
                       // only via the rename trigger. If it's already the
                       // active theme (user triggered + hasn't switched
                       // away), keep it visible so it shows as selected.
-                      t.id !== "washi-kyokujitsu" || theme === "washi-kyokujitsu",
+                      t.id !== KYOKUJITSU_THEME || theme === KYOKUJITSU_THEME,
                   ).map((t) => (
                     <button
                       key={t.id}
                       data-set={t.id}
                       data-active={theme === t.id ? "true" : undefined}
+                      aria-pressed={theme === t.id}
                       title={t.title}
                       onClick={() => setTheme(t.id)}
+                      // --dot-bg drives the bg-half of the picker-dot
+                      // gradient (see App.css `.themes button[data-set=…]`).
+                      // Set inline from THEME_BGS so the picker swatch can't
+                      // drift from the trigger-dot, which uses the same
+                      // source one level up.
+                      style={
+                        {
+                          ["--dot-bg" as string]: THEME_BGS[t.id],
+                        } as React.CSSProperties
+                      }
                     />
                   ))}
                 </div>
@@ -1069,6 +1125,7 @@ export default function App() {
                       className="texture-chip"
                       data-tex={t.id}
                       data-active={texture === t.id ? "true" : undefined}
+                      aria-pressed={texture === t.id}
                       title={t.title}
                       onClick={() => setTexture(t.id)}
                     >
@@ -1097,6 +1154,7 @@ export default function App() {
                       className="texture-chip texture-chip-rain"
                       data-tex={t.id}
                       data-active={texture === t.id ? "true" : undefined}
+                      aria-pressed={texture === t.id}
                       title={t.title}
                       onClick={() => setTexture(t.id)}
                     >
@@ -1370,9 +1428,15 @@ export default function App() {
                   className="name name-edit"
                   autoFocus
                   defaultValue={s.name}
-                  // Pre-select the existing name so a fresh keystroke
-                  // replaces it instead of inserting next to the caret.
-                  ref={(el) => el?.select()}
+                  // Hard-cap matches SLOT_NAME_MAX in persistence.ts —
+                  // a longer name passes renameTile's trim-only check
+                  // but isValidSlot rejects it on next launch and the
+                  // tile vanishes silently.
+                  maxLength={256}
+                  // Selection is set imperatively in a `useEffect` keyed
+                  // on `editingKey` (see App body) — an inline ref re-fires
+                  // on every parent render and clobbers the caret.
+                  ref={editingInputRef}
                   onClick={(ev) => ev.stopPropagation()}
                   onBlur={(ev) => {
                     renameTile(s.key, ev.currentTarget.value);
@@ -1390,10 +1454,24 @@ export default function App() {
               ) : (
                 <span
                   className="name"
-                  title="Double-click to rename"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Rename ${s.name}`}
+                  title="Double-click or press Enter to rename"
                   onDoubleClick={(ev) => {
                     ev.stopPropagation();
                     setEditingKey(s.key);
+                  }}
+                  onKeyDown={(ev) => {
+                    // Enter and F2 are the conventional rename keys across
+                    // web (Enter) and desktop file managers (F2). Pointer
+                    // drag is gated on pointerdown→pointermove, so keyboard
+                    // activation can't accidentally start a tile drag.
+                    if (ev.key === "Enter" || ev.key === "F2") {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      setEditingKey(s.key);
+                    }
                   }}
                 >
                   {s.name}
@@ -1541,16 +1619,23 @@ export default function App() {
               setBg(null);
             },
             allAppearance: () => {
-              setTheme(APPEARANCE_DEFAULTS.theme);
-              setTexture(APPEARANCE_DEFAULTS.texture);
-              setLayout(APPEARANCE_DEFAULTS.layout);
-              setFz(APPEARANCE_DEFAULTS.fz);
-              setTfz(APPEARANCE_DEFAULTS.tfz);
-              setTexAmt(APPEARANCE_DEFAULTS.texAmt);
-              setBrightness(APPEARANCE_DEFAULTS.brightness);
-              setAccent(APPEARANCE_DEFAULTS.accent);
-              setBg(APPEARANCE_DEFAULTS.bg);
-              setAlertStyle(APPEARANCE_DEFAULTS.alertStyle);
+              // Dispatch table — Record<keyof Appearance, () => void> makes
+              // TS enforce parity. Adding a field to Appearance without a
+              // resetter here is a compile error. React 19 batches the
+              // sequential setter calls into a single tick → single persist.
+              const APPEARANCE_RESETTERS: Record<keyof Appearance, () => void> = {
+                theme: () => setTheme(APPEARANCE_DEFAULTS.theme),
+                texture: () => setTexture(APPEARANCE_DEFAULTS.texture),
+                layout: () => setLayout(APPEARANCE_DEFAULTS.layout),
+                fz: () => setFz(APPEARANCE_DEFAULTS.fz),
+                tfz: () => setTfz(APPEARANCE_DEFAULTS.tfz),
+                texAmt: () => setTexAmt(APPEARANCE_DEFAULTS.texAmt),
+                brightness: () => setBrightness(APPEARANCE_DEFAULTS.brightness),
+                accent: () => setAccent(APPEARANCE_DEFAULTS.accent),
+                bg: () => setBg(APPEARANCE_DEFAULTS.bg),
+                alertStyle: () => setAlertStyle(APPEARANCE_DEFAULTS.alertStyle),
+              };
+              for (const reset of Object.values(APPEARANCE_RESETTERS)) reset();
             },
           }}
         />
@@ -1829,8 +1914,12 @@ function ConfirmKillAllModal({
   onConfirm: () => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
   useEffect(() => {
     confirmRef.current?.focus();
+  }, []);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -1852,9 +1941,12 @@ function ConfirmKillAllModal({
         className="modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-kill-all"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Extinguish all sessions</div>
+        <div className="modal-title" id="modal-title-kill-all">
+          Extinguish all sessions
+        </div>
         <div className="modal-body">
           End <b>{count}</b> session{count === 1 ? "" : "s"}? Any in-progress
           work will be lost.
@@ -1922,8 +2014,12 @@ function ConfirmCloseModal({
   onConfirm: () => void;
 }) {
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
   useEffect(() => {
     confirmRef.current?.focus();
+  }, []);
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -1945,9 +2041,12 @@ function ConfirmCloseModal({
         className="modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-confirm-close"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Close session</div>
+        <div className="modal-title" id="modal-title-confirm-close">
+          Close session
+        </div>
         <div className="modal-body">
           End <b>{name}</b>? Any in-progress work in this terminal will be lost.
         </div>
@@ -1981,6 +2080,18 @@ function ResetMenuModal({
     allAppearance: () => void;
   };
 }) {
+  const firstItemRef = useRef<HTMLButtonElement | null>(null);
+  // Mount-only focus: parent re-renders churn callback identities, and re-running
+  // focus mid-interaction would yank focus away from wherever the user has Tab'd.
+  // rAF-deferred so xterm's underlying-tile focus-steal has settled before we
+  // claim focus — without the defer, focus lands on the modal's cancel button
+  // (last in tab order) instead of the first reset item.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      firstItemRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -2026,13 +2137,17 @@ function ResetMenuModal({
         className="modal reset-modal"
         role="dialog"
         aria-modal="true"
+        aria-labelledby="modal-title-reset"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-title">Reset…</div>
+        <div className="modal-title" id="modal-title-reset">
+          Reset…
+        </div>
         <div className="reset-list">
-          {items.map((it) => (
+          {items.map((it, idx) => (
             <button
               key={it.label}
+              ref={idx === 0 ? firstItemRef : undefined}
               className="reset-item"
               onClick={() => {
                 it.run();
