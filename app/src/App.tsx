@@ -679,6 +679,51 @@ export default function App() {
     setActiveId(decls[decls.length - 1].key);
   }, []);
 
+  /* Batch popover keyboard nav.
+     Open the popover via ⌘⌃N. Then:
+       - Digit 1..8: spawn that many sessions (if not disabled).
+       - ↑/↓: walk the .batch-option buttons with edge-wrap.
+       - Enter on a focused option: native button click.
+     Esc/click-outside dismissal stays with usePopover. */
+  useEffect(() => {
+    if (!batchMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.altKey || e.ctrlKey) return;
+      if (/^Digit[1-8]$/.test(e.code)) {
+        const n = parseInt(e.code.slice(5), 10);
+        const room = MAX_TILES - tiles.length;
+        if (n > room) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setBatchMenuOpen(false);
+        void spawnBatch(n);
+        return;
+      }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        const popover = batchMenuRef.current;
+        if (!popover) return;
+        const items = Array.from(
+          popover.querySelectorAll<HTMLButtonElement>(
+            "button.batch-option:not([disabled])",
+          ),
+        );
+        if (items.length === 0) return;
+        const active = document.activeElement as HTMLButtonElement | null;
+        const idx = active ? items.indexOf(active) : -1;
+        const next =
+          e.key === "ArrowDown"
+            ? items[(idx + 1 + items.length) % items.length]
+            : items[(idx - 1 + items.length) % items.length];
+        e.preventDefault();
+        e.stopPropagation();
+        next?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", onKey, { capture: true });
+  }, [batchMenuOpen, tiles.length, spawnBatch]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Suppress hub shortcuts while any confirmation modal is mounted.
@@ -687,12 +732,35 @@ export default function App() {
       // its own Esc/Enter via a sibling capture-phase listener, so
       // cancel-to-dismiss still works.
       if (pendingClose !== null || killAllOpen || resetMenuOpen) return;
+
+      // ⌘+⌃ chords — handled BEFORE the meta-only filter below because
+      // these combos intentionally pair ⌘ with ⌃ (ctrlKey true). No
+      // alt or shift allowed. Avoids macOS system-bound chords (e.g.
+      // ⌘⇧N is sometimes bound to "new private window" in browser
+      // contexts and arrow combos collide with Mission Control).
+      if (e.metaKey && e.ctrlKey && !e.altKey && !e.shiftKey) {
+        // ⌘+⌃+R — rename the active tile.
+        if (e.code === "KeyR") {
+          e.preventDefault();
+          e.stopPropagation();
+          if (activeId) setEditingKey(activeId);
+          return;
+        }
+        // ⌘+⌃+N — open batch-spawn popover.
+        if (e.code === "KeyN") {
+          e.preventDefault();
+          e.stopPropagation();
+          setBatchMenuOpen((v) => !v);
+          return;
+        }
+      }
+
       // Hub-level shortcuts (⌘N/⌘W/⌘+arrow/⌘+1..9) must run regardless
       // of focus target — xterm has its own hidden textarea that always
       // owns focus, and the tile rename input shouldn't trap ⌘W either.
-      // We only filter on `meta && !alt && !ctrl` so plain typing in any
-      // input field falls through untouched.
-      if (!e.metaKey || e.altKey || e.ctrlKey) return;
+      // We only filter on `meta && !alt && !ctrl && !shift` so plain
+      // typing in any input field falls through untouched.
+      if (!e.metaKey || e.altKey || e.ctrlKey || e.shiftKey) return;
 
       // ⌘+N — spawn a new session.
       if (e.code === "KeyN") {
@@ -1462,24 +1530,10 @@ export default function App() {
               ) : (
                 <span
                   className="name"
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`Rename ${s.name}`}
-                  title="Double-click or press Enter to rename"
+                  title="Double-click or press ⌘⌃R to rename"
                   onDoubleClick={(ev) => {
                     ev.stopPropagation();
                     setEditingKey(s.key);
-                  }}
-                  onKeyDown={(ev) => {
-                    // Enter and F2 are the conventional rename keys across
-                    // web (Enter) and desktop file managers (F2). Pointer
-                    // drag is gated on pointerdown→pointermove, so keyboard
-                    // activation can't accidentally start a tile drag.
-                    if (ev.key === "Enter" || ev.key === "F2") {
-                      ev.preventDefault();
-                      ev.stopPropagation();
-                      setEditingKey(s.key);
-                    }
                   }}
                 >
                   {s.name}
