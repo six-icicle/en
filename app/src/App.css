@@ -744,10 +744,17 @@ input:focus-visible {
   align-items: center;
   gap: calc(8px * var(--fz));
   padding: 0 calc(20px * var(--fz));
-  border-bottom: 1px solid var(--line-2);
-  background: linear-gradient(180deg,
-    color-mix(in oklch, var(--bg), var(--ink-4) 22%) 0%,
-    var(--bg) 100%);
+  /* Lifted-ledge recipe (mockup 61, variant 03): bar is color-flush
+     with canvas, separation comes purely from light + cast shadow.
+     1px inner highlight catches the top edge ("caught light"), and a
+     soft drop shadow falls onto the workspace below. Reads as a
+     foreground plane held above a sunken canvas. */
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 6px 14px -8px rgba(0, 0, 0, 0.55);
   container-type: inline-size;
   container-name: nav;
 }
@@ -898,17 +905,24 @@ input:focus-visible {
   border-color: var(--line-2);
 }
 
-/* Foot bar + navbar gradient: ink-toned overlay (not white) so the seam
-   reads on light bg. */
-[data-theme="washi"] .foot,
-[data-theme="washi-kyokujitsu"] .foot {
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.06) 0%, transparent 100%);
-  border-top-color: var(--line-2);
-}
+/* Lifted-ledge on light: same architectural recipe as the dark themes
+   (bar at --bg, separation by light + cast shadow), but inverted —
+   on cream the "caught light" inset uses sumi (ink-toned alpha) and
+   the cast shadow gets less alpha since multiply on light needs less
+   weight than screen on dark to read at the same perceptual delta. */
 [data-theme="washi"] .titlebar,
 [data-theme="washi-kyokujitsu"] .titlebar {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, var(--bg) 100%);
-  border-bottom-color: var(--line-2);
+  background: var(--bg);
+  box-shadow:
+    inset 0 1px 0 rgba(0, 0, 0, 0.07),
+    0 6px 14px -8px rgba(0, 0, 0, 0.18);
+}
+[data-theme="washi"] .foot,
+[data-theme="washi-kyokujitsu"] .foot {
+  background: var(--bg);
+  box-shadow:
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 -6px 14px -8px rgba(0, 0, 0, 0.18);
 }
 
 /* Grid gap color: --line is too faint at 0.10 alpha for tile-on-tile
@@ -2759,8 +2773,15 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   align-items: center;
   padding: 0 calc(20px * var(--fz));
   gap: calc(18px * var(--fz));
-  border-top: 1px solid var(--line);
-  background: linear-gradient(180deg, var(--bg) 0%, var(--tile-2) 100%);
+  /* Lifted-ledge mirror of .titlebar: bar at --bg, 1px inner highlight
+     on its outer (bottom) edge, soft drop shadow casting UP onto the
+     canvas. Symmetric bookend with the titlebar's downward shadow. */
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 -6px 14px -8px rgba(0, 0, 0, 0.55);
   font-family: var(--mono);
   font-size: calc(13.5px * var(--fz));
   color: var(--accent);

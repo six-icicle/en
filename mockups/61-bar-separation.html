@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>en — bar separation mockup (top + bottom)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@600&display=swap" rel="stylesheet" />
+<style>
+  /* Rose-pine-soft canvas (the canonical default + en's actual default) */
+  :root {
+    --bg:        #2a273f;
+    --tile:      #312e4a;
+    --tile-2:    #383454;
+    --line:      rgba(255,255,255,0.06);
+    --line-2:    rgba(255,255,255,0.10);
+    --ink:       #e0def4;
+    --ink-2:     #908caa;
+    --ink-3:     #6e6a86;
+    --ink-4:     #4a4660;
+    --accent:    #ea9a97;
+    --accent-glow: rgba(234,154,151,0.35);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --display: 'Outfit', 'Space Grotesk', sans-serif;
+    --fz: 1;
+    --dur-fast: 120ms;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+  /* Subtle texture so the canvas reads — mimics seigaiha/dots-style faint pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 0 50%, transparent 18px, rgba(255,255,255,0.012) 18px, rgba(255,255,255,0.012) 19px, transparent 19px);
+    background-size: 28px 56px;
+    opacity: 0.6;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 56px 24px 120px;
+  }
+  header.head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 44px;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span { color: var(--accent); }
+  .lede {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 48px;
+  }
+  .lede-body {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink-2);
+    margin-bottom: 56px;
+    max-width: 78ch;
+    line-height: 1.65;
+  }
+  .lede-body b { color: var(--ink); font-weight: 500; }
+
+  /* Variant block */
+  .variant {
+    margin-bottom: 52px;
+  }
+  .variant-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 0 4px 10px;
+    flex-wrap: wrap;
+  }
+  .variant-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    flex: none;
+  }
+  .variant-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .skill-chip {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+    color: var(--ink-2);
+    background: rgba(255,255,255,0.03);
+  }
+  .skill-chip.claude     { color: #c9a3ee; border-color: rgba(201,163,238,0.35); }
+  .skill-chip.frontend   { color: #88c0d0; border-color: rgba(136,192,208,0.35); }
+  .skill-chip.impeccable { color: #ea9a97; border-color: rgba(234,154,151,0.35); }
+  .skill-chip.proma      { color: #b8d290; border-color: rgba(184,210,144,0.35); }
+  .variant-recipe {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+  .variant-note {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    line-height: 1.65;
+    color: var(--ink-2);
+    padding: 12px 4px 0;
+    max-width: 84ch;
+  }
+  .variant-note b { color: var(--ink); font-weight: 500; }
+
+  /* Frame around the bar+canvas+foot stack so we see how it sits against the canvas */
+  .frame {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--bg);
+  }
+
+  /* Titlebar — base structure shared by every variant. Only `background`
+     and adjacent decorations change per variant via .v-XXX overrides. */
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    padding: 0 calc(20px * var(--fz));
+    height: calc(50px * var(--fz));
+    border-bottom: 1px solid var(--line-2);
+    position: relative;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: calc(16px * var(--fz));
+    letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .brand-mark {
+    width: calc(14px * var(--fz));
+    height: calc(14px * var(--fz));
+    color: var(--accent);
+    flex: none;
+  }
+
+  .status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--fz));
+    flex-wrap: nowrap;
+  }
+
+  /* Frosted-glass nav buttons — same recipe as App.css */
+  .nbtn {
+    flex: none;
+    position: relative;
+    width: calc(30px * var(--fz));
+    height: calc(30px * var(--fz));
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-top-color: rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background:
+      linear-gradient(180deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    color: var(--accent);
+    font-family: var(--mono);
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 1px 2px rgba(0,0,0,0.20),
+      0 4px 12px -4px rgba(0,0,0,0.40);
+  }
+  .nbtn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .nbtn-aa {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+  .theme-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bg) 50%, var(--accent) 50%);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* Canvas — body-level surface between titlebar and foot */
+  .canvas-preview {
+    height: 96px;
+    background: var(--bg);
+    background-image:
+      linear-gradient(transparent 0, transparent calc(50% - 1px), rgba(255,255,255,0.018) calc(50% - 1px), rgba(255,255,255,0.018) 50%, transparent 50%);
+    background-size: 100% 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+  }
+
+  /* Foot — base. Only `background` and adjacent decorations change per variant. */
+  .foot {
+    display: flex;
+    align-items: center;
+    height: calc(30px * var(--fz));
+    padding: 0 calc(20px * var(--fz));
+    gap: calc(18px * var(--fz));
+    border-top: 1px solid var(--line);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: calc(13.5px * var(--fz));
+    position: relative;
+  }
+  .foot .group { display: flex; align-items: center; gap: calc(6px * var(--fz)); flex: none; }
+  .foot kbd {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 1px 6px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    color: var(--accent);
+    background: transparent;
+  }
+  .foot .right { margin-left: auto; color: var(--accent); }
+
+
+  /* ============================================================ */
+  /*           PER-VARIANT TITLEBAR + FOOT BG RECIPES              */
+  /* ============================================================ */
+
+  /* ─── 01 · Claude · Hairline + Drop ─── */
+  .v-claude-hairline .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.06) inset,    /* top hairline highlight */
+      0 8px 14px -8px rgba(0,0,0,0.55);         /* soft drop into canvas */
+    border-bottom: 1px solid color-mix(in oklch, var(--ink-4), black 25%);
+  }
+  .v-claude-hairline .foot {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 100%);
+    box-shadow:
+      0 -1px 0 rgba(255,255,255,0.06) inset,
+      0 -8px 14px -8px rgba(0,0,0,0.55);
+    border-top: 1px solid color-mix(in oklch, var(--ink-4), black 25%);
+  }
+
+  /* ─── 02 · Claude · Tile-flush bands ─── */
+  .v-claude-tileflush .titlebar {
+    background: var(--tile);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .v-claude-tileflush .foot {
+    background: var(--tile);
+    border-top: 1px solid var(--line-2);
+  }
+
+  /* ─── 03 · frontend-design · Lifted Ledge ─── */
+  .v-fd-ledge .titlebar {
+    background: var(--bg);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 6px 14px -8px rgba(0,0,0,0.55);
+    position: relative;
+    z-index: 2;
+    border-bottom: none;
+  }
+  .v-fd-ledge .foot {
+    background: var(--bg);
+    box-shadow:
+      inset 0 -1px 0 rgba(255,255,255,0.05),
+      0 -6px 14px -8px rgba(0,0,0,0.55);
+    position: relative;
+    z-index: 2;
+    border-top: none;
+  }
+  .v-fd-ledge .canvas-preview {
+    box-shadow:
+      inset 0 8px 12px -10px rgba(0,0,0,0.50),
+      inset 0 -8px 12px -10px rgba(0,0,0,0.50);
+  }
+
+  /* ─── 04 · frontend-design · Planed Beam ─── */
+  .v-fd-beam .titlebar {
+    background: linear-gradient(180deg,
+      var(--tile-2) 0%,
+      var(--tile) 55%,
+      var(--bg) 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    border-bottom: none;
+  }
+  .v-fd-beam .foot {
+    background: linear-gradient(180deg,
+      var(--bg) 0%,
+      var(--tile) 45%,
+      var(--tile-2) 100%);
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.04);
+    border-top: none;
+  }
+
+  /* ─── 05 · impeccable · Tooled edge ─── */
+  .v-imp-tooled .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 100%);
+    box-shadow:
+      0 1px 0 0 var(--line-2),
+      0 2px 0 0 color-mix(in oklch, var(--bg), var(--ink-4) 56%),
+      0 3px 0 0 var(--line);
+    border-bottom: none;
+  }
+  .v-imp-tooled .foot {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 100%);
+    box-shadow:
+      0 -1px 0 0 var(--line),
+      0 -2px 0 0 color-mix(in oklch, var(--bg), var(--ink-4) 56%),
+      0 -3px 0 0 var(--line-2);
+    border-top: none;
+  }
+  .v-imp-tooled .canvas-preview { padding: 3px 0; }
+
+  /* ─── 06 · impeccable · Set shadow ─── */
+  .v-imp-set .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 18%) 86%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 32%) 100%);
+    border-bottom: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklch, var(--bg), white 5%),
+      inset 0 -1px 0 color-mix(in oklch, var(--bg), black 12%);
+  }
+  .v-imp-set .foot {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 32%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 18%) 14%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 100%);
+    border-top: 1px solid var(--line);
+    box-shadow:
+      inset 0 -1px 0 color-mix(in oklch, var(--bg), white 4%),
+      inset 0 1px 0 color-mix(in oklch, var(--bg), black 12%);
+  }
+
+  /* ─── 07 · ui-ux-pro-max · Inverted-wash anchor ─── */
+  .v-pm-anchor .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 14%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 42%) 100%);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .v-pm-anchor .foot {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 42%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 14%) 100%);
+    border-top: 1px solid var(--line-2);
+  }
+
+  /* ─── 08 · ui-ux-pro-max · Engawa lip ─── */
+  .v-pm-engawa .titlebar {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 100%);
+    border-bottom: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 -1px 0 var(--tile-2),
+      0 6px 18px -10px rgba(0,0,0,0.45);
+    position: relative;
+    z-index: 2;
+  }
+  .v-pm-engawa .foot {
+    background: linear-gradient(180deg,
+      color-mix(in oklch, var(--bg), var(--ink-4) 12%) 0%,
+      color-mix(in oklch, var(--bg), var(--ink-4) 38%) 100%);
+    border-top: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 1px 0 var(--tile-2),
+      0 -6px 18px -10px rgba(0,0,0,0.45);
+    position: relative;
+    z-index: 2;
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="wordmark">en — bar separation</div>
+  </header>
+  <div class="lede">titlebar + foot · 8 variants · rose-pine-soft canvas</div>
+  <div class="lede-body">
+    The chrome bars currently fade into the body via a soft <b>--ink-4</b> gradient. On screen they read more "blended" than "distinct," and macOS WKWebView's compositor leaks subtle translucency through the window edges (decorations: false trade-off). These 8 variants explore ways to give the top + bottom bars more visual identity <b>without breaking the lifted-bg recipe</b> or relying on translucency tricks. Each variant shows the full sandwich: titlebar → canvas → foot. Pick the one that feels like en. Skill-chips label who designed each variant.
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 01 · Claude · Hairline + Drop                                 -->
+  <!-- ============================================================ -->
+  <div class="variant v-claude-hairline">
+    <div class="variant-head">
+      <div class="variant-num">01</div>
+      <div class="variant-title">Hairline + Drop</div>
+      <div class="skill-chip claude">Claude</div>
+      <div class="variant-recipe">+ inset top sheen, 8px outer shadow into canvas</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Keeps the current ink-wash gradient</b> but adds two subtle architectural lights: a 1px white-sheen <i>inside</i> the bar's edge nearest the canvas (reads as a top-of-material highlight), and an 8–14px soft drop-shadow falling into the canvas (the bar casts a shadow → it's a higher plane). Border darkens slightly to anchor. Reads as: "the chrome is a foreground layer." Fully token-driven, no theme overrides needed.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 02 · Claude · Tile-flush bands                                -->
+  <!-- ============================================================ -->
+  <div class="variant v-claude-tileflush">
+    <div class="variant-head">
+      <div class="variant-num">02</div>
+      <div class="variant-title">Tile-flush bands</div>
+      <div class="skill-chip claude">Claude</div>
+      <div class="variant-recipe">var(--tile)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Bars adopt the tile color</b> — same level as the panels they bracket. Reads as "the chrome IS a tile, just stretched horizontally." No gradient, no shadow. Maximum honesty about hierarchy: titlebar/foot/tile are siblings of the same lifted plane, with body-bg as the gap between them. Single-token recipe; ports cleanly to every theme since `--tile` is the canonical lifted surface in all 10.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 03 · frontend-design · Lifted Ledge                           -->
+  <!-- ============================================================ -->
+  <div class="variant v-fd-ledge">
+    <div class="variant-head">
+      <div class="variant-num">03</div>
+      <div class="variant-title">Lifted Ledge</div>
+      <div class="skill-chip frontend">frontend-design</div>
+      <div class="variant-recipe">var(--bg) + 1px inner highlight + soft shadow cast onto canvas</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Bars are the same color as canvas — separation is purely architectural.</b> A 1px inner highlight catches light along the outer edge of each bar, and a soft outset shadow falls onto the canvas. The canvas itself receives a faint inset darken at top and bottom, reading as the <i>sunken</i> work surface between two raised ledges. Chroma-zero, token-only — works on every theme without retuning.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 04 · frontend-design · Planed Beam                            -->
+  <!-- ============================================================ -->
+  <div class="variant v-fd-beam">
+    <div class="variant-head">
+      <div class="variant-num">04</div>
+      <div class="variant-title">Planed Beam</div>
+      <div class="skill-chip frontend">frontend-design</div>
+      <div class="variant-recipe">3-stop gradient: tile-2 (outer) → tile → bg (canvas seam)</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Each bar is a 3-stop gradient through tile-family tokens.</b> The OUTER edge (top of titlebar / bottom of foot) is <code>--tile-2</code> — the lightest tile — fading through <code>--tile</code> down to <code>--bg</code> at the canvas seam. Reads like the chamfered top edge of a planed wooden beam catching light: weight at the outer face, melting into the canvas. Strict lifted-bg compliance (chrome only pulls UP, never down). Top + bottom mirror so canvas is bookended with symmetric chamfered light.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 05 · impeccable · Tooled edge                                 -->
+  <!-- ============================================================ -->
+  <div class="variant v-imp-tooled">
+    <div class="variant-head">
+      <div class="variant-num">05</div>
+      <div class="variant-title">Tooled edge</div>
+      <div class="skill-chip impeccable">impeccable</div>
+      <div class="variant-recipe">3 stacked hairlines as box-shadow: line-2 / cinch / line</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Replaces the single hairline border with a 3-line stack</b> painted via the bar's own box-shadow — <code>--line-2</code> first, then a cinch in <code>bg+ink-4 56%</code> (deeper than the bar's deepest stop), then <code>--line</code>. Reads like a tooled edge in bookbinding — the bar is announced by the cut, not by a tonal jump. Cinch tucks the bar under itself. Token-driven, 3 px tall — canvas reserves that gap so the lines don't overlap content.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 06 · impeccable · Set shadow                                  -->
+  <!-- ============================================================ -->
+  <div class="variant v-imp-set">
+    <div class="variant-head">
+      <div class="variant-num">06</div>
+      <div class="variant-title">Set shadow</div>
+      <div class="skill-chip impeccable">impeccable</div>
+      <div class="variant-recipe">4-stop gradient + paired inset light/shade lips</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Bar reads as a struck plate seated into the workspace.</b> The gradient gains a deeper 4th stop near the seam (3-4% darker), so the bar tucks under at its body edge. A 1px inner highlight on the outer face is the brightened "lip" that catches light when a set plate is hit — the inner face gets a paired dark inset for plate depth. Single hairline border survives but its work is done by light, not just tone.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 07 · ui-ux-pro-max · Inverted-wash anchor                     -->
+  <!-- ============================================================ -->
+  <div class="variant v-pm-anchor">
+    <div class="variant-head">
+      <div class="variant-num">07</div>
+      <div class="variant-title">Inverted-wash anchor</div>
+      <div class="skill-chip proma">ui-ux-pro-max</div>
+      <div class="variant-recipe">flip the gradient — heaviest mix lands AT the canvas seam</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Smallest possible diff to the current recipe.</b> Same two tokens, same 14% / 42% mix steps, just the gradient direction flipped — the heaviest <code>bg+ink-4</code> mix sits AT the seam (titlebar bottom, foot top) instead of away from it. The canvas-facing edge carries the contrast load, so the bar's weight lands exactly where the workspace meets it. Surgical: one number per gradient changes; everything else stays.
+    </div>
+  </div>
+
+
+  <!-- ============================================================ -->
+  <!-- 08 · ui-ux-pro-max · Engawa lip                               -->
+  <!-- ============================================================ -->
+  <div class="variant v-pm-engawa">
+    <div class="variant-head">
+      <div class="variant-num">08</div>
+      <div class="variant-title">Engawa lip</div>
+      <div class="skill-chip proma">ui-ux-pro-max</div>
+      <div class="variant-recipe">current gradient + 1px tile-2 inside-highlight at the seam + drop shadow</div>
+    </div>
+    <div class="frame">
+      <div class="titlebar">
+        <div class="brand">
+          <svg class="brand-mark" viewBox="0 0 44 44" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+              <path d="M5 12 Q22 8 39 12" />
+              <line x1="11" y1="18" x2="33" y2="18" />
+              <line x1="14" y1="12" x2="14" y2="36" />
+              <line x1="30" y1="12" x2="30" y2="36" />
+            </g>
+          </svg>
+          en
+        </div>
+        <div class="status">
+          <button class="nbtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" /><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" /></svg></button>
+          <button class="nbtn"><span class="nbtn-aa">Aa</span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" /></svg></button>
+          <button class="nbtn"><span class="theme-dot"></span></button>
+          <button class="nbtn"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+        </div>
+      </div>
+      <div class="canvas-preview">— canvas —</div>
+      <div class="foot">
+        <span class="group">navigate <kbd>⌘</kbd><kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd></span>
+        <span class="group">close <kbd>⌘</kbd><kbd>W</kbd></span>
+        <span class="right">focus —</span>
+      </div>
+    </div>
+    <div class="variant-note">
+      <b>Keeps the current top-heavy wash (lifted-bg compliant)</b>, then paints a 1px luminous "lip" of <code>--tile-2</code> on the inside of the seam plus a soft shadow falling onto the canvas. Named for an engawa — the wooden veranda that sits between an inner room and the garden, holding light at its edge while the room recedes behind it. The bar separates by depth (caught light + cast shadow), introducing zero new chroma.
+    </div>
+  </div>
+
+
+</div>
+</body>
+</html>
