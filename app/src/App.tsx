@@ -708,6 +708,14 @@ export default function App() {
         return;
       }
 
+      // ⌘+R — open the reset menu. Tauri intercepts the default WebView
+      // reload, so this doesn't shadow any user-visible browser behavior.
+      if (e.code === "KeyR") {
+        e.preventDefault();
+        setResetMenuOpen(true);
+        return;
+      }
+
       // ⌘+1..9 jumps to the Nth tile.
       if (/^Digit[1-9]$/.test(e.code)) {
         const idx = parseInt(e.code.slice(5), 10) - 1;
@@ -2098,6 +2106,26 @@ function ResetMenuModal({
         e.preventDefault();
         e.stopImmediatePropagation();
         onClose();
+        return;
+      }
+      // Arrow-key navigation through .reset-item buttons. Wraps at edges.
+      // Cancel button is excluded (it sits in .modal-actions, separate row).
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        const list = firstItemRef.current?.parentElement;
+        if (!list) return;
+        const buttons = Array.from(
+          list.querySelectorAll<HTMLButtonElement>("button.reset-item"),
+        );
+        if (buttons.length === 0) return;
+        const active = document.activeElement as HTMLButtonElement | null;
+        const idx = active ? buttons.indexOf(active) : -1;
+        const next =
+          e.key === "ArrowDown"
+            ? buttons[(idx + 1 + buttons.length) % buttons.length]
+            : buttons[(idx - 1 + buttons.length) % buttons.length];
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        next?.focus();
       }
     };
     window.addEventListener("keydown", onKey, { capture: true });
