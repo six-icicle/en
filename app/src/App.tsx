@@ -2083,8 +2083,14 @@ function ResetMenuModal({
   const firstItemRef = useRef<HTMLButtonElement | null>(null);
   // Mount-only focus: parent re-renders churn callback identities, and re-running
   // focus mid-interaction would yank focus away from wherever the user has Tab'd.
+  // rAF-deferred so xterm's underlying-tile focus-steal has settled before we
+  // claim focus — without the defer, focus lands on the modal's cancel button
+  // (last in tab order) instead of the first reset item.
   useEffect(() => {
-    firstItemRef.current?.focus();
+    const id = requestAnimationFrame(() => {
+      firstItemRef.current?.focus();
+    });
+    return () => cancelAnimationFrame(id);
   }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

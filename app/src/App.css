@@ -2686,6 +2686,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   transition: border-color var(--dur-fast), color var(--dur-fast), background var(--dur-fast);
 }
 .reset-item:hover,
+.reset-item:focus,
 .reset-item:focus-visible {
   border-color: var(--accent);
   color: var(--accent);
@@ -2703,6 +2704,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   text-align: right;
 }
 .reset-item:hover .reset-item-desc,
+.reset-item:focus .reset-item-desc,
 .reset-item:focus-visible .reset-item-desc {
   color: var(--ink-2);
 }
