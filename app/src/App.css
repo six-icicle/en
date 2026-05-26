@@ -2399,8 +2399,13 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   color: var(--ink);
   font-weight: 500;
   letter-spacing: 0.02em;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+  /* Ellipsis cap that stays a roughly CONSTANT PIXEL WIDTH across font
+     scales. `ch` grows with font-size, so plain `32ch` would balloon at
+     tfz=1.6 and crowd the icons. Dividing by --tfz cancels the scale →
+     fewer-but-bigger chars, same pixel cap (~32 chars wide at tfz=1). */
+  max-width: calc(32ch / var(--tfz, 1));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2426,6 +2431,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
 .t-head .meta { color: var(--ink-3); font-size: calc(13.5px * var(--tfz, 1)); letter-spacing: 0.04em; }
 
 .t-close {
+  flex: none;
   width: calc(18px * var(--tfz, 1));
   height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
@@ -2455,6 +2461,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
    the destructive warn-red. Sits to the LEFT of .t-close so the close
    stays at the trailing edge. */
 .t-reveal {
+  flex: none;
   width: calc(18px * var(--tfz, 1));
   height: calc(18px * var(--tfz, 1));
   border-radius: 4px;
@@ -2768,8 +2775,18 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   background: transparent;
   margin: 0 2px;
 }
-.foot .group { display: flex; align-items: center; gap: calc(6px * var(--fz)); }
-.foot .right { margin-left: auto; color: var(--accent); }
+.foot .group { display: flex; align-items: center; gap: calc(6px * var(--fz)); flex: none; }
+.foot .right {
+  margin-left: auto;
+  color: var(--accent);
+  /* Cap mirrors .t-head .name: divide by --fz (foot scales with app
+     font, not terminal font) so pixel cap stays constant across scales. */
+  min-width: 0;
+  max-width: calc(32ch / var(--fz, 1));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .foot .right b { color: var(--accent); font-weight: 500; }
 
 /* ─── Sleeping tile (Phase B-lite restore) ───
