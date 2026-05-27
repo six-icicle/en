@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!--
+    Hardened Runtime entitlements for en.
+
+    These are the minimum exceptions required for portable-pty to spawn shells
+    (zsh / bash / claude) under macOS hardened runtime + notarization.
+    Without these, posix_spawn / forkpty silently fails at runtime.
+
+    All four are notarization-compatible (Apple permits them for Developer ID
+    distribution; they would NOT pass App Store review, which is fine since
+    en is not App Store distributed).
+  -->
+
+  <!-- Allow loading dynamic libraries that aren't signed by the same Team ID.
+       portable-pty pulls in transitive deps that may not match. -->
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+
+  <!-- Allow executing unsigned code regions (JIT, scripting interpreters).
+       Shells frequently exec interpreted scripts. -->
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+
+  <!-- Allow JIT-compiled memory pages.
+       V8 / WebKit (Tauri's webview) needs this; some shell interpreters do too. -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+
+  <!-- Allow DYLD_* environment variables to propagate into child processes.
+       PTY children inherit env from the parent; without this, claude's process
+       loses parts of its environment. -->
+  <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+  <true/>
+</dict>
+</plist>

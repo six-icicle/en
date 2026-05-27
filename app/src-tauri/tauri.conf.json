@@ -35,6 +35,11 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "signingIdentity": "Developer ID Application: Austin Pozo-DesPortes (5ASLTT5NUW)",
+      "minimumSystemVersion": "11.0",
+      "entitlements": "Entitlements.plist"
+    }
   }
 }

@@ -2,6 +2,7 @@ mod appearance;
 mod env;
 mod events;
 mod hooks;
+mod path_env;
 mod pty;
 
 use pty::{kill_session, resize_session, send_input, spawn_session, PtyManager};
@@ -14,6 +15,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .manage(PtyManager::default())
+        .manage(path_env::resolve())
         .setup(|app| {
             // Run before any JS executes so tauri-plugin-store can't
             // observe (and later overwrite) a corrupt file.

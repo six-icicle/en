@@ -34,3 +34,9 @@ pass-code.md
 
 # Audit run outputs (per-session, archived locally only)
 .claude/audits/
+
+# Apple notarization secrets (never commit)
+.env.release
+*.certSigningRequest
+devid.key
+developerID_application.cer

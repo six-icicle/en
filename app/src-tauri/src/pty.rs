@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::env::{EN_HUB_HOOK_URL, EN_HUB_SESSION_ID, HOOK_URL_PATH};
 use crate::events::{PTY_EVENT_PREFIX, PTY_EXIT_EVENT_PREFIX};
 use crate::hooks::HookConfig;
+use crate::path_env::ResolvedPath;
 
 pub struct PtySession {
     writer: Arc<Mutex<Box<dyn Write + Send>>>,
@@ -44,6 +45,7 @@ pub fn spawn_session(
     app: AppHandle,
     state: State<PtyManager>,
     hooks: State<HookConfig>,
+    resolved_path: State<ResolvedPath>,
     cwd: Option<String>,
     cols: Option<u16>,
     rows: Option<u16>,
@@ -74,6 +76,11 @@ pub fn spawn_session(
     for (k, v) in std::env::vars() {
         command.env(k, v);
     }
+    // Override PATH with our resolved version. Mac apps launched from
+    // Finder/Spotlight inherit a minimal PATH that doesn't see Homebrew,
+    // ~/.local/bin, etc. — so `claude` and other shell tools wouldn't
+    // resolve. See path_env.rs for the resolution strategy.
+    command.env("PATH", &resolved_path.0);
     command.env("TERM", "xterm-256color");
     // Status detection: claude hooks read these to curl back to our local
     // receiver. When unset (claude run outside en), the hook command no-ops.

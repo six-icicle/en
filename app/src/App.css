@@ -690,10 +690,12 @@ body::after {
   height: 100vh;
   position: relative;
   z-index: 1;
-  /* Global brightness modulator, set as inline style on <html>. Defaults
-     to 1 when the var is unset. Applied via filter so it modulates every
-     descendant including textures, the navbar, and xterm canvases. */
-  filter: brightness(var(--app-brightness, 1));
+  /* Brightness modulator is split across .titlebar / .grid / .foot
+     instead of being on .app. Reason: `filter` on .app creates a
+     stacking context that traps popovers below xterm WebGL canvases;
+     putting the filter on each direct child of .app produces visually
+     identical "modulate everything" behavior because every visible
+     pixel lives in one of those three children. */
 }
 
 /* ─── Chrome non-selectable ───
@@ -744,6 +746,7 @@ input:focus-visible {
   align-items: center;
   gap: calc(8px * var(--fz));
   padding: 0 calc(20px * var(--fz));
+  filter: brightness(var(--app-brightness, 1));
   /* Lifted-ledge recipe (mockup 61, variant 03): bar is color-flush
      with canvas, separation comes purely from light + cast shadow.
      1px inner highlight catches the top edge ("caught light"), and a
@@ -1348,7 +1351,7 @@ input:focus-visible {
     0 12px 32px -8px rgba(0, 0, 0, 0.55),
     inset 0 0 0 1px var(--accent);
   padding: calc(6px * var(--fz));
-  z-index: 50;
+  z-index: 9998;
   display: flex;
   flex-direction: column;
   gap: calc(2px * var(--fz));
@@ -1421,7 +1424,7 @@ input:focus-visible {
   border: 1px solid var(--line-2);
   box-shadow: 0 8px 24px -8px rgba(0,0,0,0.5);
   pointer-events: none;
-  z-index: 60;
+  z-index: 9999;
 }
 .alert-style-preview > .tile.needs {
   display: block;
@@ -1749,6 +1752,7 @@ input:focus-visible {
   min-height: 0;
   min-width: 0;
   position: relative;
+  filter: brightness(var(--app-brightness, 1));
 }
 
 .grid-handles {
@@ -2773,6 +2777,7 @@ html[data-alert-style="hinode"] .tile.needs:not(.active) {
   align-items: center;
   padding: 0 calc(20px * var(--fz));
   gap: calc(18px * var(--fz));
+  filter: brightness(var(--app-brightness, 1));
   /* Lifted-ledge mirror of .titlebar: bar at --bg, 1px inner highlight
      on its outer (bottom) edge, soft drop shadow casting UP onto the
      canvas. Symmetric bookend with the titlebar's downward shadow. */

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EN / 62 — App icon studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Noto+Serif+JP:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+:root {
+  --bg:          #232136;
+  --tile:        #2a273f;
+  --tile-2:      #312e4a;
+  --line:        #393552;
+  --line-2:      #44415a;
+  --ink:         #e0def4;
+  --ink-2:       #908caa;
+  --ink-3:       #6e6a86;
+  --accent:      #ea9a97;
+  --accent-2:    #c4a7e7;
+  --kanagawa-accent: #c4746e;
+  --everforest-accent: #a7c080;
+  --hinoki-accent: #d4a55a;
+  --washi-bg: #ebedf0;
+  --washi-accent: #bc002d;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+  --brand: 'Outfit', var(--sans);
+  --jp:    'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+}
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  padding: 36px 28px 80px;
+  min-height: 100%;
+}
+
+h1 {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.subhead {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  margin-bottom: 28px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.variant {
+  background: var(--tile);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.variant h3 {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.variant .desc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.icon-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+/* The "icon" container is a rounded-square plate that mimics macOS dock icons. */
+.icon {
+  display: block;
+  border-radius: 22.37%; /* Apple's standard icon corner radius */
+  overflow: hidden;
+  position: relative;
+  flex: none;
+}
+
+.icon.s1024 { width: 256px; height: 256px; }
+.icon.s256  { width: 128px; height: 128px; }
+.icon.s64   { width: 64px;  height: 64px;  }
+.icon.s32   { width: 32px;  height: 32px;  }
+
+.icon svg { display: block; width: 100%; height: 100%; }
+
+.size-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-3);
+  text-align: center;
+  margin-top: 6px;
+  letter-spacing: 0.05em;
+}
+
+.size-cell { display: flex; flex-direction: column; align-items: center; }
+
+/* === VARIANT PLATES === */
+
+/* V1: Filled torii silhouette on accent plate */
+.plate-v1 { background: var(--accent); }
+
+/* V2: Inverted — torii in accent on dark plate */
+.plate-v2 { background: var(--tile-2); }
+
+/* V3: Stroke torii on bg plate */
+.plate-v3 {
+  background: linear-gradient(135deg, var(--tile) 0%, var(--bg) 100%);
+}
+
+/* V4: Torii + wordmark stacked, dark plate w/ subtle gradient */
+.plate-v4 {
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in oklch, var(--accent), transparent 80%), transparent 60%),
+    linear-gradient(160deg, var(--tile-2), var(--bg));
+}
+
+/* V5: Negative-space torii (cut out of accent plate) */
+.plate-v5 { background: var(--accent); }
+
+/* V6: Architectural torii on cream/washi-style plate */
+.plate-v6 {
+  background:
+    radial-gradient(ellipse at 50% 30%, color-mix(in oklch, var(--washi-bg), white 5%) 0%, var(--washi-bg) 70%);
+}
+
+/* === THEME COMPARISON ROW === */
+.theme-comparison {
+  margin-top: 48px;
+  background: var(--tile);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.theme-comparison h2 {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.theme-comparison .desc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: 20px;
+}
+
+.theme-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.theme-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.theme-cell .lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
+/* Per-theme accent variants for the comparison row */
+.plate-rose      { background: #ea9a97; }
+.plate-kanagawa  { background: #c4746e; }
+.plate-everforest{ background: #a7c080; }
+.plate-hinoki    { background: #d4a55a; }
+.plate-washi     { background: var(--washi-bg); }
+
+/* === DOCK PREVIEW === */
+.dock-preview {
+  margin-top: 48px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.dock-preview h2 {
+  font-family: var(--brand);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.dock-preview .desc {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.dock-bg {
+  /* fake macOS dock background — translucent strip on a wallpaper-style gradient */
+  background: linear-gradient(180deg, #4a3850 0%, #2a1d35 100%);
+  border-radius: 16px;
+  padding: 36px 28px;
+  position: relative;
+}
+.dock-bar {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: flex-end;
+  width: fit-content;
+  margin: 0 auto;
+}
+.dock-bar .icon { transition: transform 200ms; }
+.dock-bar .icon:hover { transform: scale(1.4) translateY(-12px); }
+
+/* === Helper: torii SVG glyphs at 1024 viewBox ===
+   Original in-app torii uses a 44×44 viewBox with these strokes:
+     top curve : path d="M5 12 Q22 8 39 12"
+     crossbar  : x1="11" y1="18" x2="33" y2="18"
+     left pillar : x1="14" y1="12" x2="14" y2="36"
+     right pillar: x1="30" y1="12" x2="30" y2="36"
+   Scaled up to 1024 (multiply each coord by 1024/44 ≈ 23.27):
+     top curve  : M116 280 Q512 186 908 280
+     crossbar   : x1=256 y1=419 x2=768 y2=419
+     left pillar  : x1=326 y1=280 x2=326 y2=838
+     right pillar : x1=698 y1=280 x2=698 y2=838
+   We use these as the basis for stroke variants and as guides for filled silhouettes. */
+</style>
+</head>
+<body>
+
+<h1>en — app icon studies</h1>
+<p class="subhead">six variants · each shown at 256 / 128 / 64 / 32 px (proxies for 1024 / 512 / 128 / 64)</p>
+
+<div class="grid">
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V1 — Filled torii silhouette in INK on ACCENT plate              -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V1 — Solid torii on accent plate</h3>
+    <p class="desc">Torii becomes a filled silhouette in deep ink on a coral-accent plate. Strongest brand pop, reads at every size, identical mark across themes if accent is fixed to rose-pine.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v1">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#2a273f">
+            <!-- top kasagi: a thick curved beam -->
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <!-- shimaki (second beam, thinner) -->
+            <rect x="120" y="345" width="784" height="40" />
+            <!-- nuki (crossbar) -->
+            <rect x="240" y="500" width="544" height="50" />
+            <!-- left pillar -->
+            <rect x="280" y="385" width="90" height="500" />
+            <!-- right pillar -->
+            <rect x="654" y="385" width="90" height="500" />
+            <!-- pillar bases -->
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v1">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#2a273f">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v1">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#2a273f">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v1">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#2a273f">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V2 — Filled torii silhouette in ACCENT on dark plate             -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V2 — Accent torii on dark plate</h3>
+    <p class="desc">Inverse of V1. Plate matches the app's tile color, torii is in coral. Quieter at small sizes, more "engineering tool" energy. Reads more like a CLI/dev app icon.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v2">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#ea9a97">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v2">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#ea9a97">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v2">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#ea9a97">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v2">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#ea9a97">
+            <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+            <rect x="120" y="345" width="784" height="40" />
+            <rect x="240" y="500" width="544" height="50" />
+            <rect x="280" y="385" width="90" height="500" />
+            <rect x="654" y="385" width="90" height="500" />
+            <rect x="260" y="870" width="130" height="30" />
+            <rect x="634" y="870" width="130" height="30" />
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V3 — Stroke torii (faithful to in-app), thicker for icon scale  -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V3 — Stroke torii on gradient plate</h3>
+    <p class="desc">Most faithful to the in-app navbar mark — same 4-stroke construction (top curve, crossbar, 2 pillars), but at icon-appropriate stroke weight (~80px). Risks looking spindly at 32px.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v3">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round">
+            <path d="M 116 280 Q 512 186 908 280" />
+            <line x1="256" y1="419" x2="768" y2="419" />
+            <line x1="326" y1="280" x2="326" y2="838" />
+            <line x1="698" y1="280" x2="698" y2="838" />
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v3">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round">
+            <path d="M 116 280 Q 512 186 908 280" />
+            <line x1="256" y1="419" x2="768" y2="419" />
+            <line x1="326" y1="280" x2="326" y2="838" />
+            <line x1="698" y1="280" x2="698" y2="838" />
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v3">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round">
+            <path d="M 116 280 Q 512 186 908 280" />
+            <line x1="256" y1="419" x2="768" y2="419" />
+            <line x1="326" y1="280" x2="326" y2="838" />
+            <line x1="698" y1="280" x2="698" y2="838" />
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v3">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round">
+            <path d="M 116 280 Q 512 186 908 280" />
+            <line x1="256" y1="419" x2="768" y2="419" />
+            <line x1="326" y1="280" x2="326" y2="838" />
+            <line x1="698" y1="280" x2="698" y2="838" />
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V4 — Torii + wordmark stacked                                    -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V4 — Torii + "en" wordmark</h3>
+    <p class="desc">Mirrors the navbar layout: torii on top, "en" wordmark below in Outfit 600. Most explicit brand identity. Wordmark gets hard to read below 64px.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v4">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#ea9a97">
+              <path d="M 100 200 Q 512 110 924 200 L 924 270 Q 512 190 100 270 Z" />
+              <rect x="160" y="290" width="704" height="34" />
+              <rect x="270" y="420" width="484" height="44" />
+              <rect x="304" y="324" width="78" height="380" />
+              <rect x="642" y="324" width="78" height="380" />
+            </g>
+            <text x="512" y="900" text-anchor="middle"
+                  font-family="Outfit, sans-serif"
+                  font-weight="600"
+                  font-size="220"
+                  fill="#ea9a97"
+                  letter-spacing="8">en</text>
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v4">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#ea9a97">
+              <path d="M 100 200 Q 512 110 924 200 L 924 270 Q 512 190 100 270 Z" />
+              <rect x="160" y="290" width="704" height="34" />
+              <rect x="270" y="420" width="484" height="44" />
+              <rect x="304" y="324" width="78" height="380" />
+              <rect x="642" y="324" width="78" height="380" />
+            </g>
+            <text x="512" y="900" text-anchor="middle"
+                  font-family="Outfit, sans-serif"
+                  font-weight="600"
+                  font-size="220"
+                  fill="#ea9a97"
+                  letter-spacing="8">en</text>
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v4">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#ea9a97">
+              <path d="M 100 200 Q 512 110 924 200 L 924 270 Q 512 190 100 270 Z" />
+              <rect x="160" y="290" width="704" height="34" />
+              <rect x="270" y="420" width="484" height="44" />
+              <rect x="304" y="324" width="78" height="380" />
+              <rect x="642" y="324" width="78" height="380" />
+            </g>
+            <text x="512" y="900" text-anchor="middle"
+                  font-family="Outfit, sans-serif"
+                  font-weight="600"
+                  font-size="220"
+                  fill="#ea9a97"
+                  letter-spacing="8">en</text>
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v4">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <g fill="#ea9a97">
+              <path d="M 100 200 Q 512 110 924 200 L 924 270 Q 512 190 100 270 Z" />
+              <rect x="160" y="290" width="704" height="34" />
+              <rect x="270" y="420" width="484" height="44" />
+              <rect x="304" y="324" width="78" height="380" />
+              <rect x="642" y="324" width="78" height="380" />
+            </g>
+            <text x="512" y="900" text-anchor="middle"
+                  font-family="Outfit, sans-serif"
+                  font-weight="600"
+                  font-size="220"
+                  fill="#ea9a97"
+                  letter-spacing="8">en</text>
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V5 — Negative-space torii (cut out of accent plate)              -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V5 — Negative-space torii</h3>
+    <p class="desc">Plate is solid accent, torii is cut OUT of it (revealing the dock background or app behind). Stamp/seal feel, very strong identity. Slight risk: at 32px the cutouts could get muddy.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v5">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <mask id="torii-mask-v5">
+                <rect width="1024" height="1024" fill="white"/>
+                <g fill="black">
+                  <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+                  <rect x="120" y="345" width="784" height="40" />
+                  <rect x="240" y="500" width="544" height="50" />
+                  <rect x="280" y="385" width="90" height="500" />
+                  <rect x="654" y="385" width="90" height="500" />
+                </g>
+              </mask>
+            </defs>
+            <rect width="1024" height="1024" fill="#ea9a97" mask="url(#torii-mask-v5)"/>
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v5">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <mask id="torii-mask-v5b">
+                <rect width="1024" height="1024" fill="white"/>
+                <g fill="black">
+                  <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+                  <rect x="120" y="345" width="784" height="40" />
+                  <rect x="240" y="500" width="544" height="50" />
+                  <rect x="280" y="385" width="90" height="500" />
+                  <rect x="654" y="385" width="90" height="500" />
+                </g>
+              </mask>
+            </defs>
+            <rect width="1024" height="1024" fill="#ea9a97" mask="url(#torii-mask-v5b)"/>
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v5">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <mask id="torii-mask-v5c">
+                <rect width="1024" height="1024" fill="white"/>
+                <g fill="black">
+                  <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+                  <rect x="120" y="345" width="784" height="40" />
+                  <rect x="240" y="500" width="544" height="50" />
+                  <rect x="280" y="385" width="90" height="500" />
+                  <rect x="654" y="385" width="90" height="500" />
+                </g>
+              </mask>
+            </defs>
+            <rect width="1024" height="1024" fill="#ea9a97" mask="url(#torii-mask-v5c)"/>
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v5">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <mask id="torii-mask-v5d">
+                <rect width="1024" height="1024" fill="white"/>
+                <g fill="black">
+                  <path d="M 60 240 Q 512 140 964 240 L 964 320 Q 512 230 60 320 Z" />
+                  <rect x="120" y="345" width="784" height="40" />
+                  <rect x="240" y="500" width="544" height="50" />
+                  <rect x="280" y="385" width="90" height="500" />
+                  <rect x="654" y="385" width="90" height="500" />
+                </g>
+              </mask>
+            </defs>
+            <rect width="1024" height="1024" fill="#ea9a97" mask="url(#torii-mask-v5d)"/>
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- V6 — Architectural torii on washi-paper plate                    -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="variant">
+    <h3>V6 — Architectural torii on washi plate</h3>
+    <p class="desc">Most realistic torii — curved upturned eaves on the kasagi (top beam), proper proportions, in deep crimson on a cream paper plate. Premium / editorial feel. Plate is light, so this is the variant that pops on a dark dock vs. blends on a light dock.</p>
+    <div class="icon-row">
+      <div class="size-cell">
+        <div class="icon s1024 plate-v6">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#bc002d">
+            <!-- kasagi (top beam with upturned eaves) -->
+            <path d="M 40 220
+                     Q 80 160 130 180
+                     Q 250 220 512 200
+                     Q 774 220 894 180
+                     Q 944 160 984 220
+                     Q 944 240 894 230
+                     Q 774 280 512 270
+                     Q 250 280 130 230
+                     Q 80 240 40 220 Z" />
+            <!-- shimaki (second beam) -->
+            <rect x="140" y="290" width="744" height="44" />
+            <!-- nuki (mid crossbar) -->
+            <rect x="270" y="430" width="484" height="56" />
+            <!-- left pillar (slight taper via two trapezoids) -->
+            <polygon points="294,334 384,334 392,860 286,860" />
+            <!-- right pillar -->
+            <polygon points="640,334 730,334 738,860 632,860" />
+            <!-- pillar bases -->
+            <rect x="266" y="860" width="146" height="32" />
+            <rect x="612" y="860" width="146" height="32" />
+          </svg>
+        </div>
+        <div class="size-label">1024</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s256 plate-v6">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#bc002d">
+            <path d="M 40 220 Q 80 160 130 180 Q 250 220 512 200 Q 774 220 894 180 Q 944 160 984 220 Q 944 240 894 230 Q 774 280 512 270 Q 250 280 130 230 Q 80 240 40 220 Z" />
+            <rect x="140" y="290" width="744" height="44" />
+            <rect x="270" y="430" width="484" height="56" />
+            <polygon points="294,334 384,334 392,860 286,860" />
+            <polygon points="640,334 730,334 738,860 632,860" />
+            <rect x="266" y="860" width="146" height="32" />
+            <rect x="612" y="860" width="146" height="32" />
+          </svg>
+        </div>
+        <div class="size-label">512</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s64 plate-v6">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#bc002d">
+            <path d="M 40 220 Q 80 160 130 180 Q 250 220 512 200 Q 774 220 894 180 Q 944 160 984 220 Q 944 240 894 230 Q 774 280 512 270 Q 250 280 130 230 Q 80 240 40 220 Z" />
+            <rect x="140" y="290" width="744" height="44" />
+            <rect x="270" y="430" width="484" height="56" />
+            <polygon points="294,334 384,334 392,860 286,860" />
+            <polygon points="640,334 730,334 738,860 632,860" />
+            <rect x="266" y="860" width="146" height="32" />
+            <rect x="612" y="860" width="146" height="32" />
+          </svg>
+        </div>
+        <div class="size-label">128</div>
+      </div>
+      <div class="size-cell">
+        <div class="icon s32 plate-v6">
+          <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="#bc002d">
+            <path d="M 40 220 Q 80 160 130 180 Q 250 220 512 200 Q 774 220 894 180 Q 944 160 984 220 Q 944 240 894 230 Q 774 280 512 270 Q 250 280 130 230 Q 80 240 40 220 Z" />
+            <rect x="140" y="290" width="744" height="44" />
+            <rect x="270" y="430" width="484" height="56" />
+            <polygon points="294,334 384,334 392,860 286,860" />
+            <polygon points="640,334 730,334 738,860 632,860" />
+            <rect x="266" y="860" width="146" height="32" />
+            <rect x="612" y="860" width="146" height="32" />
+          </svg>
+        </div>
+        <div class="size-label">64</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- V3 ACROSS ALL THEMES                                                  -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="theme-comparison">
+  <h2>V3 across all 5 theme families</h2>
+  <p class="desc">Each plate uses that theme's <code>--bg</code> token; stroke uses the theme's <code>--accent</code>. Reminder: macOS app icons are static — they don't retint with theme like the in-app navbar mark does. You'd pick ONE.</p>
+  <div class="theme-row">
+    <!-- rose-pine: bg #232136, accent #ea9a97 -->
+    <div class="theme-cell">
+      <div class="icon s256" style="background: #232136;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <span class="lbl">rose-pine</span>
+    </div>
+    <!-- kanagawa: bg #1f1f28, accent #c4746e -->
+    <div class="theme-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <span class="lbl">kanagawa</span>
+    </div>
+    <!-- everforest: bg #2d353b, accent #a7c080 -->
+    <div class="theme-cell">
+      <div class="icon s256" style="background: #2d353b;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <span class="lbl">everforest</span>
+    </div>
+    <!-- hinoki: bg #1a1612, accent #d4a55a -->
+    <div class="theme-cell">
+      <div class="icon s256" style="background: #1a1612;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <span class="lbl">hinoki</span>
+    </div>
+    <!-- washi: bg #ebedf0, accent #bc002d -->
+    <div class="theme-cell">
+      <div class="icon s256" style="background: #ebedf0;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <span class="lbl">washi</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- 5×5 MIX-AND-MATCH MATRIX — every bg × every accent stroke            -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="theme-comparison" style="max-width: 1100px;">
+  <h2>5×5 mix matrix — every bg paired with every stroke accent</h2>
+  <p class="desc">Rows = plate (bg) color. Columns = stroke (accent) color. The diagonal (top-left to bottom-right) is each theme paired with its own accent — same as the section above. Off-diagonal cells are the cross-pollinated combos.</p>
+
+  <div style="display: grid; grid-template-columns: 70px repeat(5, 1fr); gap: 10px; align-items: center;">
+    <!-- header row -->
+    <div></div>
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: center; letter-spacing: 0.04em;">rose<br/>#ea9a97</div>
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: center; letter-spacing: 0.04em;">kanagawa<br/>#c4746e</div>
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: center; letter-spacing: 0.04em;">everforest<br/>#a7c080</div>
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: center; letter-spacing: 0.04em;">hinoki<br/>#d4a55a</div>
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: center; letter-spacing: 0.04em;">washi<br/>#bc002d</div>
+
+    <!-- ROW 1: rose-pine bg #232136 -->
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: right; letter-spacing: 0.04em;">rose<br/>#232136</div>
+    <div class="size-cell"><div class="icon s256" style="background: #232136;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #232136;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #232136;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #232136;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #232136;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+
+    <!-- ROW 2: kanagawa bg #1f1f28 -->
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: right; letter-spacing: 0.04em;">kanagawa<br/>#1f1f28</div>
+    <div class="size-cell"><div class="icon s256" style="background: #1f1f28;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1f1f28;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1f1f28;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1f1f28;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1f1f28;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+
+    <!-- ROW 3: everforest bg #2d353b -->
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: right; letter-spacing: 0.04em;">everforest<br/>#2d353b</div>
+    <div class="size-cell"><div class="icon s256" style="background: #2d353b;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #2d353b;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #2d353b;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #2d353b;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #2d353b;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+
+    <!-- ROW 4: hinoki bg #1a1612 -->
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: right; letter-spacing: 0.04em;">hinoki<br/>#1a1612</div>
+    <div class="size-cell"><div class="icon s256" style="background: #1a1612;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1a1612;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1a1612;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1a1612;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #1a1612;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+
+    <!-- ROW 5: washi bg #ebedf0 -->
+    <div style="font-family: var(--mono); font-size: 10px; color: var(--ink-2); text-align: right; letter-spacing: 0.04em;">washi<br/>#ebedf0</div>
+    <div class="size-cell"><div class="icon s256" style="background: #ebedf0;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#ea9a97" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #ebedf0;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#c4746e" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #ebedf0;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #ebedf0;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#d4a55a" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+    <div class="size-cell"><div class="icon s256" style="background: #ebedf0;"><svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#bc002d" stroke-width="80" stroke-linecap="round"><path d="M 116 280 Q 512 186 908 280"/><line x1="256" y1="419" x2="768" y2="419"/><line x1="326" y1="280" x2="326" y2="838"/><line x1="698" y1="280" x2="698" y2="838"/></svg></div></div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- KANAGAWA + EVERFOREST AT EVERY SIZE — does the stroke hold up small? -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="theme-comparison">
+  <h2>★ Picked combo (kanagawa bg + everforest stroke) at all sizes</h2>
+  <p class="desc">The honest stress test. Stroke at 80px works at 1024 but can get spindly at 32–64. Look at the rightmost column especially. If it dies at 32, we'd need to bump stroke weight.</p>
+  <div class="icon-row" style="justify-content: flex-start;">
+    <div class="size-cell">
+      <div class="icon s1024" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">1024</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">512</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s64" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">128</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s32" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">64</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- STROKE-WEIGHT TUNING — find the right thickness for kanagawa/sage    -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="theme-comparison">
+  <h2>Stroke-weight study (kanagawa + everforest, 256px)</h2>
+  <p class="desc">Same torii at 4 stroke weights. The in-app mark uses ~3px on a 44 viewBox = stroke/viewBox ratio ≈ 6.8%. Scaled to 1024 viewBox that'd be 70px. We push beyond that for icon scale.</p>
+  <div class="icon-row" style="justify-content: flex-start;">
+    <div class="size-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="60" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">60px (faithful)</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">80px (current)</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="110" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">110px (heavier)</div>
+    </div>
+    <div class="size-cell">
+      <div class="icon s256" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="140" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <div class="size-label">140px (chunky)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- DOCK PREVIEW                                                          -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="dock-preview">
+  <h2>★ How the picked combo sits in the macOS dock</h2>
+  <p class="desc">Kanagawa bg (#1f1f28) + everforest sage stroke (#a7c080). Hovering simulates dock magnification. Compares against generic dock neighbors.</p>
+  <div class="dock-bg">
+    <div class="dock-bar">
+      <!-- Fake neighbor 1: blue square (Finder) -->
+      <div class="icon s64" style="background: linear-gradient(180deg, #4ec1ff, #2a7eb7);">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="#fff">
+          <circle cx="32" cy="32" r="14" fill="none" stroke="#fff" stroke-width="3"/>
+          <rect x="30" y="18" width="4" height="14"/>
+        </svg>
+      </div>
+      <!-- The actual en V3 icon (kanagawa + everforest) -->
+      <div class="icon s64" style="background: #1f1f28;">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#a7c080" stroke-width="80" stroke-linecap="round">
+          <path d="M 116 280 Q 512 186 908 280" />
+          <line x1="256" y1="419" x2="768" y2="419" />
+          <line x1="326" y1="280" x2="326" y2="838" />
+          <line x1="698" y1="280" x2="698" y2="838" />
+        </svg>
+      </div>
+      <!-- Fake neighbor 2: green (Messages) -->
+      <div class="icon s64" style="background: linear-gradient(180deg, #5fde6e, #2a8b3a);"></div>
+      <!-- Fake neighbor 3: purple gradient (some app) -->
+      <div class="icon s64" style="background: linear-gradient(135deg, #7e5bef, #3a1a8a);"></div>
+      <!-- Fake neighbor 4: dark (terminal-like) -->
+      <div class="icon s64" style="background: #1a1a1a; border: 1px solid #333;">
+        <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="#5fde6e">
+          <text x="32" y="42" text-anchor="middle" font-family="monospace" font-weight="700" font-size="36">_</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
