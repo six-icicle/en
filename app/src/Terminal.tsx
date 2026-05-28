@@ -255,6 +255,127 @@ function paletteFor(theme: Theme): ITheme {
   };
 }
 
+/* xterm.js has no `bold:` slot in its ITheme contract — bold is a weight
+   attribute, not a color. Claude (and most markdown-style CLIs) emit
+   headers as plain `\e[1m` with no color, so they render in `foreground`.
+   To paint bold with theme accent, we transform the byte stream in
+   place: when `\e[1m` arrives WITHOUT a preceding color in the same
+   span, we splice an accent foreground SGR right after it. When color
+   arrives explicitly (claude's syntax highlighting), we leave it alone.
+
+   State machine is per-session and survives across PTY chunks (escapes
+   can split at any byte boundary). Only intercepts CSI ... m (SGR);
+   every other escape passes through untouched. */
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map((c) => c + c).join("") : h, 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+class BoldColorizer {
+  private accentSgr = "";
+  private buffered = ""; // partial escape across chunks
+  // Streaming UTF-8 decoder so multi-byte chars (e.g. box-drawing `─`,
+  // 3 bytes) split across PTY chunks don't get replaced with U+FFFD.
+  private decoder = new TextDecoder("utf-8", { fatal: false });
+  // span state: bold on? does the current span already have an explicit fg color?
+  private boldOn = false;
+  private colorOn = false;
+
+  setAccent(hex: string) {
+    const [r, g, b] = hexToRgb(hex);
+    this.accentSgr = `\x1b[38;2;${r};${g};${b}m`;
+  }
+
+  // Walk a complete SGR parameter list (numeric codes between CSI and 'm').
+  // Decide AFTER walking all params — same SGR group can carry both bold
+  // and color (e.g. \e[1;38;5;240m for dim-grey table borders), and we
+  // must not inject our accent in that case.
+  private applySgr(params: number[]): { inject: boolean; suppress: boolean } {
+    const wasBold = this.boldOn;
+    const wasColor = this.colorOn;
+    if (params.length === 0) params = [0];
+    for (let i = 0; i < params.length; i++) {
+      const p = params[i];
+      if (p === 0) {
+        this.boldOn = false;
+        this.colorOn = false;
+      } else if (p === 1) {
+        this.boldOn = true;
+      } else if (p === 22) {
+        this.boldOn = false;
+      } else if (p === 39) {
+        this.colorOn = false;
+      } else if ((p >= 30 && p <= 37) || (p >= 90 && p <= 97)) {
+        this.colorOn = true;
+      } else if (p === 38) {
+        this.colorOn = true;
+        if (params[i + 1] === 5) i += 2;
+        else if (params[i + 1] === 2) i += 4;
+      }
+    }
+    // Inject accent when we transition INTO a bold-no-color span.
+    const inBoldNoColor = this.boldOn && !this.colorOn;
+    const wasBoldNoColor = wasBold && !wasColor;
+    const inject = inBoldNoColor && !wasBoldNoColor;
+    // Suppress (= emit default-fg reset) when we leave bold-no-color
+    // while our injected accent is still live.
+    const suppress = wasBoldNoColor && !inBoldNoColor && this.colorOn === false;
+    return { inject, suppress };
+  }
+
+  transform(input: Uint8Array): string {
+    if (!this.accentSgr) return this.decoder.decode(input, { stream: true });
+    const text = this.buffered + this.decoder.decode(input, { stream: true });
+    this.buffered = "";
+    let out = "";
+    let i = 0;
+    while (i < text.length) {
+      const ch = text[i];
+      if (ch !== "\x1b") {
+        out += ch;
+        i++;
+        continue;
+      }
+      if (i + 1 >= text.length) {
+        this.buffered = text.slice(i);
+        break;
+      }
+      if (text[i + 1] !== "[") {
+        // non-CSI escape (OSC, charset, etc) — pass through unparsed
+        out += text[i] + text[i + 1];
+        i += 2;
+        continue;
+      }
+      // scan CSI: params then a final byte 0x40..0x7E
+      let j = i + 2;
+      while (j < text.length) {
+        const code = text.charCodeAt(j);
+        if (code >= 0x40 && code <= 0x7e) break;
+        j++;
+      }
+      if (j >= text.length) {
+        this.buffered = text.slice(i);
+        break;
+      }
+      const final = text[j];
+      const seq = text.slice(i, j + 1);
+      i = j + 1;
+      if (final !== "m") {
+        out += seq;
+        continue;
+      }
+      const body = seq.slice(2, seq.length - 1);
+      const params = body.length === 0 ? [] : body.split(";").map((s) => parseInt(s, 10) || 0);
+      const { inject, suppress } = this.applySgr(params);
+      out += seq;
+      if (inject) out += this.accentSgr;
+      if (suppress) out += "\x1b[39m";
+    }
+    return out;
+  }
+}
+
 export default function TerminalView({
   decl,
   theme,
@@ -267,6 +388,7 @@ export default function TerminalView({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const termRef = useRef<Xterm | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
+  const colorizerRef = useRef<BoldColorizer | null>(null);
   const { ensure, sendInput, resize, subscribe } = useSessionsMethods();
 
   useEffect(() => {
@@ -275,6 +397,8 @@ export default function TerminalView({
     const term = new Xterm({
       fontFamily: "'JetBrains Mono', ui-monospace, monospace",
       fontSize: Math.round(14 * fontScale),
+      fontWeight: 300,
+      fontWeightBold: 700,
       theme: themeFor(theme, accent, bg),
       cursorBlink: true,
       allowProposedApi: true,
@@ -367,9 +491,13 @@ export default function TerminalView({
     };
     pendingEnsureFrame = requestAnimationFrame(tryEnsure);
 
+    const colorizer = new BoldColorizer();
+    colorizer.setAccent(accent ?? THEME_ACCENTS[theme]);
+    colorizerRef.current = colorizer;
+
     const unsubscribe = subscribe(
       sessionKey,
-      (bytes) => term.write(bytes),
+      (bytes) => term.write(colorizer.transform(bytes)),
       () => term.writeln("\r\n\x1b[2m[session ended]\x1b[0m"),
     );
 
@@ -433,6 +561,7 @@ export default function TerminalView({
     const term = termRef.current;
     if (!term) return;
     term.options.theme = themeFor(theme, accent, bg);
+    colorizerRef.current?.setAccent(accent ?? THEME_ACCENTS[theme]);
   }, [theme, accent, bg]);
 
   useEffect(() => {
