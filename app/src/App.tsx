@@ -1636,6 +1636,24 @@ export default function App() {
           <kbd>↓</kbd>
         </span>
         <span className="group">
+          spawn <kbd>⌘</kbd>
+          <kbd>N</kbd>
+        </span>
+        <span className="group">
+          batch <kbd>⌘</kbd>
+          <kbd>⌃</kbd>
+          <kbd>N</kbd>
+        </span>
+        <span className="group">
+          rename <kbd>⌘</kbd>
+          <kbd>⌃</kbd>
+          <kbd>R</kbd>
+        </span>
+        <span className="group">
+          reset <kbd>⌘</kbd>
+          <kbd>R</kbd>
+        </span>
+        <span className="group">
           close <kbd>⌘</kbd>
           <kbd>W</kbd>
         </span>
