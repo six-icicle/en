@@ -41,14 +41,14 @@ pub fn resolve() -> ResolvedPath {
     //    duplicates if the shell already had these).
     let home = std::env::var("HOME").unwrap_or_default();
     let fallback = [
-        "/opt/homebrew/bin".to_string(),
-        "/opt/homebrew/sbin".to_string(),
-        "/usr/local/bin".to_string(),
-        "/usr/local/sbin".to_string(),
         format!("{home}/.local/bin"),
         format!("{home}/.cargo/bin"),
         format!("{home}/.bun/bin"),
         format!("{home}/.nvm/versions/node/current/bin"),
+        "/opt/homebrew/bin".to_string(),
+        "/opt/homebrew/sbin".to_string(),
+        "/usr/local/bin".to_string(),
+        "/usr/local/sbin".to_string(),
     ];
     for p in fallback {
         entries.push(p);
